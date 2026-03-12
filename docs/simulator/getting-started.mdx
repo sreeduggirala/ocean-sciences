@@ -1,0 +1,370 @@
+---
+title: Getting Started
+description: Installation and first simulation setup
+---
+
+# Getting Started
+
+## System Requirements
+
+Before installing, ensure you have:
+
+- **Python ≥ 3.11** ([download](https://www.python.org/downloads/))
+- **Node.js ≥ 18** ([download](https://nodejs.org/))
+- **`uv` package manager** (install via `pip install uv` or [see docs](https://docs.astral.sh/uv/getting-started/installation/))
+- **Git** (to clone the repository)
+
+Verify installation:
+
+```bash
+python --version      # Should be 3.11+
+node --version        # Should be 18+
+npm --version         # Should be 9+
+uv --version          # Should be 0.1.0+
+```
+
+---
+
+## Clone and Navigate
+
+```bash
+git clone https://github.com/your-org/ocean-sciences.git
+cd ocean-sciences
+```
+
+(Replace with your actual repository URL.)
+
+---
+
+## Backend Setup
+
+The backend is a **FastAPI** server that runs simulations. Set it up in a separate terminal:
+
+### 1. Create a Virtual Environment
+
+```bash
+cd backend
+uv sync
+```
+
+This command:
+- Creates a `.venv` virtual environment
+- Installs all dependencies from `pyproject.toml`
+- Takes ~30 seconds on first run
+
+### 2. Start the Server
+
+```bash
+uv run uvicorn api:app --reload
+```
+
+**Expected output**:
+```
+INFO:     Uvicorn running on http://0.0.0.0:8000
+INFO:     Application startup complete
+```
+
+The `--reload` flag enables hot-reloading during development; remove it for production.
+
+### 3. Verify the Server
+
+In a third terminal, test connectivity:
+
+```bash
+curl http://localhost:8000/health
+```
+
+**Expected response**:
+```json
+{"status": "ok", "uptime_seconds": 2.34}
+```
+
+---
+
+## Frontend Setup
+
+The frontend is a **React + Vite** web app. Set it up in a separate terminal:
+
+### 1. Install Dependencies
+
+```bash
+cd frontend
+npm install
+```
+
+This installs ~163 packages listed in `package.json`. Takes ~1–2 minutes on first run.
+
+### 2. Start the Development Server
+
+```bash
+npm run dev
+```
+
+**Expected output**:
+```
+VITE v5.4.21 ready in 205ms
+
+➜  Local:   http://localhost:5173/
+➜  press h + enter to show help
+```
+
+The Vite dev server automatically reloads when you edit files.
+
+### 3. Open in Browser
+
+Navigate to **http://localhost:5173** in your web browser.
+
+---
+
+## First Simulation
+
+You should now see the Stommel Simulator UI:
+
+```
+┌─────────────────────────────────────────────────────┐
+│ Stommel 1961 Thermohaline Circulation Simulator     │
+├──────────────┬──────────────────────────────────────┤
+│              │                                      │
+│  Controls    │       Visualizations                │
+│  (left)      │       (right: 6 panels)             │
+│              │                                      │
+│  T_e: ████   │  ┌──────┐ ┌──────┐                │
+│  T_p: ████   │  │Box   │ │AMOC  │                │
+│  S_e0: ████  │  │Model │ │vs.   │                │
+│  S_p0: ████  │  └──────┘ └──────┘                │
+│  ...         │  ┌────────────────────┐           │
+│              │  │   Time Series      │           │
+│  [Run]       │  │   (3 lines)        │           │
+│  [Export]    │  └────────────────────┘           │
+│              │  ┌──────┐ ┌──────┐                │
+│              │  │Phase │ │Bifur │                │
+│              │  │Space │ │cation│                │
+│              │  └──────┘ └──────┘                │
+└──────────────┴──────────────────────────────────────┘
+```
+
+### Click "Run Simulation"
+
+1. Leave all parameters at defaults
+2. Click the **"Run Simulation"** button
+3. Watch the visualizations populate:
+   - **Top-left**: Two-box ocean diagram with animated arrows
+   - **Top-right**: Comparison of model's q_sv vs. observed RAPID mean
+   - **Middle**: Time series of q, S_e, S_p vs. time (years)
+   - **Bottom-left**: Phase space portrait (ΔS vs. q)
+   - **Bottom-right**: [empty until you click "Compute Bifurcation"]
+
+The simulation took ~1–2 seconds. The system quickly equilibrated to a steady state (note the flat time series near t=3000 years).
+
+---
+
+## Understanding the Layout
+
+### Left Panel: Controls
+
+- **Parameters sliders**: Adjust T_e, T_p, S_e0, S_p0, α, β, k, F, t_max, dt, noise_amplitude
+- **Log scale toggle**: k has a logarithmic slider (exponential scale)
+- **Preset buttons**: Load "Normal AMOC", "Weakened AMOC", "Collapsed AMOC", "Stommel 1961"
+- **Run Simulation**: Execute the simulation with current parameters
+- **Compute Bifurcation**: (advanced) Sweep F to generate bifurcation diagram
+- **Export**: Download current result as JSON
+
+### Right Panel: Visualizations (6 panels)
+
+See [Visualizations](/simulator/visualizations) for detailed explanation of each.
+
+---
+
+## Smoke Tests: Verify Everything Works
+
+Run these commands to confirm the full stack is operational:
+
+### Backend Health
+
+```bash
+curl -s http://localhost:8000/health | jq .
+# Expected: {"status": "ok", "uptime_seconds": ...}
+```
+
+### API Simulation Endpoint
+
+```bash
+curl -s -X POST http://localhost:8000/simulate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "T_e": 25,
+    "T_p": 5,
+    "S_e0": 36,
+    "S_p0": 34,
+    "alpha": 1.5e-4,
+    "beta": 8e-4,
+    "k": 1.5e-6,
+    "F": 1e-4,
+    "t_max": 100,
+    "dt": 1,
+    "noise_amplitude": 0
+  }' | jq '.q_sv_final'
+# Expected: ~14.7
+```
+
+### API Presets Endpoint
+
+```bash
+curl -s http://localhost:8000/presets | jq '.[] | .name'
+# Expected:
+# "Normal AMOC"
+# "Weakened AMOC"
+# "Collapsed AMOC"
+# "Stommel 1961 Original"
+```
+
+### Frontend Page Load
+
+```bash
+curl -s http://localhost:5173 | grep -i "<title>" | head -1
+# Expected: <title>Stommel THC Simulator</title>
+```
+
+---
+
+## Troubleshooting
+
+### Issue: "Port 8000 is already in use"
+
+**Solution**: Either kill the process on port 8000 or use a different port:
+
+```bash
+# Find and kill process on port 8000 (macOS/Linux)
+lsof -ti:8000 | xargs kill -9
+
+# Or use a different port
+uv run uvicorn api:app --reload --port 8001
+```
+
+### Issue: "uv: command not found"
+
+**Solution**: Install uv globally:
+
+```bash
+pip install uv
+uv --version
+```
+
+Or use the installation script:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### Issue: "npm install fails" or takes forever
+
+**Solution**: Clear npm cache and try again:
+
+```bash
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Issue: "Python version mismatch" (need 3.11+)
+
+**Solution**: Check your Python version and install a newer one if needed:
+
+```bash
+python --version
+# If < 3.11, install Python 3.11 or 3.12
+```
+
+On macOS with Homebrew:
+```bash
+brew install python@3.12
+brew link python@3.12
+```
+
+### Issue: Browser shows blank page / "Cannot GET /"
+
+**Solution**: Make sure the frontend dev server is running and on port 5173:
+
+```bash
+cd frontend
+npm run dev
+# Verify output shows "Local: http://localhost:5173/"
+```
+
+Then clear browser cache (Ctrl+Shift+R or Cmd+Shift+R) and reload.
+
+### Issue: Simulations show "Failed to fetch" errors
+
+**Solution**: Ensure backend is running on port 8000:
+
+```bash
+# Terminal 1
+cd backend
+uv run uvicorn api:app --reload
+
+# Check connectivity
+curl http://localhost:8000/health
+```
+
+The frontend expects the backend at `http://localhost:8000`. If using a different port, update the Vite config or backend server URL.
+
+---
+
+## Project Structure
+
+```
+ocean-sciences/
+├── backend/
+│   ├── pyproject.toml          ← Dependencies and metadata
+│   ├── api.py                  ← FastAPI app (main entry point)
+│   ├── model.py                ← Stommel two-box model
+│   └── .venv/                  ← Virtual environment (created by uv sync)
+│
+├── frontend/
+│   ├── package.json            ← NPM dependencies
+│   ├── vite.config.ts          ← Vite build config
+│   ├── src/
+│   │   ├── main.tsx            ← React entry point
+│   │   ├── App.tsx             ← Main component
+│   │   └── components/         ← Visualization & control components
+│   └── node_modules/           ← NPM packages (created by npm install)
+│
+├── docs/                        ← This documentation
+│   ├── mint.json               ← Mintlify config
+│   ├── index.mdx
+│   ├── theory/
+│   ├── simulator/
+│   └── api-reference/
+│
+└── README.md, SETUP_COMPLETE.md, etc.
+```
+
+---
+
+## Next Steps
+
+1. **Explore parameters**: Read [Parameters](/simulator/parameters) to understand what each slider does
+2. **Load presets**: Try the preset scenarios ("Weakened AMOC", "Collapsed AMOC") to see different regimes
+3. **Run guided experiments**: Follow [Running Experiments](/simulator/running-experiments) to find tipping points and demonstrate hysteresis
+4. **Learn the theory**: Start with [Stommel 1961](/theory/stommel-1961) for historical context or [The Two-Box Model](/theory/two-box-model) for equations
+5. **Use the API**: See [API Reference](/api-reference/overview) to integrate simulations into your own code
+
+---
+
+## Quick Cheat Sheet
+
+| Task | Command |
+|------|---------|
+| Start backend | `cd backend && uv run uvicorn api:app --reload` |
+| Start frontend | `cd frontend && npm run dev` |
+| Test backend | `curl http://localhost:8000/health` |
+| Open simulator | http://localhost:5173 |
+| Stop server | Ctrl+C (in terminal) |
+| Edit source | Files auto-reload with --reload flag |
+| Reset to defaults | Reload page (Cmd+R) |
+
+---
+
+**Stuck?** Check the [Troubleshooting](#troubleshooting) section above, or open an issue on GitHub with your error message.
+
+**Ready to explore?** Load a preset or jump to [Parameters](/simulator/parameters) to see what each control does!

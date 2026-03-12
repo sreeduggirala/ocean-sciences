@@ -1,0 +1,311 @@
+---
+title: Preset Scenarios
+description: Four curated parameter sets representing different AMOC regimes
+---
+
+# Preset Scenarios
+
+The simulator includes **four preset parameter sets** representing distinct regimes of the Atlantic Meridional Overturning Circulation. Load them with one click and immediately see their behavior.
+
+---
+
+## Preset 1: Normal AMOC
+
+**Description**: Baseline present-day circulation. Strong, stable, and similar to observations.
+
+### Parameters
+
+| Parameter | Value |
+|-----------|-------|
+| T_e | 25°C |
+| T_p | 5°C |
+| S_e0 | 36 psu |
+| S_p0 | 34 psu |
+| α | 1.5 × 10⁻⁴ /°C |
+| β | 8 × 10⁻⁴ /psu |
+| k | 1.5 × 10⁻⁶ /s |
+| **F** | **8 × 10⁻⁵ psu/s** |
+| t_max | 3000 years |
+| dt | 1 year |
+| noise | 0 |
+
+### What to Observe
+
+**Time series**:
+- Fast equilibration: Within ~500 years, system reaches steady state
+- Final q_sv ≈ **15–16 Sv** (strong AMOC)
+- Salinity difference ΔS ≈ **2 psu** (equator much saltier than pole)
+- Flat asymptote: System converges to stable equilibrium
+
+**Phase portrait**:
+- Initial condition (red star) at ΔS ≈ 2 psu
+- Trajectory spirals toward green circle (attractor) on upper branch
+- No crossing of separatrix; stays in upper basin
+
+**Two-box diagram**:
+- Thick northward arrow (large q > 0)
+- Warm equatorial box (red), cold polar box (blue)
+- Label: "Thermally Driven" or "Strong AMOC"
+
+**AMOC comparison**:
+- Model q_sv ≈ 15–16 Sv
+- Observed mean (RAPID-MOCHA) ≈ 16.9 ± 4.4 Sv
+- **Match**: Excellent! This preset is calibrated to observations
+
+**Bifurcation diagram**:
+- Current F marker is far from tipping points
+- Lots of "safety margin" to the left (collapse) and right (recovery)
+- System is stable to perturbations
+
+### Physical Interpretation
+
+This represents the **current (2000s) state of the real AMOC**:
+- Strong thermal forcing from equator-to-pole temperature difference
+- Active salt transport maintains density gradient
+- Circulation is self-sustaining and resilient
+
+### Experiments to Try
+
+1. **Perturb salinity**: Temporarily increase S_p0 to 35 psu (freshwater input), then click Run → watch system recover to same attractor
+2. **Run multiple times with noise**: Add noise = 1×10⁻⁵ psu/s, run several times → all trajectories converge to same state
+3. **Compute bifurcation**: Click "Compute Bifurcation" → see distance to tipping point F_c1
+
+---
+
+## Preset 2: Weakened AMOC
+
+**Description**: Near-present trajectory. Circulation is noticeably weaker, approaching a tipping point.
+
+### Parameters
+
+| Parameter | Value |
+|-----------|-------|
+| T_e | 25°C |
+| T_p | 5°C |
+| S_e0 | 36 psu |
+| S_p0 | 34 psu |
+| α | 1.5 × 10⁻⁴ /°C |
+| β | 8 × 10⁻⁴ /psu |
+| k | 1.5 × 10⁻⁶ /s |
+| **F** | **1.8 × 10⁻⁴ psu/s** |
+| t_max | 3000 years |
+| dt | 1 year |
+| noise | 0 |
+
+### What to Observe
+
+**Time series**:
+- Slower equilibration: Takes ~1500–2000 years to approach steady state
+- Final q_sv ≈ **5–8 Sv** (weak AMOC)
+- Circulation strength reduced by ~50% compared to Normal AMOC
+- Trajectory shows lingering approach to equilibrium (critical slowing down?)
+
+**Phase portrait**:
+- Initial condition same as Normal AMOC
+- Trajectory moves along upper branch but stops closer to the fold
+- Starting to approach the separatrix (unstable middle branch)
+
+**Two-box diagram**:
+- Thinner northward arrow (smaller q)
+- Boxes still have temperature difference, but salinity difference smaller
+- Label: "Weakened AMOC" or "Marginal"
+
+**AMOC comparison**:
+- Model q_sv ≈ 5–8 Sv
+- Much lower than observed mean (16.9 Sv)
+- Suggests a weakening scenario
+
+**Bifurcation diagram**:
+- Current F marker ≈ 1.8 × 10⁻⁴ is now in the bistable region (between F_c2 and F_c1)
+- Closer to forward tipping point (F_c1)
+- Still stable but "fragile"
+
+### Physical Interpretation
+
+This represents a **near-future projection** of the AMOC if freshwater forcing increases:
+- Thermal forcing still supports circulation but haline forcing opposes it
+- Increasing freshwater (e.g., Greenland melt) pushes the system toward collapse
+- The state is metastable; further perturbations could trigger tipping
+
+### Experiments to Try
+
+1. **Find the tipping point**: Compute bifurcation diagram → note distance to F_c1 ≈ 2.0 × 10⁻⁴
+2. **Test proximity to bifurcation**: Add noise = 2×10⁻⁵ psu/s, run multiple times → occasionally see jumps to lower branch (noise-induced tipping)
+3. **Slow approach**: Note the time series bends more gradually than Normal AMOC → suggests marginal stability
+
+---
+
+## Preset 3: Collapsed AMOC
+
+**Description**: Post-tipping state. Circulation has collapsed to a weak or reversed regime.
+
+### Parameters
+
+| Parameter | Value |
+|-----------|-------|
+| T_e | 25°C |
+| T_p | 5°C |
+| S_e0 | 36 psu |
+| S_p0 | 34.5 psu |
+| α | 1.5 × 10⁻⁴ /°C |
+| β | 8 × 10⁻⁴ /psu |
+| k | 1.5 × 10⁻⁶ /s |
+| **F** | **3 × 10⁻⁴ psu/s** |
+| t_max | 3000 years |
+| dt | 1 year |
+| noise | 0 |
+
+### What to Observe
+
+**Time series**:
+- q_sv approaches **0 or slightly negative** (circulation near-zero or reversed)
+- Initial drop suggests jump (or slow transition) to lower branch
+- System stays weak even over 3000 years
+- Polar salinity S_p rises (becomes less fresh) due to weak northward salt transport
+
+**Phase portrait**:
+- Initial condition on upper branch (ΔS ≈ 1.5)
+- Trajectory jumps or drifts to lower branch (small ΔS or negative)
+- Red star and green circle are far apart (different branches)
+
+**Two-box diagram**:
+- Arrow is nearly horizontal or reversed (q ≈ 0 or q < 0)
+- Equatorial box warm but not saltier than polar box (ΔS < 0)
+- Label: "Collapsed" or "Reversed"
+
+**AMOC comparison**:
+- Model q_sv ≈ 0–2 Sv (or negative)
+- Drastically below observations (16.9 Sv)
+- Shows what the ocean would look like if AMOC tipped
+
+**Bifurcation diagram**:
+- Current F = 3 × 10⁻⁴ is well beyond F_c1 (collapse threshold)
+- Only lower branch is stable; upper branch is gone
+- No escape route without reducing F to F < F_c2
+
+### Physical Interpretation
+
+This represents a **collapsed AMOC state**, potentially resembling:
+- **Ice Age circulation** (inferred from paleoclimate)
+- **Younger Dryas** cooling event (1,200 years of disrupted AMOC)
+- **Worst-case future scenario** if tipping is triggered
+
+**Key insight**: The circulation hasn't merely weakened — it's fundamentally reversed or shut down. The haline feedback dominates so strongly that thermal forcing cannot restore northward flow.
+
+### Experiments to Try
+
+1. **Test hysteresis**: Load this preset, note q_sv ≈ 0. Then:
+   - Reduce F slider to 1.5 × 10⁻⁴ (near F_c2) and run → still collapsed
+   - Reduce further to 0.5 × 10⁻⁴ (well below F_c2) and run → should suddenly recover to upper branch
+2. **Slow recovery**: Even after recovery, polar salinity S_p remains high initially; watch slow salinity adjustment
+3. **Compare with Normal AMOC**: Load Normal AMOC, compute bifurcation, then load Collapsed → visualize they're on different branches
+
+---
+
+## Preset 4: Stommel 1961 Original
+
+**Description**: Replica of the parameter values Stommel used in his seminal 1961 paper.
+
+### Parameters
+
+| Parameter | Value |
+|-----------|-------|
+| T_e | 25°C |
+| T_p | 5°C |
+| S_e0 | 36 psu |
+| S_p0 | 34 psu |
+| α | 1.5 × 10⁻⁴ /°C |
+| β | 8 × 10⁻⁴ /psu |
+| k | 1.5 × 10⁻⁶ /s |
+| **F** | **1.0 × 10⁻⁴ psu/s** |
+| t_max | 3000 years |
+| dt | 1 year |
+| noise | 0 |
+
+### What to Observe
+
+**Time series**:
+- Final q_sv ≈ **10–12 Sv** (intermediate strength)
+- Moderate equilibration time (~1000 years)
+- System reaches a stable intermediate state
+
+**Phase portrait**:
+- Upper branch, but closer to the separatrix than Normal AMOC
+
+**Bifurcation diagram**:
+- F ≈ 1 × 10⁻⁴ is *in the bistable region* (between F_c2 and F_c1)
+- Slightly closer to F_c2 (recovery threshold)
+
+### Physical Interpretation
+
+Stommel's original parameters represent a state where **bistability is clearly present**:
+- Two stable equilibria exist (upper and lower branches)
+- The system can tip if pushed past F_c1 or recover if reduced past F_c2
+
+### Experiments to Try
+
+1. **Reproduce Stommel's S-curve**: Compute bifurcation → see the classic fold bifurcation
+2. **Demonstrate hysteresis loop**:
+   - Start with this preset (F = 1 × 10⁻⁴) → run → note upper branch
+   - Increase F to 2.5 × 10⁻⁴ → run → collapse to lower branch
+   - Decrease F back to 1 × 10⁻⁴ → run → still on lower branch (hysteresis!)
+   - Continue decreasing to 0.5 × 10⁻⁴ → run → suddenly recover (beyond F_c2)
+3. **Historical significance**: Read [Stommel 1961](/theory/stommel-1961) and [Bifurcations & Hysteresis](/theory/bifurcations-hysteresis) to understand why these parameters are historically important
+
+---
+
+## Comparison: Presets at a Glance
+
+| Aspect | Normal | Weakened | Collapsed | Stommel 1961 |
+|--------|--------|----------|-----------|-------------|
+| **Freshwater F** | 0.8e-4 | 1.8e-4 | 3.0e-4 | 1.0e-4 |
+| **Final q_sv** | ~15 Sv | ~5 Sv | ~0 Sv | ~10 Sv |
+| **Regime** | Strong, stable | Weak, marginal | Collapsed | Intermediate, bistable |
+| **In bifurcation diagram** | Left (monostable) | Middle (bistable) | Right (monostable) | Middle (bistable) |
+| **Time to equilibrium** | ~500 years | ~1500 years | ~1000 years | ~800 years |
+| **Resembles** | Present AMOC | Near-future risk | Ice Age / worst-case | Stommel's setup |
+
+---
+
+## Using Presets Effectively
+
+### Quick Exploration
+- Click a preset name
+- Click "Run Simulation"
+- Observe the 6 visualizations populate
+- Compare to other presets
+
+### Systematic Study
+1. Load **Normal AMOC** → run → note equilibrium q_sv
+2. Load **Weakened AMOC** → run → observe gradual weakening
+3. Load **Collapsed AMOC** → run → see near-zero circulation
+4. Try to recover: Reduce F slider manually and re-run to find F_c2
+
+### Bifurcation Analysis
+1. Load **Stommel 1961 Original**
+2. Click **"Compute Bifurcation"**
+3. Observe the S-curve with hysteresis window shaded
+4. Load **Normal AMOC** and re-compute → see how S-curve shifts (F_c1, F_c2 both increase)
+
+---
+
+## Can I Modify a Preset?
+
+Yes! Load a preset, then:
+- Adjust any sliders (parameters)
+- Click "Run Simulation" again
+- The system uses your modified parameters, not the preset
+
+To revert to the original preset, click its button again.
+
+---
+
+## Further Reading
+
+- [Parameters](/simulator/parameters) for detailed explanation of each slider
+- [Running Experiments](/simulator/running-experiments) for guided investigations using these presets
+- [Bifurcations & Hysteresis](/theory/bifurcations-hysteresis) for the physics of these regimes
+
+---
+
+**Next**: Try [Running Experiments](/simulator/running-experiments) with these presets to find tipping points, demonstrate hysteresis, and explore noise effects.

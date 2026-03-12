@@ -1,0 +1,318 @@
+---
+title: API Reference Overview
+description: Backend architecture, authentication, CORS, and general principles
+---
+
+# API Reference Overview
+
+## Base URL
+
+All API endpoints are hosted at:
+
+```
+http://localhost:8000
+```
+
+In production, update to your deployment domain.
+
+---
+
+## Architecture Overview
+
+The backend is built with **FastAPI** (modern, fast Python web framework) and provides:
+
+- **RESTful endpoints** for simulations and bifurcation analysis
+- **Pydantic v2 validation** for type safety and error handling
+- **Async/await** for non-blocking I/O
+- **ThreadPoolExecutor** for long-running simulations (doesn't block HTTP server)
+
+---
+
+## General Principles
+
+### Request Format
+
+All POST requests use **JSON body**:
+
+```bash
+curl -X POST http://localhost:8000/endpoint \
+  -H "Content-Type: application/json" \
+  -d '{"param1": value1, "param2": value2}'
+```
+
+GET requests typically use query parameters or no body.
+
+### Response Format
+
+All responses are **JSON**:
+
+```json
+{
+  "status": "success",
+  "data": { ... },
+  "time_ms": 1234
+}
+```
+
+or on error:
+
+```json
+{
+  "detail": "Validation error or error message",
+  "status": 422,
+  "errors": [...]
+}
+```
+
+### HTTP Status Codes
+
+| Code | Meaning | Example |
+|------|---------|---------|
+| 200 | Success | Simulation completed |
+| 400 | Bad Request | Malformed JSON |
+| 422 | Validation Error | T_e < T_p (constraint violation) |
+| 500 | Server Error | Unhandled exception (rare) |
+
+---
+
+## Authentication & CORS
+
+### No Authentication Required
+
+The simulator uses **no authentication**. All endpoints are open.
+
+**Production note**: If deploying publicly, add authentication (API keys, OAuth, etc.).
+
+### CORS (Cross-Origin Resource Sharing)
+
+CORS is **enabled** for:
+- `http://localhost:5173` (local development frontend)
+- `http://localhost:3000` (alternative local frontend)
+- Production domains (configured in backend)
+
+This allows the frontend to make requests to the backend from a different port/domain.
+
+---
+
+## Common Parameters
+
+Most endpoints accept these parameters:
+
+| Parameter | Type | Default | Units | Validation |
+|-----------|------|---------|-------|-----------|
+| T_e | float | 25 | °C | Must be > T_p |
+| T_p | float | 5 | °C | Must be < T_e |
+| S_e0 | float | 36 | psu | ge: 30, le: 40 |
+| S_p0 | float | 34 | psu | ge: 28, le: 40 |
+| alpha | float | 1.5e-4 | 1/°C | ge: 0.5e-4, le: 3e-4 |
+| beta | float | 8e-4 | 1/psu | ge: 2e-4, le: 1.5e-3 |
+| k | float | 1.5e-6 | 1/s | ge: 5e-8, le: 1e-5 |
+| F | float | 1e-4 | psu/s | ge: 0, le: 5e-4 |
+| t_max | float | 3000 | years | ge: 100, le: 10000 |
+| dt | float | 1.0 | years | ge: 0.1, le: 100 |
+| noise_amplitude | float | 0 | psu/s | ge: 0, le: 5e-5 |
+
+**Validation rules**:
+- All ge/le bounds are enforced
+- T_e > T_p is enforced (custom validator)
+- Bounds correspond to slider ranges in UI
+
+---
+
+## Error Handling
+
+### Validation Error (422)
+
+If parameters violate constraints:
+
+```bash
+curl -X POST http://localhost:8000/simulate \
+  -H "Content-Type: application/json" \
+  -d '{"T_e": 20, "T_p": 25, ...}' # T_e < T_p violates constraint
+```
+
+Response:
+
+```json
+{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": ["body", "T_e"],
+      "msg": "T_e must be greater than T_p"
+    }
+  ]
+}
+```
+
+### Server Error (500)
+
+Rare, but if the server crashes:
+
+```json
+{
+  "detail": "Internal server error. Contact administrator."
+}
+```
+
+Check the backend logs (terminal running uvicorn) for details.
+
+---
+
+## Rate Limiting
+
+**No rate limiting** is currently enforced. Production deployments should add:
+- Per-IP limits (e.g., 100 requests/minute)
+- Per-user limits (with authentication)
+
+---
+
+## Performance & Timeouts
+
+### Simulation Computation Time
+
+| Scenario | Time | Hardware |
+|----------|------|----------|
+| Single simulation (t_max=3000) | 0.5–2 sec | 2022 MacBook Pro |
+| Bifurcation (200 points, 2 directions) | 10–30 sec | Same |
+| Long simulation (t_max=10000) | 2–5 sec | Same |
+
+**Timeout**: HTTP timeout is set to **60 seconds**. Very large t_max with small dt might exceed this.
+
+### Memory Usage
+
+- Single simulation output: ~100 KB (JSON)
+- Bifurcation output: ~50 KB (JSON)
+- Concurrent requests: Each uses ~10 MB memory for ODE solver
+
+With default `ThreadPoolExecutor(max_workers=2)`, simultaneous requests are queued.
+
+---
+
+## API Endpoints Summary
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/health` | GET | Server health check |
+| `/simulate` | POST | Run a single simulation |
+| `/bifurcation` | POST | Compute bifurcation diagram |
+| `/presets` | GET | List available presets |
+
+---
+
+## Next Steps
+
+- See [POST /simulate](/api-reference/simulate) for the simulation endpoint
+- See [POST /bifurcation](/api-reference/bifurcation) for bifurcation analysis
+- See [GET /presets](/api-reference/presets) for preset configurations
+- Return to [Getting Started](/simulator/getting-started) for integration examples
+
+---
+
+## Example: Complete Request-Response Cycle
+
+**1. Check server health**:
+```bash
+curl http://localhost:8000/health
+```
+
+Response:
+```json
+{"status": "ok", "uptime_seconds": 42.3}
+```
+
+**2. Run simulation**:
+```bash
+curl -X POST http://localhost:8000/simulate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "T_e": 25,
+    "T_p": 5,
+    "S_e0": 36,
+    "S_p0": 34,
+    "alpha": 1.5e-4,
+    "beta": 8e-4,
+    "k": 1.5e-6,
+    "F": 1e-4,
+    "t_max": 3000,
+    "dt": 1.0,
+    "noise_amplitude": 0
+  }'
+```
+
+Response (truncated):
+```json
+{
+  "parameters": { ... },
+  "time": [0, 1, 2, ..., 3000],
+  "S_e": [36.0, 35.999, 35.998, ..., 36.15],
+  "S_p": [34.0, 34.001, 34.002, ..., 33.85],
+  "q": [1.5e-9, 1.51e-9, ..., 2.1e-9],
+  "q_sv_final": 14.7,
+  "steady_state_reached": true,
+  "computation_time_sec": 1.23
+}
+```
+
+**3. Extract and analyze**:
+```python
+import json
+import requests
+
+resp = requests.post('http://localhost:8000/simulate', json={
+    "T_e": 25, "T_p": 5, "S_e0": 36, "S_p0": 34,
+    "alpha": 1.5e-4, "beta": 8e-4, "k": 1.5e-6,
+    "F": 1e-4, "t_max": 3000, "dt": 1, "noise_amplitude": 0
+})
+
+data = resp.json()
+print(f"Final AMOC: {data['q_sv_final']:.1f} Sv")
+print(f"Steady state: {data['steady_state_reached']}")
+```
+
+Output:
+```
+Final AMOC: 14.7 Sv
+Steady state: True
+```
+
+---
+
+## Debugging
+
+### Enable Backend Logging
+
+Start uvicorn with verbose output:
+
+```bash
+uv run uvicorn api:app --reload --log-level debug
+```
+
+Watch the terminal for request/response logs.
+
+### Use a REST Client
+
+Tools like **Postman**, **Insomnia**, or **Thunder Client** (VS Code extension) provide GUIs for testing APIs without command-line curl.
+
+### Check Frontend Console
+
+Open browser developer tools (Cmd+Option+J on macOS) and check the Network tab to see requests sent and responses received.
+
+---
+
+## Production Considerations
+
+If deploying to production:
+
+1. **Authentication**: Add API keys or OAuth
+2. **Rate limiting**: Prevent abuse
+3. **HTTPS**: Use SSL/TLS certificates
+4. **CORS**: Restrict to trusted domains
+5. **Logging**: Log all requests (for debugging and monitoring)
+6. **Monitoring**: Set up alerts for high error rates
+7. **Load balancing**: Use multiple server instances if high traffic expected
+8. **Caching**: Cache bifurcation results for common parameter sets
+
+---
+
+**Next**: Explore the specific endpoints for [Simulate](/api-reference/simulate), [Bifurcation](/api-reference/bifurcation), and [Presets](/api-reference/presets).

@@ -1,0 +1,339 @@
+---
+title: Bifurcations, Tipping Points, and Hysteresis
+description: Saddle-node bifurcations, catastrophic transitions, and irreversibility in the two-box model
+---
+
+# Bifurcations, Tipping Points, and Hysteresis
+
+## Bifurcation: A Change in System Behavior
+
+A **bifurcation** occurs when the number or stability of equilibria changes as a parameter varies. In the Stommel model, as freshwater forcing **F** increases, the system undergoes a **saddle-node (fold) bifurcation** — the defining feature of tipping points and hysteresis.
+
+---
+
+## The S-Curve and Fold Bifurcation
+
+When we plot the equilibrium circulation strength **q** against the bifurcation parameter **F**, we get the characteristic **S-shaped curve**:
+
+```
+q (circulation strength, Sv)
+ ^
+ |    ______ (upper branch, stable AMOC)
+ |   /
+ |  |        (middle branch, unstable)
+ |   \_____
+ |         \______ (lower branch, weak/collapsed)
+ |
+ +-------+-------+------+-----> F (freshwater flux)
+      F_c2    F_c1   F_crit
+         ↑       ↑
+      (backward) (forward)
+      recovery   collapse
+        point    point
+```
+
+### Three Regimes
+
+1. **For F < F_c2** (low freshwater):
+   - Only one stable equilibrium: the upper branch (strong AMOC)
+   - System stays in strong state
+
+2. **For F_c2 < F < F_c1** (intermediate, bistable regime):
+   - **TWO** stable equilibria coexist (upper and lower branches)
+   - **Hysteresis region**: Which state you're in depends on history
+   - An unstable middle branch separates the two basins of attraction
+
+3. **For F > F_c1** (high freshwater):
+   - Only one stable equilibrium: the lower branch (weak/collapsed AMOC)
+   - System must collapse; no stable strong state exists
+
+---
+
+## Forward Tipping: Collapse
+
+**Scenario**: Gradually increase freshwater forcing (e.g., Greenland melt).
+
+**Dynamics**:
+
+1. **Initial state**: System is on the upper (strong AMOC) branch
+   - q ≈ 15 Sv (strong northward circulation)
+
+2. **Slow increase of F**:
+   - Equilibrium moves along the upper branch toward the fold
+   - q decreases gradually (circulation weakens)
+   - But the system remains stable; perturbations decay
+
+3. **Approaching F_c1** (forward tipping point):
+   - Equilibrium q approaches the fold point
+   - Stability eigenvalue λ₂ → 0⁻ (marginal stability)
+   - System becomes increasingly "fragile": recovery from perturbations is slow
+
+4. **F exceeds F_c1**:
+   - Upper branch equilibrium no longer exists
+   - The fold has been crossed
+   - System **cannot stay** on upper branch
+
+5. **Collapse**:
+   - Trajectory jumps discontinuously from upper branch to lower branch
+   - q drops rapidly from ~15 Sv to near 0 (or reverses)
+   - This is the **tipping event**: a sudden, catastrophic transition
+
+6. **Post-collapse state**:
+   - Now on the lower (weak/reversed) branch
+   - q ≈ 0–5 Sv or even negative
+   - Polar box becomes fresher (less salty) due to weak northward salt transport
+
+### Key Feature: Irreversibility Forward Path Cannot Be Retraced
+
+Once you've tipped, simply **reversing** the forcing does not restore the original state — this is hysteresis.
+
+---
+
+## Backward Recovery: The Hysteresis Loop
+
+**Scenario**: After collapse, gradually *reduce* freshwater forcing.
+
+**Dynamics**:
+
+1. **Start on lower branch** with high F (post-collapse):
+   - q is weak or reversed
+
+2. **Decrease F slowly**:
+   - Equilibrium moves along the lower branch
+   - q remains weak; the system does not spontaneously recover
+   - The upper branch does not reappear yet
+
+3. **Continue decreasing F** past the original collapse point F_c1:
+   - Still no recovery! The lower branch is still stable
+   - The system "remembers" its collapsed state
+
+4. **Approaching F_c2** (backward recovery threshold):
+   - Lower branch equilibrium approaches its fold point
+   - Stability eigenvalue λ₂ → 0⁻ again
+
+5. **F drops below F_c2**:
+   - Lower branch equilibrium vanishes
+   - System **cannot stay** on lower branch
+
+6. **Recovery jump**:
+   - Trajectory jumps from lower branch back to upper branch
+   - q suddenly increases to ~15 Sv
+   - Circulation is restored
+
+### The Hysteresis Window
+
+$$\text{Hysteresis width} = F_{c1} - F_{c2}$$
+
+Example with default parameters:
+- $F_{c1} \approx 2.0 \times 10^{-4}$ psu/s (collapse threshold)
+- $F_{c2} \approx 1.0 \times 10^{-4}$ psu/s (recovery threshold)
+- Hysteresis width ≈ $1.0 \times 10^{-4}$ psu/s
+
+**Physical interpretation**: In the hysteresis window, the system "sticks" to whichever state it entered first. Reversing the cause (F) is insufficient to reverse the effect (AMOC state).
+
+---
+
+## Why Hysteresis Matters for Climate Policy
+
+### The Tipping Point Dilemma
+
+If Earth's AMOC is currently in the bistable region (some evidence suggests it might be), then:
+
+1. **If we reach F_c1**: AMOC will collapse even if we stabilize forcing at that level.
+2. **If we exceed F_c1 and then reduce forcing**: We must reduce all the way to F_c2 (much lower) to restore AMOC.
+3. **The cost of delay**: Every decade without reducing F increases the threshold we must overshoot to eventually recover.
+
+### Paleoclimate Analogue: The Younger Dryas
+
+The **Younger Dryas** (12,900–11,700 years ago) is a dramatic example:
+
+- **Event**: After the last glaciation's warming trend, temperatures suddenly *dropped* back to near-glacial levels for ~1,200 years
+- **Suspected trigger**: Massive freshwater discharge from the melting North American ice sheet (Laurentide Ice Sheet collapse) into the Atlantic
+- **AMOC mechanism**: Freshwater input exceeded a critical threshold, collapsing the AMOC → reduced northward heat transport → rapid cooling over Europe and North Atlantic
+- **Recovery**: Gradual increase in salinity (as freshwater input ceased) allowed AMOC to recover after ~1,200 years
+
+The Younger Dryas shows that:
+- **Hysteresis is real** in Earth's climate system
+- **Abrupt reversals are possible** on century timescales
+- **The ocean's memory** (in salinity structure) can trap the climate in an unfavorable state for centuries
+
+---
+
+## Bifurcation Diagram: Reading and Interpreting
+
+### Bifurcation Diagram in the Simulator
+
+When you click **"Compute Bifurcation"**, the simulator sweeps F from minimum to maximum in both directions:
+
+```
+Forward sweep (F increasing):
+    Start at F_min, find stable equilibria as F → F_max
+    Trace the upper branch until F_c1, then jump to lower branch
+
+Backward sweep (F decreasing):
+    Start at F_max, find stable equilibria as F → F_min
+    Trace the lower branch until F_c2, then jump to upper branch
+```
+
+### Visual Elements
+
+- **Blue upper branch**: Stable AMOC states; plotted from forward sweep
+- **Orange lower branch**: Stable weak/collapsed states; plotted from backward sweep
+- **Dashed grey middle branch**: Unstable saddle points (inferred from quadratic formula)
+- **Red diamonds**: Tipping points (F_c1 and F_c2)
+- **Orange shaded region**: Bistable (hysteresis) region
+- **Orange X marker**: Current F value (from slider); shows where you are on the diagram
+
+### How to Use It
+
+1. **Identify hysteresis window**: Look for the gap between the forward and backward curves. The width of the gap is the hysteresis width.
+2. **Locate current state**: The orange X shows where your current F falls. Is it in the bistable region?
+3. **Estimate stability**: If you're in the monostable region (single stable branch), perturbations may not flip the system. In the bistable region, noise can tip you over.
+4. **Plan mitigation**: If F is approaching F_c1, reducing freshwater forcing becomes urgent to avoid collapse.
+
+---
+
+## Saddle-Node Bifurcation: The Mathematics
+
+A **saddle-node bifurcation** (also called a fold bifurcation) is a local bifurcation where two fixed points collide and annihilate as a parameter varies.
+
+### Normal Form
+
+Near a saddle-node bifurcation, the dynamics can be reduced to the 1D "normal form":
+
+$$\frac{dx}{dt} = \mu + x^2$$
+
+where:
+- $x$ represents the deviation of the state from the bifurcation
+- $\mu$ is the bifurcation parameter (shifted so $\mu = 0$ at the bifurcation)
+
+**Behavior**:
+- For $\mu < 0$: Two equilibria exist at $x = \pm\sqrt{-\mu}$ (one stable, one unstable)
+- For $\mu = 0$: One equilibrium at $x = 0$ (saddle-node)
+- For $\mu > 0$: No equilibrium; trajectories escape to infinity
+
+This is exactly the behavior of the Stommel model's S-curve!
+
+### Stability Near Bifurcation
+
+At a saddle-node bifurcation:
+- The stable branch's eigenvalue λ₂ → 0⁻ (marginal stability)
+- Perturbation recovery time $\tau = -1/\lambda_2 \to \infty$ (critical slowing down)
+- System becomes increasingly sluggish and sensitive to noise
+
+This is why **early-warning signals** of tipping can sometimes be detected: increased variability and autocorrelation in time series before a bifurcation.
+
+---
+
+## Stochastic Tipping
+
+Without noise, the deterministic forward and backward thresholds are F_c1 and F_c2. But add stochastic forcing:
+
+$$\frac{dS_e}{dt} = -q(S_e - S_p) + F + \xi(t)$$
+
+$$\frac{dS_p}{dt} = +q(S_e - S_p) - F + \xi(t)$$
+
+where $\xi(t)$ is Gaussian white noise.
+
+### Noise-Induced Transitions
+
+1. **Noise can trigger early tipping**: Even if F < F_c1, a large stochastic fluctuation can kick the system across the unstable manifold, causing it to escape to the lower branch.
+
+2. **Noise can accelerate recovery**: With noise, recovery from the lower branch can occur before deterministically reaching F_c2.
+
+3. **Mean transition time**: Depends on noise intensity and distance from the bifurcation. Very close to bifurcation, even tiny noise can cause occasional transitions.
+
+### In the Simulator
+
+The **noise_amplitude** slider lets you:
+- Set noise = 0: See purely deterministic behavior
+- Increase noise: Watch occasional transitions appear before reaching the deterministic tipping point
+- Compare: Run the same parameters multiple times with noise; trajectories diverge, showing stochasticity
+
+This demonstrates that the real climate system, with weather noise and natural variability, may be more fragile than deterministic models suggest.
+
+---
+
+## Paleoclimate Oscillations: D-O Events
+
+**Dansgaard-Oeschger (D-O) events** are rapid climate oscillations visible in Greenland ice cores during the last glaciation:
+
+- **Duration**: ~1,500–10,000 years each
+- **Temperature jump**: ~10°C warming in a few decades over Greenland
+- **Frequency**: Roughly every 1,500 years
+- **Cooling tail**: Gradual cooling back to glacial baseline after warming
+
+### AMOC Explanation (Stommel-Type Mechanism)
+
+Paleoceanographers propose that D-O events involve AMOC oscillations:
+
+1. **Warm mode**: AMOC is strong, carrying heat northward → Greenland warms by ~10°C relative to baseline
+2. **Transition**: Freshwater buildup (possibly from ice sheet surge) increases F
+3. **Collapse**: AMOC weakens and potentially reverses → heat transport drops → Greenland rapidly cools
+4. **Recovery**: Freshwater slowly decreases or salinity restabilizes → AMOC recovers → cycle repeats
+
+This is **not quite hysteresis** in the Stommel two-box sense (which is static), but rather a **dynamic oscillation** around bistable thresholds, possibly driven by ice sheet feedbacks and stochastic variability.
+
+---
+
+## Critical Slowing Down: An Early-Warning Signal
+
+As the system approaches a bifurcation, its response to perturbations slows:
+
+$$\tau = -\frac{1}{\lambda_2} \to \infty \text{ as } \lambda_2 \to 0$$
+
+This **critical slowing down** has consequences:
+
+1. **Increased autocorrelation**: Time series becomes more "red" (power concentrated at low frequencies)
+2. **Increased variance**: System fluctuates more in response to noise
+3. **Slower recovery**: Perturbations take longer to decay
+
+### Observable Precursors
+
+In paleoclimate or observational data, we can sometimes detect:
+- Rising autocorrelation of temperature or salinity time series
+- Increasing standard deviation of fluctuations
+- Spectral shifts toward lower frequencies
+
+These are the **canaries in the coal mine** — early warning that the system is approaching a bifurcation.
+
+---
+
+## Can We Detect AMOC Approaching a Tipping Point?
+
+This is an **active research question**. Recent work:
+
+- **Boers (2021)**: Analyzed Atlantic sea surface temperature anomalies and found indicators of critical slowing down, suggesting AMOC may be approaching a transition. *But*: Statistical significance is debated.
+- **RAPID-MOCHA data**: No definitive trend over 2004–2020, though decadal variations are significant.
+- **Paleoclimate**: Longer-term paleo records suggest AMOC has weakened ~15% since 1900 (Caesar et al. 2018).
+
+### Consensus
+
+- AMOC is **likely** in the bistable region (theory predicts it is)
+- AMOC is **probably** weakening (observations suggest it)
+- Whether it is **near a tipping point** is uncertain (estimates range from "very unlikely this century" to "possible by 2100")
+
+This uncertainty underscores the importance of models like Stommel's: they help us understand the *mechanism* and *potential* for tipping, even if exact timing remains elusive.
+
+---
+
+## Further Reading
+
+**Historical context**:
+- Stommel, H. (1961). Thermohaline Convection with Two Stable Regimes of Flow. *Tellus*, 13(2), 224–230.
+
+**Paleoclimate applications**:
+- Rahmstorf, S., et al. (2005). Thermohaline circulation hysteresis: A model intercomparison. *Geophys. Res. Lett.*, 32, L23605.
+- Bond, G., et al. (1993). Correlations between climate records from North Atlantic sediments and Greenland ice. *Nature*, 365, 143–147. [D-O events]
+
+**Early-warning signals**:
+- Lenton, T. M., et al. (2008). Tipping elements in the Earth's climate system. *PNAS*, 105, 1786–1793.
+- Schewe, J., Levermann, A. (2012). Statistically reliable end-member predictions of the AMOC within realistic multidecadal time horizons. *Clim. Dyn.*, 39, 1913–1931.
+
+**Recent observations**:
+- Caesar, L., et al. (2018). Observed fingerprint of a weakening Atlantic Ocean overturning circulation. *Nature*, 556, 191–196.
+- Boers, N. (2021). Early-warning signals for a collapse of the Atlantic Meridional Overturning Circulation. *Nature Clim. Change*, 11, 680–688.
+
+---
+
+**Next**: Jump to the [Simulator Guide](/simulator/getting-started) to run interactive experiments, or explore [Running Experiments](/simulator/running-experiments) for guided activities on finding tipping points and demonstrating hysteresis.

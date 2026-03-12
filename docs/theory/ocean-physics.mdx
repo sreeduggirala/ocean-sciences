@@ -1,0 +1,266 @@
+---
+title: Ocean Physics Background
+description: Thermohaline circulation, density gradients, and AMOC fundamentals
+---
+
+# Ocean Physics Background
+
+## What Is the Thermohaline Circulation?
+
+The **thermohaline circulation (THC)**, often called the "ocean conveyor belt," is a global system of interconnected currents driven by differences in **temperature** (thermal) and **salinity** (haline). Unlike wind-driven surface currents (Gulf Stream, Kuroshio), the THC operates on timescales of centuries to millennia and directly connects the surface, intermediate, and abyssal ocean.
+
+### The Conveyor Belt Picture
+
+Imagine a giant loop:
+
+1. **Sinking zone (North Atlantic)**: Cold, salty water at high latitudes becomes denser and sinks to the ocean floor.
+2. **Deep flow (southward & globally)**: This dense water spreads south and eventually circulates globally at great depth.
+3. **Upwelling zones (Southern Ocean, tropics)**: Deep water gradually rises to the surface, driven by wind and mixing.
+4. **Surface return (northward in Atlantic)**: Warm surface water flows from the tropics back to the North Atlantic, completing the loop.
+
+The round-trip takes **~1000 years**. This slow circulation is why the THC is such a powerful heat pump: it continuously carries tropical heat toward the poles.
+
+---
+
+## Density Drives Circulation
+
+The fundamental principle: **Water moves from high-pressure (dense) to low-pressure (light) regions**. In the ocean:
+
+$$\rho = \rho_0(1 - \alpha T + \beta S)$$
+
+Where:
+- **ρ**: density (kg/m³)
+- **ρ₀**: reference density (~1025 kg/m³ for seawater)
+- **T**: in-situ temperature (°C)
+- **S**: salinity (psu, practical salinity units)
+- **α ≈ 1.5 × 10⁻⁴ /°C**: **thermal expansion coefficient** (this is the key parameter in our model)
+- **β ≈ 8 × 10⁻⁴ /psu**: **haline contraction coefficient**
+
+This is a **linear equation of state** — a simplification, but accurate for the range of temperatures and salinities in the deep ocean (0–30°C, 34–36 psu).
+
+### Thermal vs. Haline Effects
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+<div>
+**Temperature Effect (α)**
+- **Warm water** (T = 25°C): less dense
+- **Cold water** (T = 5°C): denser
+- Effect: warm water floats; cold water sinks
+- **Drives circulation northward** (in the Atlantic): heat flux moves warm surface water toward poles
+</div>
+
+<div>
+**Salinity Effect (β)**
+- **Salty water** (S = 36 psu): denser
+- **Fresh water** (S = 34 psu): lighter
+- Effect: salty water sinks; fresh water floats
+- **Opposes circulation**: freshwater at high latitudes blocks sinking
+</div>
+
+</div>
+
+---
+
+## The Atlantic Meridional Overturning Circulation (AMOC)
+
+The **Atlantic Meridional Overturning Circulation (AMOC)** is the Atlantic branch of the global THC. It is the most closely observed and modeled component of the thermohaline circulation, partly because:
+
+1. It transports so much heat.
+2. It directly affects European and North American climate.
+3. We have continuous measurements from the RAPID-MOCHA array since 2004.
+
+### AMOC Structure
+
+**North Atlantic Deep Water (NADW) Formation**:
+- In winter, over the **Labrador Sea** (southeast of Greenland) and **Nordic Seas** (between Greenland, Iceland, and Norway), surface water becomes very cold and salty (via sea ice formation, which expels salt).
+- This dense water sinks to abyssal depths (~3000–4000 m).
+- ~17 Sv (Sverdrups; 1 Sv = 10⁶ m³/s) of deep water form this way annually on average.
+
+**Southward deep flow**:
+- NADW flows southward through the Atlantic basin at depth.
+
+**Upwelling and return**:
+- In the Southern Ocean and tropics, this deep water gradually rises (via wind-driven upwelling and turbulent mixing).
+- Warm surface water from the tropics flows northward to replace the sinking water.
+- This warm, northward-flowing surface current is what we see as the Gulf Stream and its continuation, the North Atlantic Current.
+
+### AMOC Strength: Observations
+
+The **RAPID-MOCHA array** has measured AMOC continuously since April 2004 with moorings across the Atlantic at 26°N:
+
+$$\text{AMOC} = 16.9 \pm 4.4 \text{ Sv (mean ± standard deviation, 2004--2020)}$$
+
+This mean of **~17 Sv** is what we calibrate our simulator's default parameters to match.
+
+**Recent trends**:
+- Caesar et al. (2018): AMOC has weakened by ~15% since 1900 (using paleo sea surface temperature and salinity proxies combined with recent observations).
+- Boers (2021): Analysis of Atlantic sea surface temperatures suggests AMOC may be moving toward a critical transition.
+- Persistent decline: The RAPID array itself shows no significant trend (2004–2020), but longer-timescale paleo evidence is concerning.
+
+---
+
+## The Two Competing Feedbacks
+
+Stommel's genius was recognizing that temperature and salinity represent **two antagonistic feedback loops** in the North Atlantic.
+
+### Positive Feedback (Thermal Feedback — Stabilizing)
+
+$$\text{Warm equatorial water} \to \text{Northward transport} \to \text{Polar warming} \to \text{Higher salinity from evaporation} \to \text{Denser water} \to \text{Stronger sinking} \to \text{Stronger circulation}$$
+
+**The loop**:
+1. The equator is warm (T_e = 25°C), the pole is cold (T_p = 5°C).
+2. This temperature contrast drives a density gradient that pulls warm surface water northward.
+3. As warm water moves north, it transports heat and **salt** (since warm water at the equator is salty).
+4. At the pole, this salt-enriched water sinks, strengthening the circulation.
+5. Stronger circulation means more salt transport north → more sinking → **self-reinforcing** (positive feedback in the sense of reinforcement, but *stabilizing* because it resists perturbations).
+
+**Why it's stabilizing**: If the circulation weakens for any reason, less salt reaches the pole, making the pole fresher and less dense, which *further* weakens sinking. But this reduction in sinking means less heat is removed from the tropics, so the equator warms and the pole cools, *restoring* the thermal gradient and the circulation. The system resists the perturbation.
+
+### Negative Feedback (Haline Feedback — Destabilizing)
+
+$$\text{Freshwater input at pole} \to \text{Polar freshening} \to \text{Reduced density} \to \text{Weaker sinking} \to \text{Weaker circulation} \to \text{Less salt northward} \to \text{Even fresher pole}$$
+
+**The loop**:
+1. Freshwater is input to the polar box (glacial melt, excess precipitation, melting sea ice).
+2. This freshens (dilutes) the polar surface water.
+3. Fresher water is less dense, so it floats — sinking is suppressed.
+4. Weaker sinking means weaker circulation → less warm, salty water transported north.
+5. Less salt input to the pole makes it even fresher → even weaker sinking.
+6. This is a **positive feedback loop** (amplifies the perturbation), and it destabilizes the circulation.
+
+**Why it's destabilizing**: Once freshwater starts to accumulate at the pole, the feedback loop *amplifies* the effect, potentially leading to a runaway collapse.
+
+---
+
+## Freshwater Forcing: What It Represents
+
+In the simulator, the **freshwater flux F** is a control parameter representing:
+
+| Physical Process | What It Models |
+|------------------|----------------|
+| **Glacial melt** | Greenland Ice Sheet discharge (particularly since 1980s, accelerating) |
+| **Sea ice formation/melting** | Net freshwater from the ice-albedo feedback |
+| **Precipitation minus evaporation (P-E)** | Net moisture convergence at high latitudes |
+| **River discharge** | Arctic river runoff and estuarine freshwater flux |
+
+Historically, at the end of the last ice age (11,700 years ago), massive freshwater influx from melting ice sheets and Lake Agassiz drainage are thought to have **triggered** (or at least amplified) the Younger Dryas cooling event — a sudden return to near-glacial conditions for ~1,200 years.
+
+In today's context:
+- Greenland ice sheet mass loss has accelerated from ~30 Gt/year (1990s) to ~280 Gt/year (2010s).
+- Arctic sea ice is declining rapidly, changing freshwater distribution.
+- If AMOC is in a bistable region, these freshwater changes could push it toward collapse.
+
+---
+
+## The Density Difference Equation
+
+At the heart of the simulator is a simplified expression for how the **density difference** drives circulation:
+
+$$\frac{\Delta \rho}{\rho_0} = -\alpha \Delta T + \beta \Delta S$$
+
+Where:
+- $\Delta T = T_e - T_p$ (equatorial minus polar; always positive in our setup)
+- $\Delta S = S_e - S_p$ (equatorial minus polar salinity difference)
+
+**Interpretation**:
+- When $\Delta \rho > 0$ (equatorial water is denser): Paradoxically, *lighter* polar water sinks and *heavier* equatorial water rises — no, wait. Actually, we're comparing the *same density reference*. The density difference drives a pressure gradient in the ocean interior.
+- More carefully: **Large positive $\Delta \rho$** means equatorial water is denser, creating a pressure head that drives *surface* flow northward (and deep southward return).
+- When $\Delta S$ is large and positive (equator much saltier than pole), $\beta \Delta S$ term is large, which reduces the net density difference → weaker circulation.
+- When $\Delta S$ becomes negative (pole saltier than equator!), the $-\beta \Delta S$ term reverses, aiding thermal forcing — but in that regime, the circulation has typically collapsed anyway.
+
+---
+
+## From Density to Circulation
+
+The model assumes that circulation strength instantly equilibrates to the density difference (no inertia):
+
+$$q = k[\alpha \Delta T - \beta \Delta S]$$
+
+Where:
+- **q** (1/s): dimensionless circulation strength
+- **k ≈ 1.5 × 10⁻⁶ 1/s**: empirical circulation coefficient
+- **[α ΔT - β ΔS]**: the net density difference normalized
+
+**Physical interpretation**:
+- $q > 0$ (positive): strong northward circulation (AMOC-like)
+- $q ≈ 0$ (near zero): circulation is very weak (collapsed)
+- $q < 0$ (negative): reversed circulation (haline-dominated, polar-to-equatorial surface flow) — rare but possible in the model
+
+**Conversion to Sverdrups**:
+To compare with observations, we convert from 1/s to Sverdrups using the box volume:
+
+$$q_{Sv} = q \cdot V_{\text{box}} / 10^6$$
+
+With typical box volumes of ~7×10¹⁵ m³, this scaling gives default model parameters yielding ~14.7 Sv, close to the observed mean of 16.9 Sv.
+
+---
+
+## Real AMOC vs. The Model
+
+### What the Model Captures
+
+✅ The **bistability** inherent in density-driven circulation
+✅ The **multiple equilibria** and **hysteresis** observed in paleoclimate
+✅ The role of freshwater forcing as a **tipping mechanism**
+✅ The **timescale** of transitions (centennial to millennial)
+
+### What the Model Omits
+
+❌ Wind forcing (important for AMOC but secondary for tipping)
+❌ Nutrient cycling and biological feedbacks
+❌ Bathymetry and continental geometry
+❌ Eddies and fine-scale mixing
+❌ Interactions with the cryosphere (sea ice, ice sheets) beyond freshwater
+❌ Coupled atmosphere-ocean feedbacks
+
+The model is a **caricature**, but a powerful one. By stripping away complexity, Stommel revealed the essential nonlinear dynamics.
+
+---
+
+## Observing the THC
+
+### RAPID-MOCHA Array
+
+Since 2004, the UK/US RAPID-MOCHA program has maintained a mooring array at 26°N across the Atlantic:
+- **26°N location**: Chosen because west of the Mid-Atlantic Ridge, the interior ocean is well-mixed vertically; east of the ridge, upwelling and boundary currents are better resolved.
+- **Moorings**: Measure velocity, temperature, and salinity at multiple depths.
+- **AMOC strength**: Computed as the net mass transport poleward minus equatorward.
+- **Variability**: Measured AMOC fluctuates on weekly to interannual timescales; the 2004–2020 mean is 16.9 Sv with a standard deviation of 4.4 Sv.
+
+### Paleoclimate Proxies
+
+Before modern measurements, we infer AMOC strength from:
+- **Radiocarbon dating** of benthic foraminifera (relates to deep water age).
+- **Isotope ratios** in sediment cores (temperature and salinity fingerprints).
+- **Sea surface temperature (SST)** patterns (Atlantic Meridional Temperature Gradient strongly linked to AMOC).
+
+---
+
+## Why This Matters for Climate
+
+1. **Heat transport**: The AMOC carries ~1.3 petawatts of heat northward. If it weakens significantly, Northern Europe cools, sea level rises in the Western Atlantic, and global precipitation patterns shift.
+
+2. **Carbon cycle**: The AMOC drives the "biological pump" — nutrient upwelling supports productive fisheries and draws down atmospheric CO₂.
+
+3. **Irreversibility**: Hysteresis in the AMOC means that once collapsed, recovery is not automatic. This has profound implications for long-term climate policy.
+
+4. **Regional vs. global**: An AMOC collapse doesn't mean global climate chaos — most models show modest global warming but regional cooling in the North Atlantic. But the regional impacts (European agriculture, North Atlantic fisheries) could be severe.
+
+---
+
+## Further Reading
+
+**Observational foundation**:
+- Smeed, D. A., McCarthy, G. D., Rayner, D., et al. (2018). The North Atlantic is in a state of reduced overturning. *Geophys. Res. Lett.*, 45, 1527–1533.
+
+**Theoretical foundation**:
+- Munk, W. H. (1966). Abyssal recipes. *Deep Sea Res.*, 13, 707–730.
+- Wunsch, C. (2002). The ocean circulation inverse problem. Cambridge University Press.
+
+**Recent concern**:
+- Boers, N. (2021). Observation-based early-warning signals for a collapse of the Atlantic Meridional Overturning Circulation. *Nat. Clim. Change*, 11, 680–688.
+
+---
+
+**Next**: Understand how we build the [Two-Box Model](/theory/two-box-model) from these principles, or explore [Steady States](/theory/steady-states) to see where bistability emerges.

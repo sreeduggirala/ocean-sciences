@@ -1,0 +1,438 @@
+---
+title: "GET /presets"
+description: Retrieve available preset parameter configurations
+---
+
+# GET /presets
+
+Retrieve all available **preset parameter configurations**. Presets are curated parameter sets representing different AMOC regimes (strong, weakened, collapsed, historical).
+
+---
+
+## Endpoint
+
+```
+GET /presets
+```
+
+No query parameters or request body required.
+
+---
+
+## Request
+
+### Simple GET
+
+```bash
+curl http://localhost:8000/presets
+```
+
+---
+
+## Response
+
+### Success (200 OK)
+
+```json
+[
+  {
+    "name": "Normal AMOC",
+    "description": "Baseline present-day circulation. Strong and stable.",
+    "parameters": {
+      "T_e": 25,
+      "T_p": 5,
+      "S_e0": 36,
+      "S_p0": 34,
+      "alpha": 1.5e-4,
+      "beta": 8e-4,
+      "k": 1.5e-6,
+      "F": 8e-5,
+      "t_max": 3000,
+      "dt": 1.0,
+      "noise_amplitude": 0
+    }
+  },
+  {
+    "name": "Weakened AMOC",
+    "description": "Near-present trajectory. Circulation is noticeably weaker, approaching a tipping point.",
+    "parameters": {
+      "T_e": 25,
+      "T_p": 5,
+      "S_e0": 36,
+      "S_p0": 34,
+      "alpha": 1.5e-4,
+      "beta": 8e-4,
+      "k": 1.5e-6,
+      "F": 1.8e-4,
+      "t_max": 3000,
+      "dt": 1.0,
+      "noise_amplitude": 0
+    }
+  },
+  {
+    "name": "Collapsed AMOC",
+    "description": "Post-tipping state. Circulation has collapsed to a weak or reversed regime.",
+    "parameters": {
+      "T_e": 25,
+      "T_p": 5,
+      "S_e0": 36,
+      "S_p0": 34.5,
+      "alpha": 1.5e-4,
+      "beta": 8e-4,
+      "k": 1.5e-6,
+      "F": 3e-4,
+      "t_max": 3000,
+      "dt": 1.0,
+      "noise_amplitude": 0
+    }
+  },
+  {
+    "name": "Stommel 1961 Original",
+    "description": "Replica of the parameter values from Stommel's seminal 1961 paper.",
+    "parameters": {
+      "T_e": 25,
+      "T_p": 5,
+      "S_e0": 36,
+      "S_p0": 34,
+      "alpha": 1.5e-4,
+      "beta": 8e-4,
+      "k": 1.5e-6,
+      "F": 1e-4,
+      "t_max": 3000,
+      "dt": 1.0,
+      "noise_amplitude": 0
+    }
+  }
+]
+```
+
+### Field Descriptions
+
+| Field | Type | Description |
+|-------|------|-------------|
+| name | string | User-friendly preset name |
+| description | string | Human-readable description of the preset |
+| parameters | object | Complete set of parameters (all 11 fields) |
+
+Each preset's `parameters` object contains:
+- T_e, T_p, S_e0, S_p0, alpha, beta, k, F, t_max, dt, noise_amplitude
+
+See [POST /simulate](/api-reference/simulate) for parameter meanings and units.
+
+---
+
+## Examples
+
+### JavaScript/Fetch (Load a Preset)
+
+```javascript
+// Fetch presets
+fetch('http://localhost:8000/presets')
+  .then(res => res.json())
+  .then(presets => {
+    // Find "Normal AMOC" preset
+    const normal = presets.find(p => p.name === "Normal AMOC");
+
+    console.log(`Preset: ${normal.name}`);
+    console.log(`Description: ${normal.description}`);
+    console.log(`Parameters:`, normal.parameters);
+
+    // Use parameters to run simulation
+    return fetch('http://localhost:8000/simulate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(normal.parameters)
+    });
+  })
+  .then(res => res.json())
+  .then(simData => {
+    console.log(`Final AMOC: ${simData.q_sv_final.toFixed(1)} Sv`);
+  });
+```
+
+### Python (List All Presets)
+
+```python
+import requests
+
+response = requests.get('http://localhost:8000/presets')
+presets = response.json()
+
+for preset in presets:
+    print(f"- {preset['name']}")
+    print(f"  {preset['description']}")
+    print(f"  F = {preset['parameters']['F']:.1e} psu/s")
+    print()
+```
+
+Output:
+```
+- Normal AMOC
+  Baseline present-day circulation. Strong and stable.
+  F = 8.0e-05 psu/s
+
+- Weakened AMOC
+  Near-present trajectory. Circulation is noticeably weaker, approaching a tipping point.
+  F = 1.8e-04 psu/s
+
+- Collapsed AMOC
+  Post-tipping state. Circulation has collapsed to a weak or reversed regime.
+  F = 3.0e-04 psu/s
+
+- Stommel 1961 Original
+  Replica of the parameter values from Stommel's seminal 1961 paper.
+  F = 1.0e-04 psu/s
+```
+
+### Python (Run All Presets, Compare Results)
+
+```python
+import requests
+
+# Fetch presets
+presets = requests.get('http://localhost:8000/presets').json()
+
+# Run each preset and compare
+results = []
+for preset in presets:
+    response = requests.post('http://localhost:8000/simulate',
+                             json=preset['parameters'])
+    sim_data = response.json()
+
+    results.append({
+        "name": preset['name'],
+        "q_sv": sim_data['q_sv_final'],
+        "steady_state": sim_data['steady_state_reached']
+    })
+
+# Display comparison table
+print(f"{'Preset':<25} {'AMOC (Sv)':<15} {'Equilibrated':<15}")
+print("-" * 55)
+for r in results:
+    steady = "Yes" if r['steady_state'] else "No"
+    print(f"{r['name']:<25} {r['q_sv']:>6.1f} Sv        {steady:<15}")
+```
+
+Output:
+```
+Preset                    AMOC (Sv)       Equilibrated
+-------------------------------------------------------
+Normal AMOC               15.2 Sv         Yes
+Weakened AMOC              5.3 Sv         Yes
+Collapsed AMOC             0.2 Sv         Yes
+Stommel 1961 Original     10.1 Sv         Yes
+```
+
+### Bash Script (Loop Over Presets)
+
+```bash
+#!/bin/bash
+
+# Fetch presets and extract names
+presets=$(curl -s http://localhost:8000/presets)
+
+# For each preset, extract parameters and run simulation
+echo "Preset | Final AMOC (Sv)"
+echo "-------|---------------"
+
+for name in "Normal AMOC" "Weakened AMOC" "Collapsed AMOC" "Stommel 1961 Original"; do
+  # Extract parameters for this preset (using jq)
+  params=$(echo "$presets" | jq -c ".[] | select(.name==\"$name\") | .parameters")
+
+  # Run simulation
+  result=$(curl -s -X POST http://localhost:8000/simulate \
+    -H "Content-Type: application/json" \
+    -d "$params")
+
+  q=$(echo "$result" | jq '.q_sv_final')
+  echo "$name | $q"
+done
+```
+
+---
+
+## Use Cases
+
+### 1. Frontend Initialization
+
+When the simulator loads, fetch presets to populate preset buttons:
+
+```javascript
+async function initializePresets() {
+  const presets = await fetch('http://localhost:8000/presets')
+    .then(r => r.json());
+
+  // Create buttons for each preset
+  const container = document.getElementById('preset-buttons');
+  presets.forEach(preset => {
+    const btn = document.createElement('button');
+    btn.textContent = preset.name;
+    btn.onclick = () => loadPreset(preset.parameters);
+    container.appendChild(btn);
+  });
+}
+```
+
+### 2. Automated Comparison Study
+
+Run all presets and compare their bifurcation diagrams:
+
+```python
+import requests
+import matplotlib.pyplot as plt
+
+presets = requests.get('http://localhost:8000/presets').json()
+
+fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+axes = axes.flatten()
+
+for i, preset in enumerate(presets):
+    # Compute bifurcation with preset's parameters
+    params = preset['parameters'].copy()
+    params.update({"n_points": 100})  # Add bifurcation parameters
+
+    bifurcation = requests.post('http://localhost:8000/bifurcation',
+                                json=params).json()
+
+    F = bifurcation['F_values']
+    q_fwd = bifurcation['q_sv_forward']
+
+    axes[i].plot(F, q_fwd, 'b-')
+    axes[i].set_title(preset['name'])
+    axes[i].set_xlabel('F (psu/s)')
+    axes[i].set_ylabel('q (Sv)')
+
+plt.tight_layout()
+plt.savefig('presets_comparison.png')
+```
+
+---
+
+## Preset Descriptions
+
+### Preset 1: Normal AMOC
+
+- **F = 8 × 10⁻⁵ psu/s**: Low freshwater forcing
+- **Expected q ≈ 15 Sv**: Strong, stable circulation
+- **Use for**: Baseline, current climate analogue
+- **See**: [Preset Guide](/simulator/presets#preset-1-normal-amoc)
+
+### Preset 2: Weakened AMOC
+
+- **F = 1.8 × 10⁻⁴ psu/s**: Moderate freshwater (in bistable region)
+- **Expected q ≈ 5 Sv**: Weak, marginal circulation
+- **Use for**: Near-tipping scenario, fragility exploration
+- **See**: [Preset Guide](/simulator/presets#preset-2-weakened-amoc)
+
+### Preset 3: Collapsed AMOC
+
+- **F = 3 × 10⁻⁴ psu/s**: High freshwater (beyond tipping)
+- **Expected q ≈ 0 Sv**: Collapsed circulation
+- **Use for**: Post-tipping state, worst-case exploration
+- **See**: [Preset Guide](/simulator/presets#preset-3-collapsed-amoc)
+
+### Preset 4: Stommel 1961 Original
+
+- **F = 1 × 10⁻⁴ psu/s**: Historical parameter set
+- **Expected q ≈ 10 Sv**: Intermediate state
+- **Use for**: Reproducing original 1961 paper, historical context
+- **See**: [Preset Guide](/simulator/presets#preset-4-stommel-1961-original)
+
+---
+
+## FAQ
+
+### Q: Can I modify a preset?
+
+A: The presets are fixed on the server, but you can use their parameters as a starting point and adjust individual sliders in the UI or pass modified parameters to `/simulate`.
+
+```python
+# Start with preset, modify F
+preset = requests.get('http://localhost:8000/presets').json()[0]
+params = preset['parameters'].copy()
+params['F'] = 1.5e-4  # Increase freshwater
+
+result = requests.post('http://localhost:8000/simulate', json=params)
+```
+
+### Q: How are presets chosen?
+
+A: Presets represent:
+1. **Present-day** (Normal AMOC) — realistic observations
+2. **Near-future** (Weakened AMOC) — risk scenario
+3. **Worst-case** (Collapsed AMOC) — tipping consequence
+4. **Historical** (Stommel 1961) — reproducibility of original work
+
+### Q: Are there other preset options available?
+
+A: Not currently, but the API can be extended to add more presets. Request custom presets via GitHub issues.
+
+### Q: Can I see the bifurcation diagram for a preset without computing it?
+
+A: Yes, use the `q_forward` and `q_backward` arrays from a `/bifurcation` request with preset parameters.
+
+---
+
+## Integration Example: Full Workflow
+
+```python
+import requests
+import json
+
+# 1. Get presets
+presets = requests.get('http://localhost:8000/presets').json()
+normal = next(p for p in presets if p['name'] == 'Normal AMOC')
+
+# 2. Run preset
+print(f"Running: {normal['name']}")
+sim = requests.post('http://localhost:8000/simulate',
+                    json=normal['parameters']).json()
+print(f"Result: {sim['q_sv_final']:.1f} Sv")
+
+# 3. Compute bifurcation with preset's parameters
+bifurc_params = normal['parameters'].copy()
+bifurc_params.update({"n_points": 100})
+bifurc = requests.post('http://localhost:8000/bifurcation',
+                       json=bifurc_params).json()
+F_c1 = bifurc['tipping_points']['F_c1']
+print(f"Tipping point: {F_c1:.2e} psu/s")
+
+# 4. Export results
+output = {
+    "preset": normal,
+    "simulation": sim,
+    "bifurcation": bifurc
+}
+with open('results.json', 'w') as f:
+    json.dump(output, f, indent=2)
+```
+
+---
+
+## Error Handling
+
+This endpoint is simple and rarely fails. Possible issues:
+
+| Issue | Response |
+|-------|----------|
+| Server down | Connection refused |
+| No content | 204 No Content (unlikely) |
+| Backend error | 500 Internal Server Error |
+
+If you get an error, check that the backend server is running:
+```bash
+curl http://localhost:8000/health
+```
+
+---
+
+## Next Steps
+
+- See [POST /simulate](/api-reference/simulate) to run simulations with preset parameters
+- See [Preset Scenarios](/simulator/presets) for detailed explanation of each preset
+- See [Running Experiments](/simulator/running-experiments) for guided use of presets
+- Return to [API Overview](/api-reference/overview) for general principles
+
+---
+
+**Tip**: Cache the presets response (it's static) to avoid repeated network calls in your frontend.

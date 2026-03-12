@@ -1,0 +1,218 @@
+---
+title: Stommel 1961 Thermohaline Circulation Simulator
+description: Interactive simulator of the two-box thermohaline circulation model
+---
+
+# Stommel 1961 Thermohaline Circulation Simulator
+
+<img
+  className="block dark:hidden"
+  src="/images/hero-light.svg"
+  alt="Hero Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/hero-dark.svg"
+  alt="Hero Dark"
+/>
+
+## Overview
+
+The **Stommel 1961 Thermohaline Circulation Simulator** is an interactive, full-stack web application that models Henry Stommel's groundbreaking two-box thermohaline circulation (THC) system. First published in *Tellus* (1961), Stommel's model was the first to mathematically demonstrate that ocean circulation can exhibit **multiple stable regimes** — and crucially, that freshwater forcing can cause **irreversible tipping** between them (hysteresis).
+
+This simulator brings Stommel's 65-year-old theoretical model to life with real-time visualizations, bifurcation diagrams, and guided experiments. Perfect for oceanographers, climate scientists, and anyone studying abrupt climate change and the fragility of the Atlantic Meridional Overturning Circulation (AMOC).
+
+### Why This Matters
+
+The Atlantic Meridional Overturning Circulation carries approximately **1.3 petawatts** of heat northward — enough to keep Northern Europe ~10°C warmer than it would be at that latitude. Recent observations (Caesar et al. 2018, Boers 2021) suggest the AMOC may already be weakening. Stommel's model reveals that collapse is not a gradual process — it can be **sudden and potentially irreversible** at current freshwater forcing levels. Understanding these tipping points is essential for climate projections and policy.
+
+---
+
+## Quick Start
+
+<CardGroup cols={2}>
+  <Card
+    title="Theory"
+    icon="flask"
+    href="/theory/stommel-1961"
+  >
+    Learn the physics and mathematics behind Stommel's model, from historical context to modern bifurcation analysis.
+  </Card>
+  <Card
+    title="Simulator"
+    icon="play"
+    href="/simulator/getting-started"
+  >
+    Install and run interactive experiments. Explore tipping points, hysteresis, and stochastic forcing.
+  </Card>
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/overview"
+  >
+    Complete REST API documentation for the backend. Integrate simulations into your own workflows.
+  </Card>
+</CardGroup>
+
+---
+
+## The Core Physics
+
+At the heart of the simulator lies one deceptively simple equation: the **circulation strength driven by density gradients**.
+
+$$q = k[\alpha(T_e - T_p) - \beta(S_e - S_p)]$$
+
+Where:
+- **q**: circulation strength (positive = northward, thermally driven AMOC-like flow)
+- **T_e, T_p**: equatorial and polar temperatures (fixed; represent fast atmospheric scales)
+- **S_e, S_p**: equatorial and polar salinity (evolve slowly; the model's state variables)
+- **α ≈ 1.5 × 10⁻⁴ /°C**: thermal expansion coefficient
+- **β ≈ 8 × 10⁻⁴ /psu**: haline contraction coefficient
+- **k ≈ 1.5 × 10⁻⁶ 1/s**: circulation efficiency constant
+
+The equation captures two competing feedbacks:
+
+1. **Thermal feedback** (positive, stabilizing): Warm equatorial water is less dense, driving a northward surface flow that transports heat and salt to the pole — a self-reinforcing circulation.
+
+2. **Haline feedback** (negative, destabilizing): Freshwater input at the pole reduces salinity and density, weakening the sinking that sustains the circulation. The weaker circulation transports less salt northward, making the pole fresher still — a positive feedback that can flip the system entirely.
+
+---
+
+## Key Discoveries
+
+✨ **Multiple Stable States**: The system is bistable — it can settle into either a thermally-driven strong AMOC state *or* a weak/reversed state, depending on initial conditions and forcing.
+
+⚡ **Hysteresis / Tipping**: Increasing freshwater forcing causes an abrupt collapse at one critical threshold. Reducing freshwater afterward does *not* restore the original state — recovery requires crossing a different (lower) threshold. The gap between them is the hysteresis window.
+
+🌪️ **Stochastic Tipping**: Small random fluctuations (noise) can trigger transitions across the basin boundary, even before reaching the deterministic tipping point.
+
+---
+
+## Get Started
+
+### Backend + Frontend in 2 Minutes
+
+```bash
+# Clone and navigate
+git clone <your-repo>
+cd ocean-sciences
+
+# Terminal 1: Backend
+cd backend
+uv sync
+uv run uvicorn api:app --reload
+# Uvicorn running on http://0.0.0.0:8000
+
+# Terminal 2: Frontend
+cd frontend
+npm install
+npm run dev
+# VITE v5.4.21 ready in 205ms → Local: http://localhost:5173/
+```
+
+Open **http://localhost:5173** and click **Run Simulation**. Watch the two-box ocean diagram animate as salinity evolves in real time.
+
+### Health Check
+
+```bash
+curl http://localhost:8000/health
+# {"status": "ok", "uptime_seconds": 42.3}
+```
+
+---
+
+## Features at a Glance
+
+| Feature | Description |
+|---------|-------------|
+| **Real-time Simulations** | Integrate the 2-box ODEs using the Radau solver with automatic bifurcation detection. |
+| **Bifurcation Diagrams** | Compute and visualize the S-curve of equilibria, showing tipping points and hysteresis windows. |
+| **6-Panel Visualization** | Two-box schematic, AMOC comparison to observations, time series, phase space, and bifurcation diagram. |
+| **Parameter Explorer** | 11 sliders to adjust temperature, salinity, and freshwater forcing in real time. |
+| **Preset Scenarios** | Load curated parameter sets representing Normal AMOC, Weakened AMOC, Collapsed AMOC, and Stommel's original setup. |
+| **Stochastic Forcing** | Add Gaussian noise to explore noise-induced tipping and the effect of unresolved climate variability. |
+| **REST API** | Programmatic access to simulations and bifurcation computations. |
+
+---
+
+## Documentation Structure
+
+<CardGroup cols={3}>
+  <Card title="Theory" icon="book">
+    **6 deep-dive pages** covering Stommel's biography, ocean physics, the two-box model derivation, steady states, linear stability analysis, and bifurcations with hysteresis.
+  </Card>
+  <Card title="Simulator" icon="sliders">
+    **5 practical guides** for installation, parameter reference, preset scenarios, guided experiments, and visualization panel explanations.
+  </Card>
+  <Card title="API" icon="database">
+    **4 technical references** for the REST endpoints, request/response schemas, and integration examples.
+  </Card>
+</CardGroup>
+
+---
+
+## Recommended Reading Order
+
+1. **First time?** Start with [Getting Started](/simulator/getting-started) to run the simulator.
+2. **Curious about the physics?** Read [Ocean Physics](/theory/ocean-physics) and [The Two-Box Model](/theory/two-box-model).
+3. **Want to understand tipping?** Explore [Bifurcations & Hysteresis](/theory/bifurcations-hysteresis), then try [Running Experiments](/simulator/running-experiments).
+4. **Building an app?** See [API Reference](/api-reference/overview).
+
+---
+
+## What This Simulator Is (And Isn't)
+
+### ✅ What It Is
+
+- A faithful implementation of Stommel's 1961 two-box model with optional stochastic forcing.
+- A tool for understanding the *stability architecture* of ocean circulation.
+- A gateway to modern research on AMOC collapse, abrupt climate change, and tipping points.
+
+### ❌ What It Isn't
+
+- A full 3D ocean model (GCM). The two-box model is a drastic simplification.
+- A climate prediction tool. Use this to build intuition; rely on IPCC reports and coupled GCMs for projections.
+- A complete treatment of real AMOC dynamics (includes nutrient cycling, wind forcing, bathymetry, etc. not present here).
+
+Think of it as a **conceptual model**: parsimonious, analytically tractable, and rich enough to reveal fundamental instabilities present in the real ocean.
+
+---
+
+## Scientific Lineage
+
+Stommel's 1961 paper spawned six decades of research:
+
+- **Rooth (1982)**: Extended the two-box model with realistic salinity feedbacks.
+- **Rahmstorf (1996, 2002)**: Bifurcation analysis and connection to paleoclimate.
+- **Dijkstra (2005)**: Comprehensive stability analysis and chaos.
+- **Lenton et al. (2008)**: Placed AMOC collapse among nine planetary tipping elements.
+- **Caesar et al. (2018)**: RAPID observations suggest ongoing AMOC weakening.
+- **Boers (2021)**: Atlantic sea surface temperatures show AMOC near a critical transition.
+
+This simulator sits at the intersection of classical dynamical systems theory and urgent climate science.
+
+---
+
+## Need Help?
+
+- **How do I install?** → [Getting Started](/simulator/getting-started)
+- **What does this parameter do?** → [Parameters](/simulator/parameters)
+- **I want to learn the math.** → [Two-Box Model](/theory/two-box-model) → [Steady States](/theory/steady-states) → [Stability](/theory/stability-analysis)
+- **Can I call the backend directly?** → [API Reference](/api-reference/overview)
+- **I found a bug!** → Open an issue on GitHub.
+
+---
+
+## Citation
+
+If you use this simulator in research or teaching, please cite:
+
+> Stommel, H. (1961). Thermohaline Convection with Two Stable Regimes of Flow. *Tellus*, 13(2), 224–230.
+
+And mention this interactive implementation:
+
+> [Your Name/Organization]. Stommel 1961 Thermohaline Circulation Simulator. [Year]. Available at [your-repo-url].
+
+---
+
+**Ready to explore?** Start with [Getting Started](/simulator/getting-started) or [Stommel's Story](/theory/stommel-1961).

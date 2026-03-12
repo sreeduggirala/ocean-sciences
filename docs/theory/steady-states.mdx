@@ -1,0 +1,328 @@
+---
+title: Steady States and Equilibrium Analysis
+description: Computing and classifying equilibria in the two-box model
+---
+
+# Steady States and Equilibrium Analysis
+
+## The Equilibrium Condition
+
+At steady state, the time derivatives vanish:
+
+$$\frac{dS_e}{dt} = 0 \quad \text{and} \quad \frac{dS_p}{dt} = 0$$
+
+This requires:
+
+$$F = q \Delta S$$
+
+where $q = k[\alpha \Delta T - \beta \Delta S]$ and $\Delta S = S_e - S_p$.
+
+Substituting:
+
+$$F = k[\alpha \Delta T - \beta \Delta S] \cdot \Delta S$$
+
+$$F = k \alpha \Delta T \cdot \Delta S - k \beta (\Delta S)^2$$
+
+Rearranging into standard quadratic form:
+
+$$k\beta (\Delta S)^2 - k \alpha \Delta T \cdot \Delta S + F = 0$$
+
+---
+
+## The Quadratic Formula
+
+Using the quadratic formula with $a = k\beta$, $b = -k\alpha\Delta T$, $c = F$:
+
+$$\Delta S = \frac{k\alpha\Delta T \pm \sqrt{(k\alpha\Delta T)^2 - 4k\beta F}}{2k\beta}$$
+
+The two solutions are:
+
+$$\Delta S_+ = \frac{k\alpha\Delta T + \sqrt{\Delta_{\text{disc}}}}{2k\beta} \quad \text{(upper branch, stronger AMOC)}$$
+
+$$\Delta S_- = \frac{k\alpha\Delta T - \sqrt{\Delta_{\text{disc}}}}{2k\beta} \quad \text{(lower branch, weaker AMOC)}$$
+
+Where the **discriminant** is:
+
+$$\Delta_{\text{disc}} = (k\alpha\Delta T)^2 - 4k\beta F$$
+
+---
+
+## Three Regimes
+
+### 1. Bistable Region: $\Delta_{\text{disc}} > 0$
+
+**Condition**: $F < F_{\text{crit}} = \frac{k(\alpha\Delta T)^2}{4\beta}$
+
+**Result**: Two real, distinct roots → **two stable equilibria**
+
+- **Upper branch** ($\Delta S_+$): Larger $\Delta S$, larger positive $q$ → strong AMOC state
+  - Higher equatorial salinity $S_e^*$, lower polar salinity $S_p^*$
+  - Circulation is northward and vigorous
+  - This is the **attractor** (stable)
+
+- **Lower branch** ($\Delta S_-$): Smaller $\Delta S$, smaller (possibly negative) $q$ → weak/reversed state
+  - Lower equatorial salinity, higher polar salinity
+  - Circulation is weak or reversed
+  - Can be either stable or unstable depending on exact parameters
+
+- **Unstable middle branch**: Where $\lambda_1 = 0$ (see [Stability Analysis](/theory/stability-analysis))
+  - Acts as a **saddle point** separating the two basins of attraction
+  - Invisible in long-term simulations but critical for understanding tipping
+
+---
+
+### 2. Critical Point: $\Delta_{\text{disc}} = 0$
+
+**Condition**: $F = F_{\text{crit}} = \frac{k(\alpha\Delta T)^2}{4\beta}$
+
+**Result**: One repeated root → **saddle-node bifurcation**
+
+$$\Delta S^* = \frac{k\alpha\Delta T}{2k\beta} = \frac{\alpha\Delta T}{2\beta}$$
+
+This is the **tipping point**. At this point:
+- The upper and lower branches "collide" and annihilate.
+- Stability of the equilibrium transitions from stable to unstable (or vice versa).
+- The system can no longer be in a stable state if forced beyond $F_{\text{crit}}$.
+
+---
+
+### 3. Monostable Region: $\Delta_{\text{disc}} < 0$
+
+**Condition**: $F > F_{\text{crit}}$
+
+**Result**: No real solutions... *theoretically*
+
+But wait — how can there be no equilibrium? Physically, the system must settle *somewhere*. The resolution is that in this region, the equilibrium is **unstable in the salinity equation alone** but is saved by the interaction with freshwater and temperature fields. More carefully:
+
+- In the true two-box model, as F increases beyond $F_{\text{crit}}$, the system enters a regime where the haline feedback dominates so strongly that even the freshwater forcing cannot sustain a stable equilibrium in the original salinity-difference coordinate.
+- The system is either **continuously being pushed** toward a new state (not quasi-equilibrium) or enters a **time-dependent oscillatory regime**.
+
+In practice, integrating the ODEs beyond $F_{\text{crit}}$ often leads to a **collapsed state** with very weak circulation or even reversal.
+
+---
+
+## Critical Freshwater Flux: Formula and Interpretation
+
+$$F_{\text{crit}} = \frac{k(\alpha\Delta T)^2}{4\beta}$$
+
+### Physical Interpretation
+
+- **Numerator**: $k(\alpha\Delta T)^2$ measures the *strength* of thermal forcing (large ΔT and large k → strong thermal drive).
+- **Denominator**: $4\beta$ measures the *strength* of salinity's effect on density (large β → salinity variations strongly affect density).
+
+**Corollary**:
+- **Large ΔT** → easier to sustain AMOC → higher $F_{\text{crit}}$ → can tolerate more freshwater before tipping.
+- **Large β** → salinity effect is strong → lower $F_{\text{crit}}$ → collapse happens at lower freshwater input.
+
+### Example with Default Parameters
+
+- α = 1.5×10⁻⁴ /°C
+- β = 8×10⁻⁴ /psu
+- ΔT = 20°C (T_e = 25°C, T_p = 5°C)
+- k = 1.5×10⁻⁶ 1/s
+
+$$F_{\text{crit}} = \frac{1.5 \times 10^{-6} \times (1.5 \times 10^{-4} \times 20)^2}{4 \times 8 \times 10^{-4}}$$
+
+$$= \frac{1.5 \times 10^{-6} \times (3 \times 10^{-3})^2}{3.2 \times 10^{-3}}$$
+
+$$= \frac{1.5 \times 10^{-6} \times 9 \times 10^{-6}}{3.2 \times 10^{-3}}$$
+
+$$\approx 4.2 \times 10^{-5} \text{ psu/s}$$
+
+But the **hysteresis window** (where both states are stable) extends from a *lower* critical value $F_{c2}$ (recovery threshold) to *upper* value $F_{c1}$ (collapse threshold), with $F_{c2} < F_{c1} < F_{\text{crit}}$.
+
+---
+
+## The S-Curve (Bifurcation Diagram)
+
+Plotting $q$ vs. $F$ for varying freshwater forcing reveals the characteristic **S-shaped** (fold) bifurcation diagram:
+
+```
+  q (circulation strength in Sv)
+  ^
+  |     _____
+  |    /
+  |   /
+  |  |
+  |   \___
+  |       \____
+  +------+------+---> F (freshwater flux)
+       F_c2  F_c1  F_crit
+```
+
+- **Upper branch** (solid blue): Thermally-driven states, q ≈ 15 Sv initially
+  - Stable as long as F < F_c1 (forward tipping point)
+  - Slope: dq/dF < 0 (increasing F weakens circulation)
+
+- **Lower branch** (solid orange): Weak/haline-driven states, q ≈ 0 or negative
+  - Stable for F < F_c2 (backward recovery threshold)
+  - Slope: dq/dF can be positive or negative
+
+- **Middle branch** (dashed grey): Unstable/saddle states
+  - Never observed in long simulations
+  - Connects the upper and lower branches at bifurcation points
+  - Represents the "forbidden zone" for stable equilibria
+
+- **Orange shaded region**: Bistable region ($F_{c2} < F < F_{c1}$)
+  - System can be in *either* state depending on initial conditions
+  - Hysteresis is the defining feature
+  - The "memory" of initial conditions persists even as F changes
+
+---
+
+## Computing Roots Numerically
+
+In code, we find the roots of the quadratic:
+
+```python
+import numpy as np
+
+def q_equilibria(F, alpha, beta, k, Delta_T):
+    """Find the two equilibrium q values for given F."""
+    a = k * beta
+    b = -k * alpha * Delta_T
+    c = F
+
+    # Quadratic formula
+    discriminant = b**2 - 4*a*c
+
+    if discriminant < 0:
+        return None, None  # No real roots
+    elif discriminant == 0:
+        return -b / (2*a), None  # One repeated root (bifurcation)
+    else:
+        sqrt_disc = np.sqrt(discriminant)
+        Delta_S_plus = (-b + sqrt_disc) / (2*a)
+        Delta_S_minus = (-b - sqrt_disc) / (2*a)
+
+        # Convert back to q
+        q_plus = k * (alpha * Delta_T - beta * Delta_S_plus)
+        q_minus = k * (alpha * Delta_T - beta * Delta_S_minus)
+
+        return q_plus, q_minus
+```
+
+---
+
+## Physical Meaning of the Two Branches
+
+### Upper Branch (Strong AMOC)
+
+- **Circulation** is thermally driven: $q = k[\alpha \Delta T - \beta \Delta S] > 0$
+- **Large positive ΔS**: Equatorial box is much saltier than polar box
+- **Energy balance**: Warm equatorial water carries salt northward → polar box becomes salty and dense → strong sinking
+- **Feedback**: Stronger circulation → more salt transport north → even stronger density gradient → **self-reinforcing** (stable)
+- **Observed analogue**: Present-day AMOC with ~17 Sv of transport
+
+### Lower Branch (Weak/Reversed AMOC)
+
+- **Circulation** is weak or haline-driven: $q = k[\alpha \Delta T - \beta \Delta S] \lesssim 0$
+- **Small or negative ΔS**: Polar box is fresh relative to equatorial box
+- **Energy balance**: Freshwater at pole blocks sinking → weak northward circulation or reversal
+- **Feedback**: Weaker circulation → less salt transport north → polar box stays fresh → **self-reinforcing** (can be stable)
+- **Observed analogue**: Collapsed AMOC states during Ice Age (inferred from paleoclimate proxies)
+
+---
+
+## Transition Behavior: Forward and Backward Paths
+
+When we slowly increase F (as might happen with increasing freshwater input from glacial melt):
+
+**Forward path (increasing F)**:
+1. Start at F = 0 on the upper branch: q ≈ q_max, strong AMOC
+2. Increase F gradually
+3. Upper branch equilibrium q decreases (circulation weakens)
+4. At F = F_c1 (forward tipping point), the upper branch terminates
+5. **System jumps** to the lower branch → q collapses suddenly
+6. Further increase in F: continue along lower branch with weak q
+
+**Backward path (decreasing F from high value)**:
+1. Start at F = high on the lower branch: q ≈ q_weak, circulation very weak
+2. Decrease F gradually
+3. Lower branch equilibrium remains weak
+4. Lower branch does *not* rejoin upper branch immediately
+5. Continue decreasing until F = F_c2 (recovery threshold), which is *lower* than F_c1
+6. At F_c2, lower branch terminates and system jumps back to upper branch
+7. Further decrease: continue on upper branch with strong q
+
+**The key**: F_c2 < F_c1 → **hysteresis window** of width ΔF = F_c1 − F_c2
+
+---
+
+## Example: Default Parameters
+
+With the standard parameter set:
+
+| Quantity | Value |
+|----------|-------|
+| F_c1 (forward tipping) | ~2.0 × 10⁻⁴ psu/s |
+| F_c2 (backward recovery) | ~1.0 × 10⁻⁴ psu/s |
+| Hysteresis width | ~1.0 × 10⁻⁴ psu/s |
+| F_crit (discriminant = 0) | ~4.2 × 10⁻⁵ psu/s |
+
+(Note: F_crit < F_c2 < F_c1 because stability analysis reveals that full annihilation of the S-curve occurs at F_crit, but the observable tipping points are offset to higher F values.)
+
+---
+
+## Stability Classification Revisited
+
+At each equilibrium, the Jacobian eigenvalue (see [Stability Analysis](/theory/stability-analysis)) determines stability:
+
+$$\lambda_1 = -2q + 2k\beta \Delta S$$
+
+**Upper branch** (large q, large ΔS):
+- $-2q$ term is large and negative
+- $+2k\beta \Delta S$ term is positive but smaller
+- Net: $\lambda_1 < 0$ → **stable** ✅
+
+**Lower branch** (small q, small ΔS):
+- $-2q$ term is small or zero
+- $+2k\beta \Delta S$ term is small or zero
+- Stability depends on the specific regime; can be stable or unstable
+
+**Middle branch** (unstable):
+- Exactly where $\lambda_1 = 0$
+- Transition from stable (upper) to unstable (lower) or vice versa
+
+---
+
+## Why Equilibria Exist (Even Beyond $F_{\text{crit}}$)
+
+A subtle point: we derived that for $F > F_{\text{crit}}$, the quadratic has no real roots. Yet the physical system must go *somewhere*. The resolution:
+
+1. **The two-box model is a reduced system**: It assumes salinity is the only state variable. In reality, temperature can adjust, spatial structure matters, and mixing processes complicate things.
+
+2. **Beyond $F_{\text{crit}}$, circulation may oscillate**: Rather than a fixed equilibrium, the system may exhibit time-dependent behavior (limit cycles or chaos). This is beyond the scope of steady-state analysis.
+
+3. **Collapsed states are quasi-stationary**: With very high F, the system sits in a quasi-steady state with very low q, high polar salinity, and slow drift. It's not a true equilibrium but a slow evolution.
+
+In the simulator, when F exceeds $F_{\text{crit}}$ by a lot, the computed q becomes very small or negative, and the trajectory asymptotically approaches a quasi-equilibrium near the lower branch.
+
+---
+
+## Geometric Picture: The S-Curve in Parameter Space
+
+The bifurcation diagram is really a **slice** through a higher-dimensional parameter space:
+
+- If we vary **F** while holding α, β, k, ΔT fixed → we see the S-curve
+- If we vary **ΔT** (e.g., changing polar temperature) → the S-curve shifts and changes shape
+- If we vary **β** (haline contraction) → critical F and hysteresis window shift
+
+The simulator lets you explore this space interactively:
+- Adjust T_e, T_p, α, β, k in the UI
+- Recompute bifurcation diagram
+- Watch how the S-curve deforms and moves
+
+---
+
+## Further Reading
+
+**Theory**:
+- Stommel, H. (1961). Thermohaline Convection with Two Stable Regimes of Flow. *Tellus*, 13(2), 224–230. [Fig. 1–3]
+
+**Applied bifurcation theory**:
+- Kuznetsov, Y. A. (2004). *Elements of Applied Bifurcation Theory*. Springer. [Chapters 2–3 on saddle-node bifurcations]
+
+---
+
+**Next**: Understand the [Stability Analysis](/theory/stability-analysis) that classifies these equilibria, or jump to [Bifurcations & Hysteresis](/theory/bifurcations-hysteresis) for the full dynamical picture.

@@ -1,0 +1,409 @@
+---
+title: Visualization Guide
+description: Detailed explanation of all six visualization panels
+---
+
+# Visualization Guide
+
+The simulator displays six interactive visualizations, each revealing different aspects of the system. This page explains what each panel shows and how to interpret it.
+
+---
+
+## Overview Layout
+
+```
+┌────────────────┬──────────────────┬────────────────┐
+│                │                  │                │
+│   Left Panel   │   Visualizations │                │
+│                │   (Right side)   │                │
+│  Controls &    │                  │                │
+│  Sliders       │  ┌────────────────┬──────────────┐│
+│                │  │ 1. Two-Box     │  2. AMOC     ││
+│                │  │    Ocean       │    Comparison││
+│                │  └────────────────┴──────────────┘│
+│                │  ┌──────────────────────────────┐│
+│                │  │ 3. Time Series               ││
+│                │  │    (3 lines)                 ││
+│                │  └──────────────────────────────┘│
+│                │  ┌────────────────┬──────────────┐│
+│                │  │ 4. Phase       │ 5. Bifurcation││
+│                │  │    Space       │   Diagram    ││
+│                │  └────────────────┴──────────────┘│
+└────────────────┴──────────────────┴────────────────┘
+```
+
+---
+
+## Panel 1: Two-Box Ocean Diagram (Top-Left)
+
+### What It Shows
+
+A simplified schematic representation of the current state of the model:
+- Two boxes representing equatorial (E) and polar (P) regions
+- Colors encode temperature and salinity
+- Arrows represent circulation between boxes
+- Animated arrows show flow direction and strength in real time
+
+### How to Read It
+
+**Box colors**:
+- **Red**: Warm, salty water (equatorial box)
+- **Blue**: Cold, fresh water (polar box)
+- **Intermediate shades**: In-between states
+
+**Arrow representation**:
+- **Thick northward arrow**: Strong positive circulation (q > 10 Sv) — typical AMOC
+- **Thin arrow**: Weak circulation (0 < q < 5 Sv)
+- **Reversed arrow**: Negative circulation (q < 0) — rare, haline-dominated regime
+- **No visible arrow**: Circulation near zero (collapsed state)
+
+**Animation**:
+- Arrows animate continuously, giving a dynamic sense of the flow rate
+- Thickness and animation speed correspond to |q|
+- Direction (north or south) corresponds to sign of q
+
+**Label indicators** (bottom of diagram):
+- "Thermally Driven": q > 10 Sv, strong AMOC
+- "Neutral": q ≈ 0, barely flowing
+- "Weakened": 2 < q < 8 Sv, visible but reduced
+- "Collapsed": q ≈ 0 or negative
+- "Reversed": q < 0, haline-dominated
+
+### Interpretation
+
+This is the **most intuitive** visualization. If you only glanced at one panel, this tells the story:
+- Wide northward arrows = healthy AMOC
+- Thin arrows = circulation failing
+- Reversed arrows = catastrophe
+
+Use this to get a quick visual sense of the system state without reading numbers.
+
+---
+
+## Panel 2: AMOC Comparison (Top-Right)
+
+### What It Shows
+
+A bar chart comparing:
+- **Left bar (blue)**: Your simulation's final circulation strength q_sv in Sverdrups
+- **Right bar (grey)**: Observed AMOC mean from the RAPID-MOCHA array (16.9 ± 4.4 Sv)
+- **Error bars**: Standard deviation (±4.4 Sv) shown on RAPID bar
+
+### How to Read It
+
+**Color coding**:
+- **Dark blue**: Normal AMOC (~15 Sv), good match to observations
+- **Orange**: Weakened AMOC (~5–10 Sv), below observed mean
+- **Bright red**: Collapsed AMOC (~0 Sv), dramatically different from observations
+
+**Scale**:
+- Y-axis shows Sverdrups (Sv), standard oceanographic unit
+- Dashed horizontal lines at 0, 5, 10, 15, 20 Sv for reference
+
+### Interpretation
+
+**What it tells you**:
+1. **Is your model realistic?** Comparing to RAPID-MOCHA data grounds your simulation in observations
+2. **How far from observations?** If your bar is outside the ±4.4 Sv error band, your forcing is likely extreme
+3. **What regime are you in?**
+   - Strongly blue: Present-day or past strong-AMOC state
+   - Orange: Future weakening scenario
+   - Red: Collapse scenario (not observed recently, but possible)
+
+**Example interpretation**:
+- Load "Normal AMOC" preset → bar aligns with RAPID mean → realistic
+- Load "Collapsed AMOC" preset → bar near zero → outside observed range (collapse state)
+
+### What It Doesn't Show
+
+- **Uncertainty in the model**: The simulator doesn't account for parameterization uncertainties
+- **Variability over time**: Only shows final state, not time-dependent behavior
+- **Other AMOC indices**: RAPID-MOCHA is just one observational product
+
+---
+
+## Panel 3: Time Series (Full-Width Middle Row)
+
+### What It Shows
+
+Three time series plotted against time (x-axis, in years):
+1. **Circulation q(t)** (blue line, left y-axis): In Sverdrups, showing how q evolves
+2. **Equatorial salinity S_e(t)** (yellow/orange line, right y-axis): In psu
+3. **Polar salinity S_p(t)** (cyan line, right y-axis): In psu
+
+### How to Read It
+
+**Time axis**:
+- Ranges from 0 to t_max (default 3000 years)
+- Represents one full simulation run
+
+**Left y-axis (blue, Sv)**:
+- Shows circulation strength
+- Range: typically -5 to +20 Sv
+- **Red dashed line at q = 0**: Marks collapse threshold
+- **Grey dashed line at q ≈ 15 Sv**: Reference line (present-day AMOC)
+
+**Right y-axis (psu)**:
+- Shows salinity (practical salinity units)
+- Range: typically 33–37 psu
+
+**Trajectory shape**:
+- **Flat (after initial transient)**: System in equilibrium; stable state
+- **Gradual curve**: System approaching equilibrium; slow dynamics
+- **Sudden jump**: Bifurcation or noise-induced transition
+
+### Interpretation Examples
+
+**Scenario A: Normal AMOC**
+```
+Time series shape:
+q: starts at ~10 Sv → quickly rises → flattens at ~15 Sv (equilibrium)
+S_e: starts at 36 → slightly decreases → flat at ~36.2 psu
+S_p: starts at 34 → slightly increases → flat at ~34.8 psu
+Interpretation: System quickly equilibrates to strong stable state
+```
+
+**Scenario B: Weakened AMOC**
+```
+Time series shape:
+q: starts at ~10 Sv → slowly decreases → flattens at ~5 Sv (after ~2000 years)
+S_e: gradual decrease → flat at lower value
+S_p: gradual increase → flat at higher value
+Interpretation: Slower equilibration (critical slowing down); marginal state
+```
+
+**Scenario C: Collapsed AMOC**
+```
+Time series shape:
+q: starts at ~10 Sv → rapidly drops → flat near 0 or negative (within ~500 years)
+S_e: rapid decrease to lower value
+S_p: rapid increase to higher value
+Interpretation: Bifurcation/jump to collapsed state; irreversible transition
+```
+
+### What to Look For
+
+1. **Equilibration time**: How long until the curves flatten?
+   - <500 years = far from bifurcation
+   - 1000–2000 years = near bifurcation (critical slowing down)
+   - >2000 years = very close to tipping
+
+2. **Salinity balance**: S_e + S_p should remain constant (salt conservation)
+   - Check a few points on the time series
+   - Should always sum to same value (≈70 psu in this model)
+
+3. **Circulation-salinity coupling**:
+   - Stronger q (more northward flow) → more salt transported north → larger S_e, smaller S_p
+   - Weaker q → less salt transport → smaller ΔS
+
+---
+
+## Panel 4: Phase Space Portrait (Bottom-Left)
+
+### What It Shows
+
+A 2D plot of the system trajectory in **state space**:
+- **X-axis**: Salinity difference ΔS = S_e − S_p (psu)
+- **Y-axis**: Circulation strength q (Sv)
+- **Colored line**: Trajectory from initial state (red star) to final state (green circle)
+- **Color gradient**: Blue = early time, Yellow = late time (viridis colormap)
+- **Dashed line**: The q-nullcline (equilibrium curve where dq/dt = 0)
+
+### How to Read It
+
+**Initial & final states**:
+- **Red star**: Starting condition (S_e0, S_p0)
+- **Green circle**: Final state (S_e^*, S_p^*) — where the system ends up
+- **Distance between them**: How far the system "moved" in state space
+
+**The q-nullcline** (dashed line):
+- This is the curve where circulation is instantaneously determined by salinity difference
+- Equation: q = k[α·ΔT − β·ΔS]
+- The nullcline is **diagonal-shaped**: positive slope (higher ΔS → weaker q)
+- The system's equilibria lie exactly on this curve
+- The trajectory **asymptotically approaches** the nullcline
+
+**Trajectory shape**:
+- **Spiral**: System "overshoots" then settles on the nullcline
+- **Straight**: Direct approach to equilibrium (rare)
+- **Jump**: Bifurcation or noise-induced transition
+
+### Interpretation Examples
+
+**Scenario A: Strong AMOC (Normal AMOC preset)**
+```
+Phase space:
+Red star at ΔS ≈ 2 psu, q ≈ 10 Sv (upper branch)
+Trajectory spirals slightly, then settles on nullcline
+Green circle at ΔS ≈ 2 psu, q ≈ 15 Sv (final equilibrium, upper branch)
+Interpretation: Starts near equilibrium; minor transient; stable attractor
+```
+
+**Scenario B: Weakened AMOC (Weakened AMOC preset)**
+```
+Phase space:
+Red star at ΔS ≈ 2 psu, q ≈ 10 Sv
+Trajectory approaches nullcline very slowly (spiral is flat, diffuse)
+Green circle at ΔS ≈ 1 psu, q ≈ 5 Sv (still upper branch but closer to fold)
+Interpretation: Critical slowing down; trajectory is sluggish; close to bifurcation
+```
+
+**Scenario C: Collapsed AMOC (Collapsed AMOC preset)**
+```
+Phase space:
+Red star at ΔS ≈ 2 psu, q ≈ 10 Sv (upper branch)
+Trajectory **jumps** across nullcline to lower branch
+Green circle at ΔS ≈ -0.5 psu, q ≈ 0 Sv (lower branch, collapsed)
+Interpretation: Bifurcation occurred; system "escaped" upper branch basin of attraction
+```
+
+### Basins of Attraction
+
+In the bistable region, the nullcline splits into three parts:
+- **Upper branch** (stable, upper right): Strong AMOC attractor
+- **Middle branch** (unstable, middle): Separatrix between basins
+- **Lower branch** (stable, lower left): Weak/collapsed attractor
+
+The **phase space portrait shows which basin you're in**:
+- Red star and green circle both on upper → you stayed in strong AMOC basin
+- Red star on upper, green circle on lower → you tipped/transitioned
+
+---
+
+## Panel 5: Bifurcation Diagram (Bottom-Right)
+
+### What It Shows
+
+*Only appears after clicking "Compute Bifurcation".*
+
+A 2D plot showing equilibrium circulation **q** as a function of freshwater forcing **F**:
+- **X-axis**: Freshwater flux F (psu/s), ranging from 0 to 5 × 10⁻⁴
+- **Y-axis**: Equilibrium circulation q_sv (Sv), ranging from -5 to +20
+- **Blue upper branch**: Stable states for increasing F (forward sweep)
+- **Orange lower branch**: Stable states for decreasing F (backward sweep)
+- **Grey dashed middle branch**: Inferred unstable (saddle) states
+- **Orange shaded region**: Bistable region (hysteresis window)
+- **Red diamonds**: Bifurcation points (F_c1 and F_c2)
+- **Orange X marker**: Current F from your slider
+
+### How to Read It
+
+**The S-curve**:
+- Resembles a sideways "S" or fold
+- **Upper right loop** = forward tipping: moving right along upper branch until collapse at F_c1
+- **Lower left loop** = backward recovery: moving left along lower branch until recovery at F_c2
+- **Gap between upper and lower** = hysteresis window; two states exist here
+
+**Bifurcation points**:
+- **F_c1** (right diamond, collapse threshold): Where upper branch ends
+  - For F < F_c1: Only upper branch is stable
+  - For F > F_c1: Only lower branch is stable
+- **F_c2** (left diamond, recovery threshold): Where lower branch begins
+  - For F < F_c2: Only upper branch is stable (recovered)
+  - For F > F_c2: Both branches can be stable
+
+**The orange X marker**:
+- Shows your current F value from the slider
+- Moves left/right as you adjust F
+- Falls in the "bistable window" if F_c2 < F < F_c1
+
+### Interpretation Examples
+
+**Scenario A: Wide hysteresis (default parameters)**
+```
+Bifurcation diagram:
+F_c1 ≈ 2.0 × 10⁻⁴ (right diamond)
+F_c2 ≈ 1.0 × 10⁻⁴ (left diamond)
+Hysteresis width ≈ 1.0 × 10⁻⁴
+Interpretation: Large "memory" — system can remain in one state far from bifurcation
+```
+
+**Scenario B: Narrow hysteresis (lower ΔT)**
+```
+Bifurcation diagram:
+F_c1 ≈ 1.5 × 10⁻⁴
+F_c2 ≈ 1.2 × 10⁻⁴
+Hysteresis width ≈ 0.3 × 10⁻⁴
+Interpretation: Small bistable region; less history dependence; easier to predict
+```
+
+### Why Compute Bifurcation?
+
+- **Understanding stability**: See the full picture of all possible steady states
+- **Finding tipping points**: Exactly identify F_c1 and F_c2
+- **Designing experiments**: Plan which F values to run based on diagram
+- **Parameter sensitivity**: Recompute after changing parameters to see how tipping points shift
+
+---
+
+## Panel 6: Parameter Controls (Left Side)
+
+### What It Shows
+
+All sliders, buttons, and options for controlling the simulation:
+- **Parameter sliders** (T_e, T_p, S_e0, S_p0, α, β, k, F, t_max, dt, noise)
+- **Preset buttons** (Normal AMOC, Weakened AMOC, Collapsed AMOC, Stommel 1961)
+- **Action buttons** (Run Simulation, Compute Bifurcation, Export)
+- **Advanced options** (if present)
+
+### How to Use It
+
+1. **Adjust sliders** to set parameters
+2. **Click "Run Simulation"** to execute with current parameters
+3. **Watch all 5 visualization panels update** with new results
+4. **Click "Compute Bifurcation"** to generate the S-curve (takes ~10–30 seconds)
+5. **Click "Export"** to save results as JSON
+
+### Tips
+
+- **Auto-run feature**: Some sliders may auto-trigger re-runs after a 500ms pause
+- **Log-scale slider (k)**: The k slider uses logarithmic scale; small visual changes correspond to big numerical changes
+- **Debounced updates**: Parameters often have a small delay before taking effect (to avoid 100 simultaneous re-runs)
+
+---
+
+## Putting It All Together: A Complete Example
+
+**Task**: You want to know if the current AMOC is stable or fragile.
+
+**Step 1**: Load "Normal AMOC" preset, run simulation
+- **Panel 1** (Two-Box): Thick northward arrow → visually: strong circulation
+- **Panel 2** (AMOC Comparison): Blue bar aligns with RAPID mean → quantitatively: realistic
+- **Panel 3** (Time Series): q flattens at 15 Sv after 500 years → dynamically: stable and fast-equilibrating
+- **Panel 4** (Phase Space): Red star and green circle both on upper branch → geometrically: strong basin attractor
+- **Panel 5** (Bifurcation): Orange X far to the left of F_c1 → quantitatively: large safety margin
+
+**Conclusion**: The AMOC is strong, stable, and far from tipping at this parameter set.
+
+**Step 2**: Load "Weakened AMOC" preset, run simulation
+- **Panel 1**: Thinner arrow; orange label "Weakened"
+- **Panel 2**: Bar drops to orange region (~5 Sv)
+- **Panel 3**: Time series bends slowly; takes 2000 years to equilibrate
+- **Panel 4**: Trajectory approaches nullcline very slowly (critical slowing down)
+- **Panel 5**: Orange X is now *inside* the bistable window, closer to F_c1
+
+**Conclusion**: The AMOC is weakened and fragile; we're approaching a tipping point.
+
+---
+
+## Troubleshooting Visualizations
+
+| Issue | Likely Cause | Solution |
+|-------|--------------|----------|
+| No data in panels | Simulation hasn't run yet | Click "Run Simulation" |
+| Panels blank/grey | Still running (slow computer) | Wait 10 seconds |
+| Time series goes off scale | Parameters extreme (very large t_max or F) | Reduce t_max or adjust F |
+| No bifurcation diagram | "Compute Bifurcation" hasn't been clicked | Click the button (takes ~20 sec) |
+| Phase space shows weird jump | Bifurcation occurred mid-simulation | Try lower F or check parameters |
+
+---
+
+## Further Reading
+
+- [Parameters](/simulator/parameters) for detailed explanation of what each slider does
+- [Running Experiments](/simulator/running-experiments) for guided uses of these visualizations
+- [Two-Box Model](/theory/two-box-model) for the mathematical equations underlying these plots
+
+---
+
+**Next**: Try the [Running Experiments](/simulator/running-experiments) guide to put these visualizations to work discovering tipping points and hysteresis!

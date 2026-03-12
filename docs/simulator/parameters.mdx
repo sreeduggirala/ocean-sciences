@@ -1,0 +1,380 @@
+---
+title: Parameter Reference
+description: Complete guide to all simulator parameters with physical meaning and ranges
+---
+
+# Parameter Reference
+
+This page explains every parameter in the simulator: its physical meaning, default value, range, and effect on simulations.
+
+---
+
+## Quick Reference Table
+
+| Parameter | Symbol | Default | Units | Min | Max | Scale | Physical Meaning |
+|-----------|--------|---------|-------|-----|-----|-------|------------------|
+| Equatorial T | T_e | 25 | °C | 15 | 35 | Linear | Tropical Atlantic surface temp |
+| Polar T | T_p | 5 | °C | -2 | 15 | Linear | High-latitude surface temp |
+| Equatorial S (initial) | S_e0 | 36 | psu | 30 | 40 | Linear | Initial equatorial salinity |
+| Polar S (initial) | S_p0 | 34 | psu | 28 | 40 | Linear | Initial polar salinity |
+| Thermal expansion | α | 1.5e-4 | 1/°C | 0.5e-4 | 3e-4 | Linear | Density change per °C warming |
+| Haline contraction | β | 8e-4 | 1/psu | 2e-4 | 1.5e-3 | Linear | Density change per psu increase |
+| Circulation coeff. | k | 1.5e-6 | 1/s | 5e-8 | 1e-5 | Log | Coupling constant for q |
+| Freshwater flux | F | 1e-4 | psu/s | 0 | 5e-4 | Linear | Net freshwater input to polar box |
+| Integration time | t_max | 3000 | years | 100 | 10000 | Linear | Total simulation duration |
+| Output interval | dt | 1.0 | years | 0.1 | 100 | Linear | Sampling interval (diagnostic only) |
+| Noise amplitude | σ | 0 | psu/s | 0 | 5e-5 | Linear | Gaussian noise std dev |
+
+---
+
+## Detailed Parameter Explanations
+
+### Temperature Parameters
+
+#### Equatorial Temperature (T_e)
+
+**Physical Meaning**: The fixed surface temperature of the equatorial box, representing the Atlantic equatorial region (~5–20°N).
+
+**Default**: 25°C
+
+**Typical Range**: 15–35°C (but realistically 20–28°C)
+
+**Real-world context**: Atlantic equatorial sea surface temperature is typically 25–27°C.
+
+**What it does**:
+- **Larger T_e** (e.g., 30°C): Increases thermal gradient ΔT = T_e − T_p → stronger thermal drive → AMOC is more stable and harder to tip
+- **Smaller T_e** (e.g., 18°C): Reduces ΔT → weaker thermal drive → AMOC is more fragile
+
+**Effect on bifurcation diagram**:
+- Increasing T_e **shifts critical F higher** → larger freshwater forcing needed to cause tipping
+- Decreasing T_e **lowers critical F** → easier to tip
+
+**Validation constraint**: T_e > T_p (enforced by the model)
+
+#### Polar Temperature (T_p)
+
+**Physical Meaning**: The fixed surface temperature of the polar box, representing high latitudes (>50°N in the North Atlantic).
+
+**Default**: 5°C
+
+**Typical Range**: -2°C (near freezing/sea ice) to 15°C (unusual warm extremes)
+
+**Real-world context**: Nordic Seas and Labrador Sea surface temperature ranges from -2°C (winter, with sea ice) to ~8°C (summer).
+
+**What it does**:
+- **Lower T_p** (e.g., 0°C): Increases ΔT → stronger thermal drive → AMOC more stable
+- **Higher T_p** (e.g., 10°C): Decreases ΔT → weaker thermal drive → AMOC more fragile
+
+**Effect on bifurcation diagram**: Same as adjusting T_e in opposite direction
+- Lower T_p → higher critical F
+- Higher T_p → lower critical F
+
+**Physical interpretation**: In a warming climate, polar regions warm faster than the equator (polar amplification). Higher T_p models this effect and makes tipping easier.
+
+**Validation constraint**: T_p < T_e (enforced)
+
+---
+
+### Salinity Parameters (Initial Conditions)
+
+#### Equatorial Salinity (S_e0)
+
+**Physical Meaning**: The initial salinity in the equatorial box at t=0.
+
+**Default**: 36 psu
+
+**Typical Range**: 30–40 psu (physically 35–37 psu)
+
+**Real-world context**: Atlantic equatorial surface salinity is 35–37 psu. High values can represent net evaporation zones.
+
+**What it does**:
+- **Larger S_e0** (e.g., 37 psu): More salt in equatorial box initially → larger initial ΔS → starts closer to upper branch
+- **Smaller S_e0** (e.g., 35 psu): Less salt → smaller initial ΔS → may start closer to lower branch
+
+**Effect on simulation**:
+- Initial salinity determines initial condition in phase space
+- System relaxes toward its attractor (upper or lower branch) depending on which basin of attraction S_e0 is in
+- In bistable region, can "switch" between stable states by changing S_e0
+
+#### Polar Salinity (S_p0)
+
+**Physical Meaning**: The initial salinity in the polar box at t=0.
+
+**Default**: 34 psu
+
+**Typical Range**: 28–40 psu (physically 32–35 psu)
+
+**Real-world context**: North Atlantic polar surface is fresher than equatorial due to ice melt and freshwater input; typical range 33–34.5 psu.
+
+**What it does**:
+- **Larger S_p0** (e.g., 35 psu): Smaller initial ΔS → starts on upper branch (AMOC-like)
+- **Smaller S_p0** (e.g., 33 psu): Larger initial ΔS but with opposite sign → may start on lower branch or collapsed regime
+
+**Effect on simulation**:
+- Initial ΔS = S_e0 − S_p0 determines starting point
+- Very low S_p0 (≤30 psu) can initialize the system in the collapsed state
+
+**Physical interpretation**: Representing freshwater input by starting with lower polar salinity is a diagnostic tool. Real freshwater forcing evolves over time (parameter F), not just via initial conditions.
+
+---
+
+### Physical Coefficients
+
+#### Thermal Expansion (α)
+
+**Physical Meaning**: The rate at which seawater density decreases with temperature increase.
+
+**Default**: 1.5 × 10⁻⁴ /°C
+
+**Typical Range**: 0.5–3.0 × 10⁻⁴ /°C
+
+**Real-world context**: Typical seawater at 20°C has α ≈ 2 × 10⁻⁴ /°C. The value is temperature-dependent but this constant approximation is standard.
+
+**What it does**:
+- Appears in thermal driving: q = k[α·ΔT − β·ΔS]
+- Larger α → stronger effect of temperature on density → stronger thermal drive → more stable AMOC
+
+**Effect on bifurcation diagram**:
+- Increasing α → shifts critical F *higher* (larger F needed to tip)
+- Decreasing α → shifts critical F *lower* (easier to tip)
+
+**Physically meaningful range**: 0.5–3.0 × 10⁻⁴ represents different water masses and temperatures.
+
+#### Haline Contraction (β)
+
+**Physical Meaning**: The rate at which seawater density increases with salinity increase.
+
+**Default**: 8 × 10⁻⁴ /psu
+
+**Typical Range**: 2–15 × 10⁻⁴ /psu
+
+**Real-world context**: Typical seawater has β ≈ 7.6 × 10⁻⁴ /psu (nearly constant over oceanographic ranges).
+
+**What it does**:
+- Appears in both thermal and haline terms: q = k[α·ΔT − β·ΔS]
+- Larger β → salinity differences have bigger effect on density → haline feedback is stronger → easier to trigger collapse
+
+**Effect on bifurcation diagram**:
+- Increasing β → shifts critical F *lower* (easier to tip)
+- Decreasing β → shifts critical F *higher* (harder to tip)
+
+**Physically meaningful range**: 2–15 × 10⁻⁴ captures variation across different water masses.
+
+**Interpretation**: β is the "fragility" parameter. A larger β means the ocean is more sensitive to freshwater forcing because salinity variations have a bigger density effect.
+
+#### Circulation Coefficient (k)
+
+**Physical Meaning**: An empirical coupling constant that converts density differences into circulation strength.
+
+**Default**: 1.5 × 10⁻⁶ /s
+
+**Typical Range**: 5 × 10⁻⁸ to 1 × 10⁻⁵ /s (logarithmic scale)
+
+**What it does**:
+- q = k[α·ΔT − β·ΔS]
+- Larger k → same ΔT difference produces faster circulation
+- Affects *rate* of approach to equilibrium but *not* the equilibrium value itself (at steady state, F = q·ΔS is independent of k if q is scaled appropriately)
+
+**Effect on bifurcation diagram**:
+- **Paradoxically, k affects neither equilibria nor critical F** (in the equilibrium sense)
+- Instead, k affects the **timescale**: larger k → faster dynamics → reaches steady state sooner
+- But note: the critical F formula involves k: $F_c = \frac{k(\alpha\Delta T)^2}{4\beta}$, so k does affect the bifurcation threshold!
+
+**Simulation behavior**:
+- Use a coarse dt to capture dynamics with small k
+- Use a fine dt to resolve fast dynamics with large k
+
+**Default calibration**: Chosen so that with default parameters, q_sv ≈ 14.7 Sv, matching RAPID observations.
+
+---
+
+### Freshwater Forcing (The Key Bifurcation Parameter)
+
+#### Freshwater Flux (F)
+
+**Physical Meaning**: Net freshwater input (or removal) to the polar box, in salinity units.
+
+**Default**: 1.0 × 10⁻⁴ psu/s
+
+**Typical Range**: 0 to 5 × 10⁻⁴ psu/s
+
+**Physical interpretation**: F > 0 means net freshwater *input* to polar box (dilutes it):
+- Glacial melt from Greenland ice sheet
+- Excess precipitation minus evaporation at high latitudes
+- Melting sea ice (releases freshwater)
+- Arctic river discharge
+
+**What it does**: This is the **primary bifurcation parameter**
+- Small F: AMOC is strong and stable (upper branch)
+- F approaches F_c1: AMOC weakens gradually
+- F exceeds F_c1: AMOC collapses (jump to lower branch)
+- Very large F: AMOC stays collapsed
+
+**Hysteresis behavior**:
+- Forward tipping at F_c1 ≈ 2 × 10⁻⁴ psu/s
+- Backward recovery at F_c2 ≈ 1 × 10⁻⁴ psu/s
+- Bistable region: 1 × 10⁻⁴ < F < 2 × 10⁻⁴ psu/s
+
+**Real-world context**:
+- Present-day Greenland mass loss: ~280 Gt/year ≈ 0.3 × 10⁻⁴ psu/s (very roughly)
+- The model suggests we're not yet at the tipping point (F < F_c1), but freshwater input is increasing
+
+**Experimentation**: This slider is the most important for exploring tipping points and hysteresis. Try:
+1. Set F to 0.8 × 10⁻⁴ (strong AMOC)
+2. Gradually increase to 2.5 × 10⁻⁴ (collapse)
+3. Decrease back to 0.5 × 10⁻⁴ (watch for hysteresis recovery at lower F than collapse)
+
+---
+
+### Integration Parameters
+
+#### Integration Time (t_max)
+
+**Physical Meaning**: The total length of time the simulation runs, in years.
+
+**Default**: 3000 years
+
+**Typical Range**: 100–10,000 years
+
+**What it does**:
+- Determines how long you wait for the system to reach steady state
+- Longer simulations are more expensive computationally but reveal long-term behavior
+
+**When to adjust**:
+- **Near tipping**: Increase to 5000–10,000 years to see slow approaches to bifurcation
+- **Quick exploration**: Decrease to 500–1000 years for fast iterations (system usually equilibrates within 1000 years for far from bifurcation)
+- **Noise experiments**: May need longer to see multiple transitions
+
+**Default rationale**: 3000 years is sufficient for the system to equilibrate in most regimes, matching paleoclimate timescales.
+
+#### Output Sampling Interval (dt)
+
+**Physical Meaning**: The time step at which results are *output* and plotted.
+
+**Default**: 1.0 year
+
+**Typical Range**: 0.1–100 years
+
+**IMPORTANT**: This is a *diagnostic* parameter only. The internal ODE solver uses adaptive time stepping (Radau method) and does not depend on dt. Changing dt:
+- Does **not** affect accuracy
+- Does **not** change the simulation results
+- **Only** affects the resolution of output time series
+
+**When to adjust**:
+- **Smooth plots**: Decrease dt to 0.1 year for finer time series resolution
+- **Quick output**: Increase dt to 10–100 years if you only care about final state (faster data download)
+
+**Default rationale**: 1 year per point gives good time series plots without excessive data.
+
+#### Noise Amplitude (σ)
+
+**Physical Meaning**: Standard deviation of Gaussian white noise added to the ODEs.
+
+**Default**: 0 (no noise)
+
+**Typical Range**: 0 to 5 × 10⁻⁵ psu/s
+
+**What it does**:
+- When σ = 0: Purely deterministic system (reproducible results)
+- When σ > 0: Gaussian noise is added at each integration step
+  - q → q + σ·ξ(t) where ξ(t) is Gaussian white noise
+  - System becomes stochastic; each run gives different trajectory
+
+**Physical interpretation**: Noise represents:
+- Unresolved sub-grid variability (eddies, mesoscale processes)
+- Weather noise (storms, atmospheric variability)
+- Decadal climate modes (NAO, AMO)
+
+**Effect on simulation**:
+- **No noise (σ = 0)**: System follows deterministic trajectory to attractor. Near bifurcation, tiny perturbations decay or grow exponentially (marginal stability).
+- **Small noise (σ = 1–2 × 10⁻⁵)**: System fluctuates around attractor; occasional small excursions
+- **Moderate noise (σ = 3–5 × 10⁻⁵)**: Regular fluctuations; may see noise-induced transitions across basin boundary
+- **Large noise**: Transitions become very frequent; signal drowns in noise
+
+**Noise-induced tipping**: In the bistable region, even if F < F_c1 (deterministically no tipping), large enough noise can occasionally kick the system to the lower branch. Rerun the same parameters multiple times with noise to see stochastic variability.
+
+**When to use**:
+- Set σ > 0 to explore how noise affects stability
+- Compare deterministic (σ=0) and stochastic (σ>0) simulations to quantify robustness
+- Study noise-induced tipping by running same parameters 5–10 times and watching for transitions
+
+---
+
+## Parameter Constraints and Validation
+
+The simulator enforces the following constraints:
+
+| Constraint | Formula | Why |
+|-----------|---------|-----|
+| T_e > T_p | Always | Equator must be warmer than pole |
+| S_e + S_p = constant | Enforced | Salt conservation |
+| All parameters > 0 | Enforced | Physical quantities must be positive |
+
+If you violate a constraint (e.g., set T_e < T_p), the simulator returns a **422 Validation Error** with a helpful message.
+
+---
+
+## Recommended Parameter Sets for Exploration
+
+### 1. Strong AMOC (Baseline)
+```
+T_e: 25, T_p: 5, S_e0: 36, S_p0: 34
+α: 1.5e-4, β: 8e-4, k: 1.5e-6, F: 0.8e-4
+Result: q_sv ≈ 16 Sv (strong, stable)
+```
+
+### 2. Near Tipping
+```
+[Same as above but F: 1.8e-4]
+Result: q_sv ≈ 5 Sv (weak, marginal)
+```
+
+### 3. Collapsed State
+```
+[Same as above but F: 3e-4]
+Result: q_sv ≈ 0 Sv (collapsed)
+```
+
+### 4. Fragile (Low Thermal Drive)
+```
+T_e: 18, T_p: 8, S_e0: 36, S_p0: 34
+[Other params default]
+Result: Lower critical F (easier to tip)
+```
+
+### 5. Robust (High Thermal Drive)
+```
+T_e: 30, T_p: 0, S_e0: 36, S_p0: 34
+[Other params default]
+Result: Higher critical F (harder to tip)
+```
+
+---
+
+## Bifurcation Diagram Reading Tips
+
+When you compute a bifurcation diagram, the tipping points depend on parameters:
+
+$$F_{c1} = \frac{k(\alpha\Delta T)^2}{4\beta} \cdot f(\text{stability})$$
+
+where f(·) is a factor accounting for stability. Roughly:
+
+- **Increase ΔT** (e.g., lower T_p): F_c shifts *right* (need more F to tip)
+- **Increase β**: F_c shifts *left* (tip more easily)
+- **Increase k**: F_c shifts *right* (stabilizing)
+- **Increase α**: F_c shifts *right* (stabilizing)
+
+Use this intuition to predict how the S-curve will move when you adjust a parameter, then recompute to verify!
+
+---
+
+## Further Reading
+
+For the physics behind these parameters, see:
+- [The Two-Box Model](/theory/two-box-model) — how they appear in equations
+- [Steady States](/theory/steady-states) — effect on bifurcation thresholds
+- [Ocean Physics](/theory/ocean-physics) — real-world ranges and contexts
+
+---
+
+**Next**: Load a [Preset](/simulator/presets) to see curated parameter sets, or jump to [Running Experiments](/simulator/running-experiments) for guided investigations.

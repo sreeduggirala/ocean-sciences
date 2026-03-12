@@ -1,0 +1,355 @@
+---
+title: The Two-Box Model Formulation
+description: Complete mathematical derivation of Stommel's two-box thermohaline circulation model
+---
+
+# The Two-Box Model Formulation
+
+This is the core of Stommel's 1961 paper: a beautifully simple yet rich dynamical system that captures the essential nonlinear behavior of thermohaline circulation.
+
+---
+
+## Conceptual Setup
+
+Imagine the Atlantic Ocean divided into **two well-mixed boxes**:
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+<div>
+**Equatorial Box (E)**
+- Warm: T_e = 25°C
+- High salinity: S_e ≈ 36 psu
+- Represents tropical Atlantic surface
+- Area: A; Volume: V_box
+</div>
+
+<div>
+**Polar Box (P)**
+- Cold: T_p = 5°C
+- Variable salinity: S_p (evolves over time)
+- Represents high-latitude (Nordic Seas, Labrador Sea) surface/intermediate water
+- Same volume: V_box
+</div>
+
+</div>
+
+---
+
+## Assumptions (Critical to Remember)
+
+The model makes several simplifying assumptions that are **critical to its tractability** but also its limitations:
+
+1. **Temperatures are fixed** (T_e, T_p = constants)
+   - Justification: Atmospheric timescale is fast (~1 year) compared to ocean salinity adjustment (~centuries). We assume the atmosphere thermostats the surface layer.
+   - Reality: Temperatures do vary, but slowly on THC timescales.
+
+2. **Salinity evolves** (S_e, S_p = state variables)
+   - Justification: Salt is quasi-conservative (only removed by ice or added by evaporation); thermohaline forcing acts via freshwater, not heat.
+   - Reality: Salinity is conservative over the simulation period.
+
+3. **Circulation is instantaneous** (no inertia)
+   - Justification: Acceleration timescale of the ocean (~1 day) is much shorter than salinity evolution (~10–100 years).
+   - Reality: Geostrophic balance and hydrostatic equilibrium relax quickly.
+
+4. **Boxes are well-mixed** (no spatial gradients within boxes)
+   - Justification: Turbulent mixing on sub-grid scales quickly homogenizes properties within each box.
+   - Reality: More complex locally, but captures large-scale averages.
+
+5. **Linear equation of state**
+   - Justification: Accurate over the small ranges (T: 5–25°C, S: 34–36 psu) relevant here.
+   - Reality: Actual seawater EOS is nonlinear (especially in freshwater/cold regimes), but linear approximation is standard in oceanography.
+
+---
+
+## State Variables and Parameters
+
+### State Variables (evolve over time)
+
+- **S_e(t)**: Equatorial box salinity (psu)
+- **S_p(t)**: Polar box salinity (psu)
+
+### Parameters (fixed per simulation)
+
+| Parameter | Symbol | Default | Units | Physical Meaning |
+|-----------|--------|---------|-------|------------------|
+| Equatorial temperature | T_e | 25 | °C | Fixed equatorial surface T |
+| Polar temperature | T_p | 5 | °C | Fixed polar surface T |
+| Thermal expansion | α | 1.5×10⁻⁴ | 1/°C | Density change per degree warming |
+| Haline contraction | β | 8×10⁻⁴ | 1/psu | Density change per unit salinity |
+| Circulation coefficient | k | 1.5×10⁻⁶ | 1/s | Empirical coupling constant |
+| Freshwater flux | F | 1.0×10⁻⁴ | psu/s | Net freshwater input to polar box |
+| Initial equatorial salinity | S_e0 | 36 | psu | S_e(0) |
+| Initial polar salinity | S_p0 | 34 | psu | S_p(0) |
+
+---
+
+## The Core Physics: Circulation Equation
+
+The circulation strength is driven by the **density difference** between boxes:
+
+$$\rho_e = \rho_0[1 - \alpha T_e + \beta S_e]$$
+
+$$\rho_p = \rho_0[1 - \alpha T_p + \beta S_p]$$
+
+The density *difference* (equatorial minus polar):
+
+$$\Delta \rho = \rho_e - \rho_p = \rho_0[-\alpha(T_e - T_p) + \beta(S_e - S_p)]$$
+
+$$= \rho_0[-\alpha \Delta T + \beta \Delta S]$$
+
+Where $\Delta T = T_e - T_p > 0$ (equator is always warmer) and $\Delta S = S_e - S_p$.
+
+The normalized density difference (divided by ρ₀) drives circulation:
+
+$$q = k[\alpha \Delta T - \beta \Delta S]$$
+
+### Interpretation of q
+
+- **$q > 0$ (positive, thermally driven)**:
+  - The equatorial box is effectively denser (despite being warmer, it's salty enough to outweigh thermal effect).
+  - Warm, salty water flows northward from the equator; cold, fresh water returns southward at depth.
+  - This is the **AMOC-like regime**: northward heat transport, carrying heat to high latitudes.
+
+- **$q \approx 0$ (near zero, neutral)**:
+  - Thermal and haline effects nearly cancel.
+  - Circulation is very weak; the system is near a tipping point.
+
+- **$q < 0$ (negative, reversed)**:
+  - The polar box is effectively denser.
+  - Fresh, cold water flows northward at the surface; warm, salty water returns southward at depth.
+  - This is a **reversed or salinity-dominated regime**: physically possible but energetically unfavorable.
+
+---
+
+## The Dynamics: ODEs for Salinity
+
+Salt is conserved: it is neither created nor destroyed, only advected by circulation and added/removed by freshwater fluxes.
+
+**Salt flux terms**:
+
+1. **Advective flux** due to circulation $q$:
+   - Circulation carries salt from equatorial box to polar box at rate $-q(S_e - S_p)$ (negative because circulation removes salt from equator, adds to pole if $q > 0$).
+   - But the sign is: when $q > 0$ (northward), equatorial water flows north, *removing* salt from equatorial box (rate: $-q \Delta S$) and *adding* to polar box (rate: $+q \Delta S$).
+
+2. **Freshwater forcing** $F$:
+   - $F > 0$: net freshwater added to polar box (dilutes it, so dS_p/dt gets a $-F$ term); simultaneously removed from equatorial box to conserve mass (so dS_e/dt gets a $+F$ term).
+   - $F < 0$: evaporation dominates; salinity increases at pole, decreases at equator.
+
+**The ODE system**:
+
+$$\frac{dS_e}{dt} = -q(S_e - S_p) + F$$
+
+$$\frac{dS_p}{dt} = +q(S_e - S_p) - F$$
+
+### Verification: Salt Conservation
+
+Adding the two equations:
+
+$$\frac{d(S_e + S_p)}{dt} = -q(S_e - S_p) + F + q(S_e - S_p) - F = 0$$
+
+Good! The total salt is conserved: $S_e(t) + S_p(t) = S_e(0) + S_p(0) = \text{const}$.
+
+---
+
+## Substituting the Circulation Equation
+
+Expand $q = k[\alpha \Delta T - \beta \Delta S]$ in the ODEs:
+
+$$\frac{dS_e}{dt} = -k[\alpha \Delta T - \beta \Delta S] \cdot (S_e - S_p) + F$$
+
+$$= -k[\alpha \Delta T - \beta \Delta S] \cdot \Delta S + F$$
+
+This is a **highly nonlinear system**: the feedback is cubic in $\Delta S$.
+
+---
+
+## Steady States and Equilibrium
+
+At steady state, both time derivatives are zero:
+
+$$0 = -q(S_e - S_p) + F = -q \Delta S + F$$
+
+Therefore at equilibrium:
+
+$$F = q \Delta S = k[\alpha \Delta T - \beta \Delta S] \cdot \Delta S$$
+
+$$F = k \alpha \Delta T \cdot \Delta S - k \beta (\Delta S)^2$$
+
+Rearranging:
+
+$$k \beta (\Delta S)^2 - k \alpha \Delta T \cdot \Delta S + F = 0$$
+
+This is a **quadratic equation** in $\Delta S$. Let $a = k\beta$, $b = -k\alpha\Delta T$, $c = F$:
+
+$$a(\Delta S)^2 + b(\Delta S) + c = 0$$
+
+### Solutions (Quadratic Formula)
+
+$$\Delta S = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} = \frac{k\alpha\Delta T \pm \sqrt{(k\alpha\Delta T)^2 - 4k\beta F}}{2k\beta}$$
+
+The **discriminant** is:
+
+$$\Delta_{\text{disc}} = (k\alpha\Delta T)^2 - 4k\beta F$$
+
+Three regimes:
+
+| Regime | Condition | # Solutions | Interpretation |
+|--------|-----------|-------------|-----------------|
+| **Bistable** | $\Delta_{\text{disc}} > 0$ | 2 real roots | Two stable equilibria exist |
+| **Critical** | $\Delta_{\text{disc}} = 0$ | 1 repeated root | Saddle-node bifurcation; tipping point |
+| **Monostable** | $\Delta_{\text{disc}} < 0$ | 0 real roots | No equilibrium (unstable to infinite state — physically unphysical) |
+
+---
+
+## Critical Freshwater Flux
+
+The system transitions from bistable to monostable when the discriminant equals zero:
+
+$$\Delta_{\text{disc}} = (k\alpha\Delta T)^2 - 4k\beta F_{\text{crit}} = 0$$
+
+$$F_{\text{crit}} = \frac{(k\alpha\Delta T)^2}{4k\beta} = \frac{k(\alpha\Delta T)^2}{4\beta}$$
+
+**Example with default parameters**:
+- α = 1.5×10⁻⁴, ΔT = 20°C, k = 1.5×10⁻⁶, β = 8×10⁻⁴
+
+$$F_{\text{crit}} = \frac{1.5 \times 10^{-6} \times (1.5 \times 10^{-4} \times 20)^2}{4 \times 8 \times 10^{-4}}$$
+
+$$= \frac{1.5 \times 10^{-6} \times (3 \times 10^{-3})^2}{3.2 \times 10^{-3}}$$
+
+$$\approx 4.2 \times 10^{-5} \text{ psu/s}$$
+
+But this is the *critical* point where bistability ends. The hysteresis window (where two states coexist) is roughly $[F_1, F_2]$ with $F_2 < F_1 < F_{\text{crit}}$.
+
+---
+
+## Stability of Equilibria
+
+For a given F, the quadratic yields one or two solutions for $\Delta S$. But are they stable?
+
+Linearize around an equilibrium $(S_e^*, S_p^*)$:
+
+$$\delta \dot{S}_e = -\frac{\partial}{\partial S_e}[-q \Delta S + F] \cdot \delta S_e - \frac{\partial}{\partial S_p}[-q \Delta S + F] \cdot \delta S_p$$
+
+With some algebra (using $\partial q / \partial S_e = -k\beta$, $\partial q / \partial S_p = +k\beta$):
+
+$$J_{11} = \frac{\partial \dot{S}_e}{\partial S_e} = -q^* + k\beta \Delta S^*$$
+
+$$J_{12} = \frac{\partial \dot{S}_e}{\partial S_p} = +q^* + k\beta \Delta S^*$$
+
+The Jacobian is:
+
+$$J = \begin{pmatrix} -q^* + k\beta \Delta S^* & q^* + k\beta \Delta S^* \\ -(- q^* + k\beta \Delta S^*) & -(q^* + k\beta \Delta S^*) \end{pmatrix}$$
+
+Due to the salt conservation constraint, one eigenvalue is always zero (neutral direction). The physically relevant eigenvalue is:
+
+$$\lambda_1 = -2q^* + 2k\beta \Delta S^*$$
+
+**Stability**:
+- If $\lambda_1 < 0$: stable node (attractor)
+- If $\lambda_1 > 0$: unstable node (saddle/repellor)
+- If $\lambda_1 = 0$: bifurcation point
+
+For the **strong AMOC branch** (upper branch, large q):
+- $q^*$ is large and positive.
+- $\Delta S^*$ is large and positive.
+- Usually $\lambda_1 < 0$: **stable** (this is the attractor we see in phase space).
+
+For the **weak/haline branch** (lower branch, small q):
+- $q^*$ is small or zero.
+- $\Delta S^*$ is small or negative.
+- Often $\lambda_1 > 0$: **unstable** (saddle point).
+
+The **middle branch** (unstable part of the S-curve):
+- Where the two roots of the quadratic transition from stable to unstable.
+- Forms the dashed line in bifurcation diagrams.
+
+---
+
+## Conversion to Sverdrups
+
+The circulation equation gives $q$ in units of 1/s. To convert to Sverdrups (observed units):
+
+$$q_{\text{Sv}} = q \times \frac{V_{\text{box}}}{10^6 \text{ m}^3/\text{s per Sv}}$$
+
+With a typical Atlantic box volume of ~7×10¹⁵ m³:
+
+$$q_{\text{Sv}} = q \times \frac{7 \times 10^{15}}{10^6} = q \times 7 \times 10^9$$
+
+So if $q \approx 2 \times 10^{-9}$ (1/s), then $q_{\text{Sv}} \approx 14$ Sv, matching observations.
+
+This scaling is baked into the simulator; all displayed values are in Sverdrups.
+
+---
+
+## Non-Dimensionalization (Advanced)
+
+It's instructive to work with non-dimensional variables. Define:
+
+- $\tilde{S} = \Delta S / (\alpha \Delta T / \beta)$: normalized salinity difference
+- $\tilde{F} = F / (k \alpha \Delta T \cdot \alpha \Delta T / \beta)$: normalized freshwater flux
+
+Then the equilibrium quadratic becomes:
+
+$$(\tilde{\Delta S})^2 - \tilde{\Delta S} + \tilde{F} = 0$$
+
+The only control parameter that appears is $\tilde{F}$! This shows that once you fix the thermal forcing and physical coefficients, all behavior is captured by a single non-dimensional number: the ratio of freshwater forcing to thermal forcing.
+
+Alternatively, the **Stommel number** is sometimes defined:
+
+$$S = \frac{\beta F}{\alpha k (\Delta T)^2}$$
+
+For $S < S_c$ (critical value ≈ 1/4), the system is bistable.
+
+---
+
+## What the Model Captures and Misses
+
+### ✅ Model Strengths
+
+- **Bistability**: Two stable states exist under the same parameters.
+- **Hysteresis**: Transition path depends on history.
+- **Tipping points**: Saddle-node bifurcations occur at parameter values that can be computed.
+- **Analytical tractability**: ODEs are simple enough to analyze by hand and numerically integrate quickly.
+- **Scalability**: Captures the essential nonlinearity even when extended to 3–4 boxes or embedded in larger models.
+
+### ❌ Model Limitations
+
+- **No time delays**: Real ocean responds over decades; this model assumes instantaneous equilibration of circulation.
+- **No wind forcing**: The AMOC actually depends on both thermohaline and wind-driven components.
+- **No spatial structure**: Real THC has 3D structure, vertical mixing, and boundary layers.
+- **No biology**: Nutrient cycling and oxygen dynamics are omitted.
+- **No eddies**: Sub-grid turbulence is parameterized away.
+- **No ice sheet dynamics**: The only ice effect is freshwater input (not ice sheet slope, extent, or rebound).
+
+---
+
+## Numerical Integration
+
+The simulator uses a **Radau solver** (a stiff, implicit Runge-Kutta method) to integrate the ODEs from $t=0$ to $t=t_{\max}$:
+
+$$\frac{dS_e}{dt} = -q(S_e - S_p) + F, \quad S_e(0) = S_{e0}$$
+
+$$\frac{dS_p}{dt} = +q(S_e - S_p) - F, \quad S_p(0) = S_{p0}$$
+
+Where $q(S_e, S_p) = k[\alpha \Delta T - \beta(S_e - S_p)]$.
+
+**With stochastic forcing** (noise_amplitude > 0), the solver switches to **Euler-Maruyama**:
+
+$$S_e(t + dt) = S_e(t) + [-q(S_e - S_p) + F] \, dt + \sigma_F \sqrt{dt} \, \xi$$
+
+Where $\sigma_F$ is the noise amplitude and $\xi \sim N(0, 1)$ is a Gaussian random variable.
+
+---
+
+## Further Reading
+
+**Original source**:
+- Stommel, H. (1961). Thermohaline Convection with Two Stable Regimes of Flow. *Tellus*, 13(2), 224–230.
+
+**Extended reviews**:
+- Rahmstorf, S. (1996). On the freshwater forcing and transport of the Atlantic thermohaline circulation. *J. Phys. Oceanogr.*, 26, 435–456.
+- Dijkstra, H. A., & Molemaker, M. J. (1997). Symmetries and dynamics of rotating shallow-water vortices. *J. Fluid Mech.*, 331, 35–59.
+
+---
+
+**Next**: Compute and analyze the [Steady States](/theory/steady-states), or dive into [Stability Analysis](/theory/stability-analysis).

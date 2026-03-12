@@ -1,0 +1,365 @@
+---
+title: Running Experiments
+description: Five guided investigations to explore tipping points, hysteresis, and stochastic forcing
+---
+
+# Running Experiments
+
+These guided experiments walk you through the key discoveries of Stommel's 1961 work and modern extensions. Each takes 10–30 minutes.
+
+---
+
+## Experiment 1: Finding the Tipping Point
+
+**Objective**: Discover the freshwater forcing threshold where AMOC collapses.
+
+**Time**: ~15 minutes
+
+**Difficulty**: Beginner
+
+### Steps
+
+1. **Load baseline state**:
+   - Click preset: **"Normal AMOC"**
+   - Click "Run Simulation"
+   - Note q_sv ≈ 15–16 Sv (strong circulation)
+
+2. **Incrementally increase freshwater forcing**:
+   - Drag the F slider to **1.0 × 10⁻⁴ psu/s** → Run
+   - Note q drops slightly; still strong (~14 Sv)
+   - Drag to **1.2 × 10⁻⁴** → Run; q ≈ 12 Sv (weakening)
+   - Drag to **1.5 × 10⁻⁴** → Run; q ≈ 7 Sv (noticeably weak)
+   - Drag to **1.8 × 10⁻⁴** → Run; q ≈ 5 Sv (marginal)
+   - Drag to **1.9 × 10⁻⁴** → Run; q ≈ 2 Sv (critical)
+   - Drag to **2.0 × 10⁻⁴** → Run; **q suddenly drops to near 0 Sv** (collapsed!)
+
+3. **Identify the collapse threshold**:
+   - The F value where q suddenly drops is approximately **F_c1 ≈ 2.0 × 10⁻⁴ psu/s**
+   - This is the **forward tipping point**
+
+4. **Fine-tune**:
+   - Zoom in: Try F = 1.95, 1.98, 2.00, 2.02 × 10⁻⁴
+   - Find the exact F value where collapse occurs (probably between 1.95 and 2.05)
+
+5. **Record your result**:
+   - Your tipping point: F_c1 ≈ ______ × 10⁻⁴ psu/s
+   - Compare to theoretical value: ~2.0 × 10⁻⁴ (matches?)
+
+### What You're Seeing
+
+As F increases:
+- **Below F_c1**: Upper branch is stable; q decreases along it
+- **At F_c1**: Upper and lower branches meet (saddle-node bifurcation)
+- **Above F_c1**: Upper branch no longer exists; system jumps to lower branch
+
+### Discussion
+
+Why doesn't AMOC weaken gradually? Why the sudden collapse?
+
+The answer: **Nonlinear feedback**. The haline (salinity) feedback becomes so strong that the circulation cannot maintain itself even with thermal forcing. At the bifurcation point, the system has a "choice" — it must jump.
+
+---
+
+## Experiment 2: Demonstrating Hysteresis
+
+**Objective**: Show that recovery from collapse requires a *lower* freshwater threshold than collapse itself — the smoking gun of irreversibility.
+
+**Time**: ~20 minutes
+
+**Difficulty**: Beginner–Intermediate
+
+### Steps
+
+1. **Collapse the AMOC**:
+   - Load preset **"Collapsed AMOC"** (F = 3 × 10⁻⁴)
+   - Run simulation
+   - Note q_sv ≈ 0–2 Sv (collapsed state)
+
+2. **Try to recover by reducing F to collapse threshold**:
+   - Drag F slider to **1.95 × 10⁻⁴** (close to the collapse point you found in Experiment 1)
+   - Run simulation
+   - **Observation**: q_sv *remains weak* (~1–2 Sv). AMOC does NOT recover!
+   - This is **hysteresis**: the system "remembers" its collapsed state
+
+3. **Continue reducing F**:
+   - Drag to **1.5 × 10⁻⁴** → Run; still collapsed
+   - Drag to **1.2 × 10⁻⁴** → Run; still collapsed
+   - Drag to **1.0 × 10⁻⁴** → Run; still collapsed
+   - Drag to **0.8 × 10⁻⁴** → Run; **suddenly q_sv jumps back to ~15 Sv** (recovered!)
+
+4. **Identify the recovery threshold**:
+   - The F value where recovery occurs is approximately **F_c2 ≈ 0.8–1.0 × 10⁻⁴ psu/s**
+   - This is the **backward recovery point**
+
+5. **Calculate the hysteresis window**:
+   - Hysteresis width = F_c1 − F_c2
+   - Example: 2.0 × 10⁻⁴ − 1.0 × 10⁻⁴ = **1.0 × 10⁻⁴ psu/s**
+   - This is the F range where two stable states coexist
+
+### What You're Seeing
+
+The S-curve of equilibria has three branches:
+- **Upper branch** (strong AMOC): exists for F < F_c1 ≈ 2.0 × 10⁻⁴
+- **Lower branch** (weak/collapsed): exists for F > F_c2 ≈ 1.0 × 10⁻⁴
+- **Overlap region** (F_c2 < F < F_c1): both stable branches exist simultaneously (bistability)
+
+In the bistable region, which state you're in depends on **history** (initial conditions), not just current forcing. This is hysteresis.
+
+### Discussion
+
+**Why does hysteresis matter for climate?**
+
+If the real AMOC is bistable and we're currently in the hysteresis region (some evidence suggests we might be), then:
+- Stopping freshwater input (e.g., stabilizing Greenland melt) may not restore AMOC
+- We'd have to reduce freshwater *below* the original forcing level
+- This makes recovery harder and more costly than initially thought
+
+---
+
+## Experiment 3: Effect of Stochastic Forcing
+
+**Objective**: Demonstrate how random noise (weather, sub-grid variability) can induce transitions even without changing mean forcing.
+
+**Time**: ~15 minutes
+
+**Difficulty**: Intermediate
+
+### Steps
+
+1. **Start with weak but stable state**:
+   - Load preset **"Weakened AMOC"** (F = 1.8 × 10⁻⁴)
+   - This is in the bistable region but on the upper (strong) branch
+   - Set **noise_amplitude = 0**
+   - Run 3 times → all trajectories converge to the same (weak but stable) state
+   - Observation: Deterministically stable
+
+2. **Add modest noise**:
+   - Set **noise_amplitude = 1 × 10⁻⁵ psu/s**
+   - Run simulation 3 times
+   - Observation: Trajectories fluctuate around the attractor but don't escape
+   - The system remains stable despite noise
+
+3. **Increase noise**:
+   - Set **noise_amplitude = 3 × 10⁻⁵ psu/s** (significantly larger)
+   - Run simulation 5 times
+   - Observation: On at least one run, you should see the trajectory jump to the lower branch (collapsed state) and stay there
+   - This is **noise-induced tipping**: the system escapes the upper branch basin of attraction due to stochastic fluctuations
+
+4. **Verify reproducibility**:
+   - Run 5 more times with the same parameters
+   - You should see a mix of "normal" (staying on upper branch) and "tipped" runs
+   - Each run differs because of different random noise realizations
+
+5. **Quantify the effect**:
+   - Count: Out of 10 runs, how many tipped?
+   - Increase noise to **5 × 10⁻⁵** and count again
+   - Higher noise → more frequent tipping
+
+### What You're Seeing
+
+**Critical slowing down**: Near a bifurcation, the system is marginally stable (eigenvalue λ ≈ 0). Recovery from perturbations is slow. Noise can exploit this weakness and push the system across the basin boundary.
+
+**Stochastic bifurcation**: This is different from deterministic bifurcation. Noise doesn't just add random fluctuations — it shifts the effective tipping point to *lower* F values. Near F_c1, even small noise can induce transitions.
+
+### Discussion
+
+**Why is this important?**
+
+Earth's climate is full of noise:
+- Weather variability (storms, eddies)
+- Solar cycles (11-year, 100-year patterns)
+- Volcanic forcing
+- Stochastic processes at sub-grid scales
+
+This noise is **not** negligible. Even if the AMOC is far from the deterministic tipping point, noise can trigger early collapse. This motivates "precautionary principle" approaches to climate policy.
+
+---
+
+## Experiment 4: Exploring the Bifurcation Diagram
+
+**Objective**: Visualize and understand the S-curve of equilibria across the full range of freshwater forcing.
+
+**Time**: ~10 minutes
+
+**Difficulty**: Beginner
+
+### Steps
+
+1. **Start from any configuration** (e.g., Normal AMOC preset)
+
+2. **Click "Compute Bifurcation"**:
+   - The backend runs ~400 simulations (200 with increasing F, 200 with decreasing F)
+   - Takes ~10–30 seconds (depends on hardware)
+   - Progress bar should appear
+
+3. **Once complete, examine the bifurcation diagram** (bottom-right panel):
+   - **Blue upper curve**: Forward sweep (increasing F) → upper branch equilibria
+   - **Orange lower curve**: Backward sweep (decreasing F) → lower branch equilibria
+   - **Dashed grey middle**: Inferred unstable saddle points connecting upper and lower
+   - **Orange shaded region**: Bistable region (hysteresis window)
+   - **Red diamonds**: Tipping points (F_c1 and F_c2)
+   - **Orange X**: Current F value from slider
+
+4. **Locate the hysteresis window**:
+   - Identify F_c1 (right diamond, where upper branch ends)
+   - Identify F_c2 (left diamond, where lower branch ends)
+   - Width = F_c1 − F_c2
+
+5. **Trace different paths**:
+   - Move F slider left and right → watch the orange X move on the diagram
+   - When you're in the bistable region (between diamonds), you're at a parameter set where two stable states can coexist
+
+### What You're Seeing
+
+This is the **S-curve** (fold bifurcation diagram) that Stommel drew in 1961. It captures the entire dynamics in one plot:
+- Every stable equilibrium as a function of forcing
+- The location of tipping points
+- The width of the hysteresis window
+
+### Experiments with the Diagram
+
+1. **Change parameters and recompute**:
+   - Reduce T_p by 3°C (lower T_p → smaller ΔT)
+   - Recompute bifurcation
+   - **Observation**: S-curve shifts left (F_c1 and F_c2 both decrease)
+   - Interpretation: Weaker thermal forcing makes the system more fragile
+
+2. **Increase α or decrease β**:
+   - Increase α to 2 × 10⁻⁴
+   - Recompute bifurcation
+   - S-curve shifts right (F_c1, F_c2 both increase)
+   - Interpretation: Stronger thermal effect, more robust AMOC
+
+---
+
+## Experiment 5: Recreating the Younger Dryas
+
+**Objective**: Use the model to understand how abrupt paleoclimate changes might have been triggered by freshwater forcing.
+
+**Time**: ~20 minutes
+
+**Difficulty**: Intermediate–Advanced
+
+### Scenario
+
+The **Younger Dryas** (~12,900–11,700 years ago) was a sudden return to glacial-like cold conditions after ~1,000 years of warming. A popular hypothesis invokes AMOC collapse triggered by freshwater discharge from the Lake Agassiz/Gulf of Mexico (massive meltwater outburst at ~12.8 kyr).
+
+### Steps
+
+1. **Set up initial warm state**:
+   - Load **"Normal AMOC"** (strong circulation, warm North Atlantic)
+   - Run simulation to confirm q ≈ 15 Sv
+
+2. **Apply a freshwater "pulse"**:
+   - This is a model limitation: we can't directly simulate time-varying F
+   - Instead, **increase F slider to 2.2 × 10⁻⁴** (beyond F_c1, sufficient to cause collapse)
+   - Run simulation
+   - **Observation**: q collapses to near zero (simulates the sudden disruption of AMOC)
+
+3. **Observe the consequences**:
+   - Time series shows q dropping from ~15 Sv to ~0 Sv over ~500 years (faster than reality but captures the essence)
+   - Polar salinity S_p rises (polar box becomes less fresh as northward salt transport stops)
+   - Equatorial salinity S_e drops (equator loses salt as circulation weakens)
+
+4. **Simulate gradual recovery** (the Younger Dryas lasted ~1,200 years):
+   - With F still at 2.2 × 10⁻⁴, extend t_max to 10,000 years
+   - Run simulation
+   - **Observation**: AMOC remains collapsed even after 10,000 years! Recovery doesn't happen at this F.
+
+5. **Force recovery by reducing F** (representing freshwater pulse tapering):
+   - Reduce F to 0.8 × 10⁻⁴ (below F_c2, forcing recovery)
+   - Run simulation with t_max = 3000 years
+   - **Observation**: System suddenly recovers to strong state after initial weak period
+   - This simulates AMOC "restarting" as freshwater forcing declined
+
+6. **Interpret the timings**:
+   - Time for collapse: ~500 years (sudden)
+   - Time spent collapsed: ~1,200 years (depends on how long F stays high)
+   - Time to recovery: ~200–500 years (once F drops enough)
+   - These timescales roughly match the Younger Dryas event
+
+### What You're Seeing
+
+The Younger Dryas likely involved:
+1. Massive freshwater discharge → AMOC collapses (weeks to years)
+2. While AMOC is weak, the North Atlantic cools (hysteresis: can't recover at original F)
+3. Freshwater input tapers as the ice sheet resets
+4. When F drops enough, AMOC suddenly restarts
+5. Heat transport resumes → rapid rewarming
+
+Stommel's two-box model, simple as it is, captures this qualitative sequence!
+
+### Discussion
+
+**Why use such a simple model for paleoclimate?**
+
+Reality is complex: 3D ice sheets, coupled atmosphere, biological carbon pump, etc. But the **essential instability** (bistability and hysteresis) appears in even the simplest models. This suggests the nonlinearity is **fundamental**, not an artifact of oversimplification.
+
+---
+
+## Challenge Experiments
+
+Once you've completed the five main experiments, try these advanced investigations:
+
+### Challenge A: Bifurcation Sensitivity
+- Compute bifurcation with default parameters; record F_c1, F_c2
+- Change one parameter at a time (e.g., α, β, T_p, T_e)
+- Recompute and see how much the tipping points shift
+- Which parameter has the biggest effect?
+
+### Challenge B: Noise-Induced Early-Warning Signals
+- Set F to 1.9 × 10⁻⁴ (close to tipping but below F_c1)
+- With noise = 3 × 10⁻⁵, run 10 times
+- Compare the time series: do you see increased variance or autocorrelation before tipping events?
+
+### Challenge C: Multi-Timescale Dynamics
+- Extend t_max to 20,000 years
+- Set F to a value in the bistable region
+- With noise = 2 × 10⁻⁵, run simulation
+- Do you see multiple transitions between states? What's the typical time between jumps?
+
+### Challenge D: Parameter Uncertainty
+- Pick a preset; add realistic noise
+- Vary several parameters ±10% from default
+- Do the conclusions (location of tipping points, hysteresis width) change significantly?
+
+---
+
+## Exporting Results
+
+To save your experimental data:
+
+1. After running a simulation, click **"Export"**
+2. A JSON file downloads containing:
+   - All parameters used
+   - Full time series (t, S_e, S_p, q)
+   - Equilibrium values
+3. Open in Python/Matlab/Excel for further analysis
+
+Example Python script:
+```python
+import json
+import matplotlib.pyplot as plt
+
+with open('simulation_export.json') as f:
+    data = json.load(f)
+
+t = data['time']
+q = data['q']
+plt.plot(t, q)
+plt.xlabel('Time (years)')
+plt.ylabel('Circulation (Sv)')
+plt.show()
+```
+
+---
+
+## Further Reading
+
+- [Two-Box Model](/theory/two-box-model) — the equations behind the experiments
+- [Bifurcations & Hysteresis](/theory/bifurcations-hysteresis) — theoretical background
+- [Stommel 1961](/theory/stommel-1961) — historical context for the Younger Dryas hypothesis
+
+---
+
+**Next**: Explore the [Visualizations](/simulator/visualizations) in detail, or dive deeper into the [Theory](/theory/stommel-1961) section.
