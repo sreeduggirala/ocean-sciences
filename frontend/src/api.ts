@@ -29,15 +29,16 @@ export const api = {
   },
 
   async bifurcation(params: {
-    T_e: number
-    T_p: number
-    S_e0: number
-    S_p0: number
+    T_1: number
+    T_2: number
+    S_1_eq: number
+    S_2_eq: number
     alpha: number
     beta: number
     k: number
-    F_min: number
-    F_max: number
+    lam: number
+    T_2_min: number
+    T_2_max: number
     n_points: number
   }): Promise<BifurcationResult> {
     if (cancelSource) {

@@ -3,7 +3,7 @@ import * as Collapsible from '@radix-ui/react-collapsible'
 import { useSimulation } from '../hooks/useSimulation'
 
 const ParameterControls: React.FC = () => {
-  const { params, setParams, runSimulation, reset, bifurcation, isLoading, loadPreset } =
+  const { params, setParams, runSimulation, reset, isLoading, loadPreset } =
     useSimulation()
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     ocean: true,
@@ -32,7 +32,7 @@ const ParameterControls: React.FC = () => {
 
   const SliderInput = ({
     label,
-    key,
+    paramKey,
     value,
     min,
     max,
@@ -40,7 +40,7 @@ const ParameterControls: React.FC = () => {
     logScale = false,
   }: {
     label: string
-    key: keyof typeof params
+    paramKey: keyof typeof params
     value: number
     min: number
     max: number
@@ -55,7 +55,7 @@ const ParameterControls: React.FC = () => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const rawValue = parseFloat(e.target.value)
       const actualValue = logScale ? Math.pow(10, rawValue) : rawValue
-      handleSliderChange(key, actualValue)
+      handleSliderChange(paramKey, actualValue)
     }
 
     return (
@@ -156,7 +156,7 @@ const ParameterControls: React.FC = () => {
         </div>
       </div>
 
-      {/* Ocean State */}
+      {/* Temperature */}
       <Collapsible.Root
         open={expandedSections.ocean}
         onOpenChange={() => toggleSection('ocean')}
@@ -175,37 +175,53 @@ const ParameterControls: React.FC = () => {
             fontWeight: 600,
           }}
         >
-          {expandedSections.ocean ? '▼' : '▶'} Ocean State
+          {expandedSections.ocean ? '▼' : '▶'} Temperature & Salinity
         </Collapsible.Trigger>
         <Collapsible.Content>
           <SliderInput
-            label="T_e (Equatorial °C)"
-            key="T_e"
-            value={params.T_e}
+            label="T₁ (Box 1 / Equatorial °C)"
+            paramKey="T_1"
+            value={params.T_1}
             min={15}
             max={35}
             step={0.1}
           />
           <SliderInput
-            label="T_p (Polar °C)"
-            key="T_p"
-            value={params.T_p}
+            label="T₂ (Box 2 / Polar °C)"
+            paramKey="T_2"
+            value={params.T_2}
             min={-2}
-            max={15}
+            max={25}
             step={0.1}
           />
           <SliderInput
-            label="S_e0 (Equatorial psu)"
-            key="S_e0"
-            value={params.S_e0}
+            label="S₁ᵉᵍ (Box 1 equilibrium psu)"
+            paramKey="S_1_eq"
+            value={params.S_1_eq}
             min={30}
             max={40}
             step={0.1}
           />
           <SliderInput
-            label="S_p0 (Polar psu)"
-            key="S_p0"
-            value={params.S_p0}
+            label="S₂ᵉᵍ (Box 2 equilibrium psu)"
+            paramKey="S_2_eq"
+            value={params.S_2_eq}
+            min={28}
+            max={40}
+            step={0.1}
+          />
+          <SliderInput
+            label="S₁ᵢⁿᵢᵗ (Box 1 initial psu)"
+            paramKey="S_1_init"
+            value={params.S_1_init}
+            min={30}
+            max={40}
+            step={0.1}
+          />
+          <SliderInput
+            label="S₂ᵢⁿᵢᵗ (Box 2 initial psu)"
+            paramKey="S_2_init"
+            value={params.S_2_init}
             min={28}
             max={40}
             step={0.1}
@@ -236,34 +252,45 @@ const ParameterControls: React.FC = () => {
         </Collapsible.Trigger>
         <Collapsible.Content>
           <SliderInput
-            label="α (Thermal expansion)"
-            key="alpha"
+            label="α (Thermal expansion, 1/°C)"
+            paramKey="alpha"
             value={params.alpha}
             min={0.5e-4}
             max={3e-4}
             step={0.1e-4}
+            logScale
           />
           <SliderInput
-            label="β (Haline contraction)"
-            key="beta"
+            label="β (Haline contraction, 1/psu)"
+            paramKey="beta"
             value={params.beta}
             min={2e-4}
-            max={1.5e-3}
+            max={2e-3}
             step={0.1e-4}
+            logScale
           />
           <SliderInput
             label="k (Circulation coefficient, log)"
-            key="k"
+            paramKey="k"
             value={params.k}
-            min={5e-8}
-            max={1e-5}
+            min={1e-10}
+            max={1e-6}
+            step={0.01}
+            logScale
+          />
+          <SliderInput
+            label="λ (Relaxation rate, log, 1/s)"
+            paramKey="lam"
+            value={params.lam}
+            min={1e-12}
+            max={1e-9}
             step={0.01}
             logScale
           />
         </Collapsible.Content>
       </Collapsible.Root>
 
-      {/* Forcing */}
+      {/* Stochastic Forcing */}
       <Collapsible.Root
         open={expandedSections.forcing}
         onOpenChange={() => toggleSection('forcing')}
@@ -282,24 +309,17 @@ const ParameterControls: React.FC = () => {
             fontWeight: 600,
           }}
         >
-          {expandedSections.forcing ? '▼' : '▶'} Forcing
+          {expandedSections.forcing ? '▼' : '▶'} Stochastic Forcing
         </Collapsible.Trigger>
         <Collapsible.Content>
           <SliderInput
-            label="F (Freshwater flux, psu/s)"
-            key="F"
-            value={params.F}
-            min={0}
-            max={5e-4}
-            step={0.1e-4}
-          />
-          <SliderInput
             label="Noise amplitude (psu/s)"
-            key="noise_amplitude"
+            paramKey="noise_amplitude"
             value={params.noise_amplitude}
             min={0}
             max={5e-5}
             step={0.1e-5}
+            logScale={params.noise_amplitude > 0}
           />
         </Collapsible.Content>
       </Collapsible.Root>
@@ -328,7 +348,7 @@ const ParameterControls: React.FC = () => {
         <Collapsible.Content>
           <SliderInput
             label="t_max (Maximum years)"
-            key="t_max"
+            paramKey="t_max"
             value={params.t_max}
             min={100}
             max={10000}
@@ -336,7 +356,7 @@ const ParameterControls: React.FC = () => {
           />
           <SliderInput
             label="dt (Output step, years)"
-            key="dt"
+            paramKey="dt"
             value={params.dt}
             min={0.1}
             max={100}
@@ -396,7 +416,7 @@ const ParameterControls: React.FC = () => {
           opacity: isLoading ? 0.6 : 1,
         }}
       >
-        {isLoading ? 'Computing...' : 'Compute Bifurcation'}
+        {isLoading ? 'Computing...' : 'Compute Bifurcation Diagram'}
       </button>
     </div>
   )

@@ -20,6 +20,8 @@ interface SimulationState {
   exportResults: () => void
 }
 
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
 export const useSimulation = create<SimulationState>((set, get) => ({
   params: DEFAULT_PARAMS,
   result: null,
@@ -34,10 +36,11 @@ export const useSimulation = create<SimulationState>((set, get) => ({
       error: null,
     }))
     // Auto-run with debounce (500ms)
-    const state = get()
-    setTimeout(() => {
-      if (state.result) {
-        state.runSimulation()
+    if (debounceTimer) clearTimeout(debounceTimer)
+    debounceTimer = setTimeout(() => {
+      const current = get()
+      if (current.result) {
+        current.runSimulation()
       }
     }, 500)
   },
@@ -69,15 +72,16 @@ export const useSimulation = create<SimulationState>((set, get) => ({
 
     try {
       const bifurcation = await api.bifurcation({
-        T_e: params.T_e,
-        T_p: params.T_p,
-        S_e0: params.S_e0,
-        S_p0: params.S_p0,
+        T_1: params.T_1,
+        T_2: params.T_2,
+        S_1_eq: params.S_1_eq,
+        S_2_eq: params.S_2_eq,
         alpha: params.alpha,
         beta: params.beta,
         k: params.k,
-        F_min: 0,
-        F_max: 5e-4,
+        lam: params.lam,
+        T_2_min: 0,
+        T_2_max: 20,
         n_points: 200,
       })
       set({

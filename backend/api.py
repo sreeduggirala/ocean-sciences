@@ -35,14 +35,14 @@ executor = ThreadPoolExecutor(max_workers=2)
 def _create_model_from_request(req: SimulationRequest | BifurcationRequest) -> StommelModel:
     """Create StommelModel instance from request."""
     return StommelModel(
-        T_e=req.T_e,
-        T_p=req.T_p,
-        S_e0=req.S_e0,
-        S_p0=req.S_p0,
+        T_1=req.T_1,
+        T_2=req.T_2,
+        S_1_eq=req.S_1_eq,
+        S_2_eq=req.S_2_eq,
         alpha=req.alpha,
         beta=req.beta,
         k=req.k,
-        F=req.F if isinstance(req, SimulationRequest) else 1.0e-4,  # Default for bifurcation
+        lam=req.lam,
         t_max=req.t_max if isinstance(req, SimulationRequest) else 3000,
         noise_amplitude=req.noise_amplitude if isinstance(req, SimulationRequest) else 0,
     )
@@ -62,14 +62,14 @@ async def simulate(request: SimulationRequest):
     Returns time series of salinity and circulation.
     """
     model = StommelModel(
-        T_e=request.T_e,
-        T_p=request.T_p,
-        S_e0=request.S_e0,
-        S_p0=request.S_p0,
+        T_1=request.T_1,
+        T_2=request.T_2,
+        S_1_eq=request.S_1_eq,
+        S_2_eq=request.S_2_eq,
         alpha=request.alpha,
         beta=request.beta,
         k=request.k,
-        F=request.F,
+        lam=request.lam,
         t_max=request.t_max,
         noise_amplitude=request.noise_amplitude,
     )
@@ -80,8 +80,8 @@ async def simulate(request: SimulationRequest):
         executor,
         run_simulation,
         model,
-        request.S_e0,
-        request.S_p0,
+        request.S_1_init,
+        request.S_2_init,
         request.t_max,
         request.dt,
         request.noise_amplitude,
@@ -90,8 +90,8 @@ async def simulate(request: SimulationRequest):
     # Build response
     return SimulationResponse(
         time=result["time"],
-        S_e=result["S_e"],
-        S_p=result["S_p"],
+        S_1=result["S_1"],
+        S_2=result["S_2"],
         q=result["q"],
         q_sv=result["q_sv"],
         steady_state_reached=result["steady_state_reached"],
@@ -106,19 +106,20 @@ async def simulate(request: SimulationRequest):
 @app.post("/bifurcation", response_model=BifurcationResponse)
 async def bifurcation(request: BifurcationRequest):
     """
-    Compute bifurcation diagram by sweeping freshwater flux F.
+    Compute bifurcation diagram by sweeping temperature difference ΔT = T_1 - T_2.
 
-    Returns forward and backward branches showing hysteresis.
+    In the original Stommel (1961) model, bifurcation is controlled by the
+    temperature difference. Returns forward and backward branches showing hysteresis.
     """
     model = StommelModel(
-        T_e=request.T_e,
-        T_p=request.T_p,
-        S_e0=request.S_e0,
-        S_p0=request.S_p0,
+        T_1=request.T_1,
+        T_2=request.T_2,  # Will be varied in the bifurcation computation
+        S_1_eq=request.S_1_eq,
+        S_2_eq=request.S_2_eq,
         alpha=request.alpha,
         beta=request.beta,
         k=request.k,
-        F=1.0e-4,  # Not used in bifurcation computation
+        lam=request.lam,
         t_max=3000,
         noise_amplitude=0.0,
     )
@@ -129,8 +130,8 @@ async def bifurcation(request: BifurcationRequest):
         executor,
         compute_bifurcation,
         model,
-        request.F_min,
-        request.F_max,
+        request.T_2_min,
+        request.T_2_max,
         request.n_points,
     )
 
@@ -147,16 +148,18 @@ async def get_presets():
     presets = [
         PresetConfig(
             name="normal_amoc",
-            description="Stable thermally-driven AMOC (~15 Sv)",
+            description="Stable thermally-driven AMOC (Stommel 1961 original)",
             params={
-                "T_e": 25.0,
-                "T_p": 5.0,
-                "S_e0": 36.0,
-                "S_p0": 34.0,
-                "alpha": 1.5e-4,
-                "beta": 8.0e-4,
-                "k": 1.5e-6,
-                "F": 8.0e-5,
+                "T_1": 25.0,
+                "T_2": 5.0,
+                "S_1_eq": 36.0,
+                "S_2_eq": 34.0,
+                "S_1_init": 36.0,
+                "S_2_init": 34.0,
+                "alpha": 2.0e-4,
+                "beta": 1.0e-3,
+                "k": 3.0e-9,
+                "lam": 3.0e-11,
                 "t_max": 3000,
                 "dt": 1.0,
                 "noise_amplitude": 0.0,
@@ -164,16 +167,18 @@ async def get_presets():
         ),
         PresetConfig(
             name="weakened_amoc",
-            description="Weakened AMOC near tipping point (~8 Sv)",
+            description="Weakened AMOC with reduced thermal forcing",
             params={
-                "T_e": 25.0,
-                "T_p": 5.0,
-                "S_e0": 36.0,
-                "S_p0": 34.0,
-                "alpha": 1.5e-4,
-                "beta": 8.0e-4,
-                "k": 1.5e-6,
-                "F": 1.8e-4,
+                "T_1": 25.0,
+                "T_2": 12.0,  # Smaller ΔT weakens thermally-driven circulation
+                "S_1_eq": 36.0,
+                "S_2_eq": 34.0,
+                "S_1_init": 36.0,
+                "S_2_init": 34.0,
+                "alpha": 2.0e-4,
+                "beta": 1.0e-3,
+                "k": 3.0e-9,
+                "lam": 3.0e-11,
                 "t_max": 3000,
                 "dt": 1.0,
                 "noise_amplitude": 0.0,
@@ -181,16 +186,18 @@ async def get_presets():
         ),
         PresetConfig(
             name="collapsed_amoc",
-            description="Collapsed AMOC post-tipping (reversed/near-zero)",
+            description="Near-collapsed AMOC with very small thermal forcing",
             params={
-                "T_e": 25.0,
-                "T_p": 5.0,
-                "S_e0": 36.0,
-                "S_p0": 34.0,
-                "alpha": 1.5e-4,
-                "beta": 8.0e-4,
-                "k": 1.5e-6,
-                "F": 3.0e-4,
+                "T_1": 25.0,
+                "T_2": 20.0,  # Very small ΔT allows haline mode
+                "S_1_eq": 36.0,
+                "S_2_eq": 34.0,
+                "S_1_init": 36.0,
+                "S_2_init": 36.5,  # Start from fresh polar condition
+                "alpha": 2.0e-4,
+                "beta": 1.0e-3,
+                "k": 3.0e-9,
+                "lam": 3.0e-11,
                 "t_max": 3000,
                 "dt": 1.0,
                 "noise_amplitude": 0.0,
@@ -198,16 +205,18 @@ async def get_presets():
         ),
         PresetConfig(
             name="stommel_original",
-            description="Parameters from Stommel 1961 original paper",
+            description="Stommel (1961) parameters with moderate thermal forcing",
             params={
-                "T_e": 25.0,
-                "T_p": 5.0,
-                "S_e0": 36.0,
-                "S_p0": 34.0,
-                "alpha": 1.5e-4,
-                "beta": 8.0e-4,
-                "k": 1.5e-6,
-                "F": 1.0e-4,
+                "T_1": 25.0,
+                "T_2": 7.5,  # ΔT = 17.5°C
+                "S_1_eq": 36.0,
+                "S_2_eq": 34.0,
+                "S_1_init": 36.0,
+                "S_2_init": 34.0,
+                "alpha": 2.0e-4,
+                "beta": 1.0e-3,
+                "k": 3.0e-9,
+                "lam": 3.0e-11,
                 "t_max": 3000,
                 "dt": 1.0,
                 "noise_amplitude": 0.0,

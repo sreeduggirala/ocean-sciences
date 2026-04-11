@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useSimulation } from './hooks/useSimulation'
 import ParameterControls from './components/ParameterControls'
 import OceanBoxDiagram from './components/OceanBoxDiagram'

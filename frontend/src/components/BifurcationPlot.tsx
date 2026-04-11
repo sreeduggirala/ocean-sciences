@@ -23,35 +23,31 @@ const BifurcationPlot: React.FC = () => {
     )
   }
 
-  const F = bifurcation.F_values
-  const q_forward = bifurcation.q_forward.map((q) => q * 3e17 / 1e6)
-  const q_backward = bifurcation.q_backward.map((q) => q * 3e17 / 1e6)
+  const deltaT = bifurcation.delta_T_values
+  const q_forward = bifurcation.q_forward  // Already in 1/s
+  const q_backward = bifurcation.q_backward
 
   // Find tipping points
   const tippingPoints = bifurcation.tipping_points
-    .map((tp) => ({
-      ...tp,
-      q_sv: tp.q * 3e17 / 1e6,
-    }))
-    .sort((a, b) => a.F - b.F)
+    .sort((a, b) => a.delta_T - b.delta_T)
 
   // Infer unstable middle branch (between tipping points if they exist)
-  let unstable_F = []
-  let unstable_q = []
+  let unstable_deltaT: number[] = []
+  let unstable_q: number[] = []
 
   if (tippingPoints.length >= 2) {
-    const f_start = tippingPoints[0].F
-    const f_end = tippingPoints[tippingPoints.length - 1].F
+    const dt_start = tippingPoints[0].delta_T
+    const dt_end = tippingPoints[tippingPoints.length - 1].delta_T
 
-    const midIndices = F.reduce((acc, f, i) => {
-      if (f >= f_start && f <= f_end) {
+    const midIndices = deltaT.reduce((acc, dt, i) => {
+      if (dt >= dt_start && dt <= dt_end) {
         acc.push(i)
       }
       return acc
     }, [] as number[])
 
     if (midIndices.length > 0) {
-      unstable_F = midIndices.map((i) => F[i])
+      unstable_deltaT = midIndices.map((i) => deltaT[i])
       unstable_q = midIndices.map((i) => {
         // Interpolate middle branch
         return (q_forward[i] + q_backward[i]) / 2
@@ -61,30 +57,30 @@ const BifurcationPlot: React.FC = () => {
 
   return (
     <div style={{ backgroundColor: '#161b22', borderRadius: '0.5rem', padding: '1rem' }}>
-      <h3 style={{ marginBottom: '1rem', color: '#58a6ff' }}>Bifurcation Diagram (F-sweep)</h3>
+      <h3 style={{ marginBottom: '1rem', color: '#58a6ff' }}>Bifurcation Diagram (ΔT-sweep)</h3>
 
       <PlotlyChart
         data={[
           {
-            x: F,
+            x: deltaT,
             y: q_forward,
             type: 'scatter',
             mode: 'lines',
-            name: 'Forward sweep',
+            name: 'Forward sweep (ΔT↑)',
             line: { color: '#58a6ff', width: 3 },
           },
           {
-            x: F,
+            x: deltaT,
             y: q_backward,
             type: 'scatter',
             mode: 'lines',
-            name: 'Backward sweep',
+            name: 'Backward sweep (ΔT↓)',
             line: { color: '#ffa94d', width: 3 },
           },
-          ...(unstable_F.length > 0
+          ...(unstable_deltaT.length > 0
             ? [
                 {
-                  x: unstable_F,
+                  x: unstable_deltaT,
                   y: unstable_q,
                   type: 'scatter',
                   mode: 'lines',
@@ -94,10 +90,10 @@ const BifurcationPlot: React.FC = () => {
               ]
             : []),
           // Hysteresis window shading
-          ...(unstable_F.length > 0 && tippingPoints.length >= 2
+          ...(unstable_deltaT.length > 0 && tippingPoints.length >= 2
             ? [
                 {
-                  x: [tippingPoints[0].F, tippingPoints[tippingPoints.length - 1].F],
+                  x: [tippingPoints[0].delta_T, tippingPoints[tippingPoints.length - 1].delta_T],
                   y: [
                     Math.min(...q_forward.slice(0, 100)),
                     Math.min(...q_forward.slice(0, 100)),
@@ -110,47 +106,39 @@ const BifurcationPlot: React.FC = () => {
                 } as any,
               ]
             : []),
-          // AMOC reference lines
+          // Reference lines
           {
-            x: F,
-            y: Array(F.length).fill(15),
+            x: deltaT,
+            y: Array(deltaT.length).fill(0),
             type: 'scatter',
             mode: 'lines',
-            name: 'Present-day AMOC',
-            line: { color: '#8b949e', width: 1, dash: 'dash' },
-          },
-          {
-            x: F,
-            y: Array(F.length).fill(5),
-            type: 'scatter',
-            mode: 'lines',
-            name: 'Weakened state',
-            line: { color: '#8b949e', width: 1, dash: 'dot' },
-          },
-          {
-            x: F,
-            y: Array(F.length).fill(0),
-            type: 'scatter',
-            mode: 'lines',
-            name: 'Collapse',
+            name: 'q = 0 (Collapse)',
             line: { color: '#ff6b6b', width: 2 },
+          },
+          {
+            x: deltaT,
+            y: Array(deltaT.length).fill(1e-6),
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Typical modern (~1e-6)',
+            line: { color: '#8b949e', width: 1, dash: 'dash' },
           },
           // Current state marker
           {
-            x: [params.F],
+            x: [params.T_1 - params.T_2],
             y: [0],
             type: 'scatter',
             mode: 'markers',
-            name: 'Current F',
+            name: `Current ΔT (${(params.T_1 - params.T_2).toFixed(1)}°C)`,
             marker: { size: 10, color: '#ffa94d', symbol: 'x' },
           },
           // Tipping points
           ...tippingPoints.map((tp) => ({
-            x: [tp.F],
-            y: [tp.q_sv],
+            x: [tp.delta_T],
+            y: [tp.q],
             type: 'scatter' as const,
             mode: 'markers' as const,
-            name: `Tipping (F=${tp.F.toExponential(1)})`,
+            name: `Bifurcation (ΔT=${tp.delta_T.toFixed(1)}°C)`,
             marker: { size: 10, color: '#ff6b6b', symbol: 'diamond' as const },
           })),
         ]}
@@ -163,12 +151,12 @@ const BifurcationPlot: React.FC = () => {
           margin: { l: 60, r: 60, t: 20, b: 40 },
           height: 400,
           xaxis: {
-            title: 'Freshwater flux F (psu/s)',
+            title: 'Temperature difference ΔT = T₁ - T₂ (°C)',
             gridcolor: '#30363d',
             zeroline: false,
           },
           yaxis: {
-            title: 'Steady-state q (Sv)',
+            title: 'Steady-state q (1/s)',
             gridcolor: '#30363d',
             zeroline: true,
             zerolinecolor: '#ff6b6b',

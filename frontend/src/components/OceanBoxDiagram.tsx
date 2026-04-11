@@ -7,32 +7,34 @@ const OceanBoxDiagram: React.FC = () => {
   const { result, params } = useSimulation()
 
   const boxData = useMemo(() => {
-    if (!result || result.S_e.length === 0) {
+    if (!result || result.S_1.length === 0) {
       return null
     }
 
-    const idx = result.S_e.length - 1
-    const S_e = result.S_e[idx]
-    const S_p = result.S_p[idx]
-    const q_sv = result.q_sv[idx]
+    const idx = result.S_1.length - 1
+    const S_1 = result.S_1[idx]
+    const S_2 = result.S_2[idx]
+    const q = result.q[idx]  // q in 1/s
+    const q_sv = result.q_sv[idx]  // q in Sv
 
-    // Determine regime
+    // Determine regime based on circulation mode
     let regime = 'Neutral'
-    if (q_sv > 10) regime = 'Thermally Driven'
-    else if (q_sv < -5) regime = 'Reversed'
-    else if (Math.abs(q_sv) < 5) regime = 'Collapsed'
+    if (q > 5e-7) regime = 'Thermally Driven'
+    else if (q < -2e-7) regime = 'Reversed/Haline'
+    else if (Math.abs(q) < 2e-7) regime = 'Collapsed'
 
     // Box colors: blue (cold/fresh) to red (warm/salty)
-    const colorE = `rgb(${Math.min(255, Math.max(0, Math.round(50 + (S_e - 34) * 15)))}, ${Math.min(255, Math.max(0, Math.round(150 - (S_e - 34) * 30)))}, 255)`
-    const colorP = `rgb(${Math.min(255, Math.max(0, Math.round(50 + (S_p - 34) * 15)))}, ${Math.min(255, Math.max(0, Math.round(150 - (S_p - 34) * 30)))}, 255)`
+    const color1 = `rgb(${Math.min(255, Math.max(0, Math.round(50 + (S_1 - 34) * 15)))}, ${Math.min(255, Math.max(0, Math.round(150 - (S_1 - 34) * 30)))}, 255)`
+    const color2 = `rgb(${Math.min(255, Math.max(0, Math.round(50 + (S_2 - 34) * 15)))}, ${Math.min(255, Math.max(0, Math.round(150 - (S_2 - 34) * 30)))}, 255)`
 
     return {
-      S_e,
-      S_p,
+      S_1,
+      S_2,
+      q,
       q_sv,
       regime,
-      colorE,
-      colorP,
+      color1,
+      color2,
     }
   }, [result])
 
@@ -88,8 +90,6 @@ const OceanBoxDiagram: React.FC = () => {
     )
   }
 
-  const arrowDirection = boxData.q_sv >= 0 ? 1 : -1
-
   return (
     <div
       style={{
@@ -107,28 +107,28 @@ const OceanBoxDiagram: React.FC = () => {
         height="300"
         style={{ maxWidth: '100%' }}
       >
-        {/* Equatorial Box */}
-        <rect x="50" y="50" width="120" height="100" fill={boxData.colorE} stroke="#58a6ff" strokeWidth="2" />
+        {/* Box 1 (Equatorial) */}
+        <rect x="50" y="50" width="120" height="100" fill={boxData.color1} stroke="#58a6ff" strokeWidth="2" />
         <text x="110" y="85" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="bold">
-          Equatorial
+          Box 1
         </text>
         <text x="110" y="105" textAnchor="middle" fill="#fff" fontSize="10">
-          T_e = {params.T_e.toFixed(1)}°C
+          T₁ = {params.T_1.toFixed(1)}°C
         </text>
         <text x="110" y="125" textAnchor="middle" fill="#fff" fontSize="10">
-          S = {boxData.S_e.toFixed(2)} psu
+          S = {boxData.S_1.toFixed(2)} psu
         </text>
 
-        {/* Polar Box */}
-        <rect x="330" y="50" width="120" height="100" fill={boxData.colorP} stroke="#58a6ff" strokeWidth="2" />
+        {/* Box 2 (Polar) */}
+        <rect x="330" y="50" width="120" height="100" fill={boxData.color2} stroke="#58a6ff" strokeWidth="2" />
         <text x="390" y="85" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="bold">
-          Polar
+          Box 2
         </text>
         <text x="390" y="105" textAnchor="middle" fill="#fff" fontSize="10">
-          T_p = {params.T_p.toFixed(1)}°C
+          T₂ = {params.T_2.toFixed(1)}°C
         </text>
         <text x="390" y="125" textAnchor="middle" fill="#fff" fontSize="10">
-          S = {boxData.S_p.toFixed(2)} psu
+          S = {boxData.S_2.toFixed(2)} psu
         </text>
 
         {/* Flow Arrow */}
@@ -148,8 +148,8 @@ const OceanBoxDiagram: React.FC = () => {
         <path
           className="flow-arrow"
           d={`M 190 100 L 330 100`}
-          stroke={boxData.q_sv >= 0 ? '#ff6b6b' : '#4dabf7'}
-          strokeWidth={Math.min(8, Math.max(2, Math.abs(boxData.q_sv) / 5))}
+          stroke={boxData.q >= 0 ? '#ff6b6b' : '#4dabf7'}
+          strokeWidth={Math.min(8, Math.max(2, Math.abs(boxData.q) / 1e-7))}
           fill="none"
           strokeDasharray="10,5"
           markerEnd="url(#arrowhead)"
@@ -159,8 +159,8 @@ const OceanBoxDiagram: React.FC = () => {
         <path
           className="flow-arrow"
           d={`M 330 150 L 190 150`}
-          stroke={boxData.q_sv >= 0 ? '#4dabf7' : '#ff6b6b'}
-          strokeWidth={Math.min(8, Math.max(2, Math.abs(boxData.q_sv) / 5))}
+          stroke={boxData.q >= 0 ? '#4dabf7' : '#ff6b6b'}
+          strokeWidth={Math.min(8, Math.max(2, Math.abs(boxData.q) / 1e-7))}
           fill="none"
           strokeDasharray="10,5"
           markerEnd="url(#arrowhead)"
@@ -168,7 +168,7 @@ const OceanBoxDiagram: React.FC = () => {
 
         {/* Circulation strength label */}
         <text x="260" y="85" textAnchor="middle" fill="#c9d1d9" fontSize="12" fontWeight="bold">
-          q = {boxData.q_sv.toFixed(2)} Sv
+          q = {boxData.q.toExponential(2)} (1/s)
         </text>
 
         {/* Regime label */}

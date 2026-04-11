@@ -8,12 +8,12 @@ const PhaseSpacePlot: React.FC = () => {
   const plotData = useMemo(() => {
     if (!result) return null
 
-    const S_e = result.S_e
-    const S_p = result.S_p
-    const q_sv = result.q_sv
+    const S_1 = result.S_1
+    const S_2 = result.S_2
+    const q = result.q  // Use raw q values in 1/s
 
-    // Compute trajectory
-    const deltaS = S_e.map((se, i) => se - S_p[i])
+    // Compute trajectory in phase space
+    const deltaS = S_1.map((s1, i) => s1 - S_2[i])
 
     // Compute nullcline analytically: q = k[α·ΔT − β·ΔS]
     const deltaS_range = Array.from({ length: 100 }, (_, i) => {
@@ -23,7 +23,7 @@ const PhaseSpacePlot: React.FC = () => {
     })
 
     const q_nullcline = deltaS_range.map((ds) => {
-      return params.k * (params.alpha * (params.T_e - params.T_p) - params.beta * ds) * 3e17 / 1e6
+      return params.k * (params.alpha * (params.T_1 - params.T_2) - params.beta * ds)
     })
 
     // Color trajectory by time
@@ -31,7 +31,7 @@ const PhaseSpacePlot: React.FC = () => {
 
     return {
       deltaS,
-      q_sv,
+      q,
       deltaS_range,
       q_nullcline,
       colors,
@@ -64,7 +64,7 @@ const PhaseSpacePlot: React.FC = () => {
         data={[
           {
             x: plotData.deltaS,
-            y: plotData.q_sv,
+            y: plotData.q,
             type: 'scatter',
             mode: 'lines+markers',
             name: 'Trajectory',
@@ -89,7 +89,7 @@ const PhaseSpacePlot: React.FC = () => {
           },
           {
             x: [plotData.deltaS[0]],
-            y: [plotData.q_sv[0]],
+            y: [plotData.q[0]],
             type: 'scatter',
             mode: 'markers',
             name: 'Initial',
@@ -97,7 +97,7 @@ const PhaseSpacePlot: React.FC = () => {
           },
           {
             x: [plotData.deltaS[plotData.deltaS.length - 1]],
-            y: [plotData.q_sv[plotData.q_sv.length - 1]],
+            y: [plotData.q[plotData.q.length - 1]],
             type: 'scatter',
             mode: 'markers',
             name: 'Final',
@@ -113,12 +113,12 @@ const PhaseSpacePlot: React.FC = () => {
           margin: { l: 60, r: 60, t: 20, b: 40 },
           height: 400,
           xaxis: {
-            title: 'ΔS = S_e - S_p (psu)',
+            title: 'ΔS = S_1 - S_2 (psu)',
             gridcolor: '#30363d',
             zeroline: false,
           },
           yaxis: {
-            title: 'q (Sv)',
+            title: 'q (1/s)',
             gridcolor: '#30363d',
             zeroline: true,
             zerolinecolor: '#ff6b6b',
