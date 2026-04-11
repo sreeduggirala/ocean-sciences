@@ -1,11 +1,11 @@
 ---
 title: The Two-Box Model Formulation
-description: Complete mathematical derivation of Stommel's two-box thermohaline circulation model
+description: Complete mathematical derivation of Stommel's (1961) two-box thermohaline circulation model with relaxation forcing
 ---
 
 # The Two-Box Model Formulation
 
-This is the core of Stommel's 1961 paper: a beautifully simple yet rich dynamical system that captures the essential nonlinear behavior of thermohaline circulation.
+This is the core of Stommel's 1961 paper: a beautifully simple yet rich dynamical system that captures the essential nonlinear behavior of thermohaline circulation. The key innovation is **relaxation-toward-equilibrium freshwater forcing**, which captures the slow adjustment of salinity to atmospheric conditions over ~1000-year timescales.
 
 ---
 
@@ -16,17 +16,17 @@ Imagine the Atlantic Ocean divided into **two well-mixed boxes**:
 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
 <div>
-**Equatorial Box (E)**
-- Warm: T_e = 25°C
-- High salinity: S_e ≈ 36 psu
+**Box 1 (Equatorial)**
+- Warm: T₁ = 25°C
+- High salinity: S₁ ≈ 36 psu
 - Represents tropical Atlantic surface
 - Area: A; Volume: V_box
 </div>
 
 <div>
-**Polar Box (P)**
-- Cold: T_p = 5°C
-- Variable salinity: S_p (evolves over time)
+**Box 2 (Polar)**
+- Cold: T₂ = 5°C
+- Variable salinity: S₂ (evolves over time)
 - Represents high-latitude (Nordic Seas, Labrador Sea) surface/intermediate water
 - Same volume: V_box
 </div>
@@ -39,16 +39,16 @@ Imagine the Atlantic Ocean divided into **two well-mixed boxes**:
 
 The model makes several simplifying assumptions that are **critical to its tractability** but also its limitations:
 
-1. **Temperatures are fixed** (T_e, T_p = constants)
+1. **Temperatures are fixed** (T₁, T₂ = constants)
    - Justification: Atmospheric timescale is fast (~1 year) compared to ocean salinity adjustment (~centuries). We assume the atmosphere thermostats the surface layer.
    - Reality: Temperatures do vary, but slowly on THC timescales.
 
-2. **Salinity evolves** (S_e, S_p = state variables)
-   - Justification: Salt is quasi-conservative (only removed by ice or added by evaporation); thermohaline forcing acts via freshwater, not heat.
+2. **Salinity evolves** (S₁, S₂ = state variables)
+   - Justification: Salt is quasi-conservative; thermohaline forcing acts via freshwater relaxation, not heat.
    - Reality: Salinity is conservative over the simulation period.
 
 3. **Circulation is instantaneous** (no inertia)
-   - Justification: Acceleration timescale of the ocean (~1 day) is much shorter than salinity evolution (~10–100 years).
+   - Justification: Acceleration timescale of the ocean (~1 day) is much shorter than salinity evolution (~100–1000 years).
    - Reality: Geostrophic balance and hydrostatic equilibrium relax quickly.
 
 4. **Boxes are well-mixed** (no spatial gradients within boxes)
@@ -57,7 +57,7 @@ The model makes several simplifying assumptions that are **critical to its tract
 
 5. **Linear equation of state**
    - Justification: Accurate over the small ranges (T: 5–25°C, S: 34–36 psu) relevant here.
-   - Reality: Actual seawater EOS is nonlinear (especially in freshwater/cold regimes), but linear approximation is standard in oceanography.
+   - Reality: Actual seawater EOS is nonlinear, but linear approximation is standard in oceanography.
 
 ---
 
@@ -65,21 +65,21 @@ The model makes several simplifying assumptions that are **critical to its tract
 
 ### State Variables (evolve over time)
 
-- **S_e(t)**: Equatorial box salinity (psu)
-- **S_p(t)**: Polar box salinity (psu)
+- **S₁(t)**: Box 1 (equatorial) salinity (psu)
+- **S₂(t)**: Box 2 (polar) salinity (psu)
 
 ### Parameters (fixed per simulation)
 
 | Parameter | Symbol | Default | Units | Physical Meaning |
 |-----------|--------|---------|-------|------------------|
-| Equatorial temperature | T_e | 25 | °C | Fixed equatorial surface T |
-| Polar temperature | T_p | 5 | °C | Fixed polar surface T |
-| Thermal expansion | α | 1.5×10⁻⁴ | 1/°C | Density change per degree warming |
-| Haline contraction | β | 8×10⁻⁴ | 1/psu | Density change per unit salinity |
-| Circulation coefficient | k | 1.5×10⁻⁶ | 1/s | Empirical coupling constant |
-| Freshwater flux | F | 1.0×10⁻⁴ | psu/s | Net freshwater input to polar box |
-| Initial equatorial salinity | S_e0 | 36 | psu | S_e(0) |
-| Initial polar salinity | S_p0 | 34 | psu | S_p(0) |
+| Box 1 temperature | T₁ | 25 | °C | Fixed equatorial surface T |
+| Box 2 temperature | T₂ | 5 | °C | Fixed polar surface T |
+| Box 1 equilibrium salinity | S₁⁰ | 36 | psu | Relaxation target (equator) |
+| Box 2 equilibrium salinity | S₂⁰ | 34 | psu | Relaxation target (pole) |
+| Thermal expansion | α | 2×10⁻⁴ | 1/°C | Density change per degree (Stommel 1961) |
+| Haline contraction | β | 1×10⁻³ | 1/psu | Density change per unit salinity (Stommel 1961) |
+| Circulation coefficient | k | 3×10⁻⁹ | 1/s | Empirical coupling constant (Stommel 1961) |
+| Relaxation rate | λ | 3×10⁻¹¹ | 1/s | ~1000-year equilibration timescale (Stommel 1961) |
 
 ---
 
@@ -87,67 +87,68 @@ The model makes several simplifying assumptions that are **critical to its tract
 
 The circulation strength is driven by the **density difference** between boxes:
 
-$$\rho_e = \rho_0[1 - \alpha T_e + \beta S_e]$$
+$$\rho_1 = \rho_0[1 - \alpha T_1 + \beta S_1]$$
 
-$$\rho_p = \rho_0[1 - \alpha T_p + \beta S_p]$$
+$$\rho_2 = \rho_0[1 - \alpha T_2 + \beta S_2]$$
 
-The density *difference* (equatorial minus polar):
+The density *difference* (Box 1 minus Box 2):
 
-$$\Delta \rho = \rho_e - \rho_p = \rho_0[-\alpha(T_e - T_p) + \beta(S_e - S_p)]$$
+$$\Delta \rho = \rho_1 - \rho_2 = \rho_0[-\alpha(T_1 - T_2) + \beta(S_1 - S_2)]$$
 
 $$= \rho_0[-\alpha \Delta T + \beta \Delta S]$$
 
-Where $\Delta T = T_e - T_p > 0$ (equator is always warmer) and $\Delta S = S_e - S_p$.
+where $\Delta T = T_1 - T_2 > 0$ (equator is always warmer) and $\Delta S = S_1 - S_2$ (salinity difference, usually positive).
 
-The normalized density difference (divided by ρ₀) drives circulation:
+A positive density difference drives circulation. The normalized density difference drives the circulation **strength**:
 
 $$q = k[\alpha \Delta T - \beta \Delta S]$$
 
 ### Interpretation of q
 
-- **$q > 0$ (positive, thermally driven)**:
-  - The equatorial box is effectively denser (despite being warmer, it's salty enough to outweigh thermal effect).
-  - Warm, salty water flows northward from the equator; cold, fresh water returns southward at depth.
+- **q > 0 (positive, thermally driven)**:
+  - The equatorial box is effectively denser (despite being warmer, salinity dominance means ρ₁ > ρ₂).
+  - Warm, salty water flows northward from Box 1; cold, fresh water returns southward at depth.
   - This is the **AMOC-like regime**: northward heat transport, carrying heat to high latitudes.
 
-- **$q \approx 0$ (near zero, neutral)**:
+- **q ≈ 0 (near zero, neutral)**:
   - Thermal and haline effects nearly cancel.
   - Circulation is very weak; the system is near a tipping point.
 
-- **$q < 0$ (negative, reversed)**:
-  - The polar box is effectively denser.
+- **q < 0 (negative, reversed)**:
+  - Box 2 is effectively denser.
   - Fresh, cold water flows northward at the surface; warm, salty water returns southward at depth.
-  - This is a **reversed or salinity-dominated regime**: physically possible but energetically unfavorable.
+  - This is a **reversed or salinity-dominated regime**: physically possible but requires very fresh polar box.
 
 ---
 
-## The Dynamics: ODEs for Salinity
+## The Dynamics: ODEs with Relaxation Forcing
 
-Salt is conserved: it is neither created nor destroyed, only advected by circulation and added/removed by freshwater fluxes.
+In Stommel's original model, salinity does **not** obey simple salt conservation. Instead, each box exchanges salt with the atmosphere through a **relaxation process** toward climatological equilibrium values:
 
-**Salt flux terms**:
+$$H_i = -\lambda(S_i - S_i^0)$$
 
-1. **Advective flux** due to circulation $q$:
-   - Circulation carries salt from equatorial box to polar box at rate $-q(S_e - S_p)$ (negative because circulation removes salt from equator, adds to pole if $q > 0$).
-   - But the sign is: when $q > 0$ (northward), equatorial water flows north, *removing* salt from equatorial box (rate: $-q \Delta S$) and *adding* to polar box (rate: $+q \Delta S$).
+where:
+- **λ ≈ 3 × 10⁻¹¹ s⁻¹** is the relaxation coefficient
+- **S₁⁰, S₂⁰** are the equilibrium salinity targets (representing climatological values in the absence of meridional transport)
+- **τ ≈ 1/λ ≈ 1000 years** is the equilibration timescale
 
-2. **Freshwater forcing** $F$:
-   - $F > 0$: net freshwater added to polar box (dilutes it, so dS_p/dt gets a $-F$ term); simultaneously removed from equatorial box to conserve mass (so dS_e/dt gets a $+F$ term).
-   - $F < 0$: evaporation dominates; salinity increases at pole, decreases at equator.
+**Physical interpretation**: The atmosphere preferentially adds freshwater to high latitudes (precipitation excess) and removes it from the tropics (evaporation excess). This creates persistent freshwater anomalies that equilibrate slowly (~1000 years) through ocean mixing and advection.
 
-**The ODE system**:
+The **complete ODE system** is:
 
-$$\frac{dS_e}{dt} = -q(S_e - S_p) + F$$
+$$\frac{dS_1}{dt} = -\lambda(S_1 - S_1^0) + q(S_2 - S_1)$$
 
-$$\frac{dS_p}{dt} = +q(S_e - S_p) - F$$
+$$\frac{dS_2}{dt} = -\lambda(S_2 - S_2^0) + q(S_1 - S_2)$$
 
-### Verification: Salt Conservation
+### Interpretation of Terms
 
-Adding the two equations:
+1. **Relaxation term** $-\lambda(S_i - S_i^0)$:
+   - Negative feedback driving salinity back toward equilibrium
+   - Acts on timescale τ ≈ 1000 years (slow!)
 
-$$\frac{d(S_e + S_p)}{dt} = -q(S_e - S_p) + F + q(S_e - S_p) - F = 0$$
-
-Good! The total salt is conserved: $S_e(t) + S_p(t) = S_e(0) + S_p(0) = \text{const}$.
+2. **Transport term** $q(S_2 - S_1)$ for Box 1 (equivalently, $q(S_1 - S_2)$ for Box 2):
+   - Positive circulation (q > 0) transports salty water northward, freshening Box 1, saltening Box 2
+   - Acts on timescale ~years to decades (fast!)
 
 ---
 
@@ -155,11 +156,13 @@ Good! The total salt is conserved: $S_e(t) + S_p(t) = S_e(0) + S_p(0) = \text{co
 
 Expand $q = k[\alpha \Delta T - \beta \Delta S]$ in the ODEs:
 
-$$\frac{dS_e}{dt} = -k[\alpha \Delta T - \beta \Delta S] \cdot (S_e - S_p) + F$$
+$$\frac{dS_1}{dt} = -\lambda(S_1 - S_1^0) - k[\alpha \Delta T - \beta \Delta S] \cdot \Delta S$$
 
-$$= -k[\alpha \Delta T - \beta \Delta S] \cdot \Delta S + F$$
+$$\frac{dS_2}{dt} = -\lambda(S_2 - S_2^0) + k[\alpha \Delta T - \beta \Delta S] \cdot \Delta S$$
 
-This is a **highly nonlinear system**: the feedback is cubic in $\Delta S$.
+where $\Delta S = S_1 - S_2$.
+
+This is a **highly nonlinear system**: the circulation feedback is quadratic in $\Delta S$, and the relaxation provides a slow restoring force.
 
 ---
 
@@ -167,189 +170,112 @@ This is a **highly nonlinear system**: the feedback is cubic in $\Delta S$.
 
 At steady state, both time derivatives are zero:
 
-$$0 = -q(S_e - S_p) + F = -q \Delta S + F$$
+$$0 = -\lambda(S_1^* - S_1^0) + q^*(\Delta S)^*$$
 
-Therefore at equilibrium:
+$$0 = -\lambda(S_2^* - S_2^0) - q^*(\Delta S)^*$$
 
-$$F = q \Delta S = k[\alpha \Delta T - \beta \Delta S] \cdot \Delta S$$
+Adding these equations:
 
-$$F = k \alpha \Delta T \cdot \Delta S - k \beta (\Delta S)^2$$
+$$0 = -\lambda[(S_1^* - S_1^0) + (S_2^* - S_2^0)]$$
+
+Define the equilibrium salinity difference as $(\Delta S)^0 = S_1^0 - S_2^0$ (typically 10 psu). If we assume **equal relaxation rates** at both boxes, the sum of the equations implies:
+
+$$(\Delta S)^* - (\Delta S)^0 = -\frac{2q^*(\Delta S)^*}{\lambda}$$
+
+Also, from either equation:
+
+$$\lambda(\Delta S)^* = 2q^* (\Delta S)^* + \lambda(\Delta S)^0$$
+
+Substituting $q^* = k[\alpha \Delta T - \beta (\Delta S)^*]$:
+
+$$0 = 2k[\alpha \Delta T - \beta (\Delta S)^*](\Delta S)^* + \lambda[(\Delta S)^* - (\Delta S)^0]$$
+
+Expanding:
+
+$$0 = 2k\alpha \Delta T (\Delta S)^* - 2k\beta (\Delta S)^{*2} + \lambda(\Delta S)^* - \lambda(\Delta S)^0$$
 
 Rearranging:
 
-$$k \beta (\Delta S)^2 - k \alpha \Delta T \cdot \Delta S + F = 0$$
+$$2k\beta (\Delta S)^{*2} - (2k\alpha \Delta T + \lambda)(\Delta S)^* + \lambda(\Delta S)^0 = 0$$
 
-This is a **quadratic equation** in $\Delta S$. Let $a = k\beta$, $b = -k\alpha\Delta T$, $c = F$:
-
-$$a(\Delta S)^2 + b(\Delta S) + c = 0$$
+This is a **quadratic equation** in $(\Delta S)^*$.
 
 ### Solutions (Quadratic Formula)
 
-$$\Delta S = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} = \frac{k\alpha\Delta T \pm \sqrt{(k\alpha\Delta T)^2 - 4k\beta F}}{2k\beta}$$
+$$\Delta S = \frac{(2k\alpha\Delta T + \lambda) \pm \sqrt{(2k\alpha\Delta T + \lambda)^2 - 8k\beta\lambda(\Delta S)^0}}{4k\beta}$$
 
 The **discriminant** is:
 
-$$\Delta_{\text{disc}} = (k\alpha\Delta T)^2 - 4k\beta F$$
+$$\Delta_{\text{disc}} = (2k\alpha\Delta T + \lambda)^2 - 8k\beta\lambda(\Delta S)^0$$
 
 Three regimes:
 
 | Regime | Condition | # Solutions | Interpretation |
 |--------|-----------|-------------|-----------------|
-| **Bistable** | $\Delta_{\text{disc}} > 0$ | 2 real roots | Two stable equilibria exist |
-| **Critical** | $\Delta_{\text{disc}} = 0$ | 1 repeated root | Saddle-node bifurcation; tipping point |
-| **Monostable** | $\Delta_{\text{disc}} < 0$ | 0 real roots | No equilibrium (unstable to infinite state — physically unphysical) |
+| **Bistable** | Δ_disc > 0 | 2 real roots | Two stable equilibria (thermal + haline) |
+| **Critical** | Δ_disc = 0 | 1 repeated root | Saddle-node bifurcation; tipping point |
+| **Monostable** | Δ_disc < 0 | 0 real roots | Only one stable state |
 
 ---
 
-## Critical Freshwater Flux
+## Critical Temperature Difference
 
-The system transitions from bistable to monostable when the discriminant equals zero:
+The system transitions from bistable to monostable as a function of **temperature difference** ΔT:
 
-$$\Delta_{\text{disc}} = (k\alpha\Delta T)^2 - 4k\beta F_{\text{crit}} = 0$$
+$$\Delta_{\text{disc}} = (2k\alpha\Delta T + \lambda)^2 - 8k\beta\lambda(\Delta S)^0 = 0$$
 
-$$F_{\text{crit}} = \frac{(k\alpha\Delta T)^2}{4k\beta} = \frac{k(\alpha\Delta T)^2}{4\beta}$$
+The critical ΔT_crit is found by solving:
 
-**Example with default parameters**:
-- α = 1.5×10⁻⁴, ΔT = 20°C, k = 1.5×10⁻⁶, β = 8×10⁻⁴
+$$(2k\alpha\Delta T_{\text{crit}} + \lambda)^2 = 8k\beta\lambda(\Delta S)^0$$
 
-$$F_{\text{crit}} = \frac{1.5 \times 10^{-6} \times (1.5 \times 10^{-4} \times 20)^2}{4 \times 8 \times 10^{-4}}$$
+**Example with Stommel's original parameters**:
+- α = 2×10⁻⁴ K⁻¹, β = 1×10⁻³ psu⁻¹, k = 3×10⁻⁹ s⁻¹, λ = 3×10⁻¹¹ s⁻¹, (ΔS)⁰ = 10 psu
 
-$$= \frac{1.5 \times 10^{-6} \times (3 \times 10^{-3})^2}{3.2 \times 10^{-3}}$$
-
-$$\approx 4.2 \times 10^{-5} \text{ psu/s}$$
-
-But this is the *critical* point where bistability ends. The hysteresis window (where two states coexist) is roughly $[F_1, F_2]$ with $F_2 < F_1 < F_{\text{crit}}$.
+The bistable window typically spans ΔT ≈ 25–35°C, with present-day Earth at ΔT ≈ 20°C (firmly in the thermally-driven regime).
 
 ---
 
 ## Stability of Equilibria
 
-For a given F, the quadratic yields one or two solutions for $\Delta S$. But are they stable?
+For a given ΔT, the quadratic yields one or two solutions for $(\Delta S)^*$. But are they stable?
 
-Linearize around an equilibrium $(S_e^*, S_p^*)$:
+Linearize around an equilibrium $(\Delta S)^*$:
 
-$$\delta \dot{S}_e = -\frac{\partial}{\partial S_e}[-q \Delta S + F] \cdot \delta S_e - \frac{\partial}{\partial S_p}[-q \Delta S + F] \cdot \delta S_p$$
+$$\delta \dot{S} = \frac{\partial f}{\partial \Delta S}\Big|_{*} \delta(\Delta S)$$
 
-With some algebra (using $\partial q / \partial S_e = -k\beta$, $\partial q / \partial S_p = +k\beta$):
+where $f(\Delta S) = -\lambda(\Delta S - \Delta S^0) + 2k[\alpha \Delta T - \beta \Delta S](\Delta S) + \ldots$
 
-$$J_{11} = \frac{\partial \dot{S}_e}{\partial S_e} = -q^* + k\beta \Delta S^*$$
+Computing the derivative:
 
-$$J_{12} = \frac{\partial \dot{S}_e}{\partial S_p} = +q^* + k\beta \Delta S^*$$
-
-The Jacobian is:
-
-$$J = \begin{pmatrix} -q^* + k\beta \Delta S^* & q^* + k\beta \Delta S^* \\ -(- q^* + k\beta \Delta S^*) & -(q^* + k\beta \Delta S^*) \end{pmatrix}$$
-
-Due to the salt conservation constraint, one eigenvalue is always zero (neutral direction). The physically relevant eigenvalue is:
-
-$$\lambda_1 = -2q^* + 2k\beta \Delta S^*$$
+$$\frac{\partial f}{\partial \Delta S} = -\lambda + 2k[\alpha \Delta T - 2\beta \Delta S^*]$$
 
 **Stability**:
-- If $\lambda_1 < 0$: stable node (attractor)
-- If $\lambda_1 > 0$: unstable node (saddle/repellor)
-- If $\lambda_1 = 0$: bifurcation point
+- If $\frac{\partial f}{\partial S} < 0$: stable (perturbations decay)
+- If $\frac{\partial f}{\partial S} > 0$: unstable (perturbations grow)
 
-For the **strong AMOC branch** (upper branch, large q):
-- $q^*$ is large and positive.
-- $\Delta S^*$ is large and positive.
-- Usually $\lambda_1 < 0$: **stable** (this is the attractor we see in phase space).
+**For the thermal (strong) branch**:
+- Far from bifurcation: stable
+- Near bifurcation: marginally stable, growth rate → 0 (critical slowing down!)
 
-For the **weak/haline branch** (lower branch, small q):
-- $q^*$ is small or zero.
-- $\Delta S^*$ is small or negative.
-- Often $\lambda_1 > 0$: **unstable** (saddle point).
-
-The **middle branch** (unstable part of the S-curve):
-- Where the two roots of the quadratic transition from stable to unstable.
-- Forms the dashed line in bifurcation diagrams.
+**For the haline (weak) branch**:
+- Always stable (salinity is far from its equilibrium, so relaxation dominates)
 
 ---
 
-## Conversion to Sverdrups
+## Key Differences from Simplified Models
 
-The circulation equation gives $q$ in units of 1/s. To convert to Sverdrups (observed units):
+Stommel's **original model** (with relaxation) differs from simplified **constant-F variants**:
 
-$$q_{\text{Sv}} = q \times \frac{V_{\text{box}}}{10^6 \text{ m}^3/\text{s per Sv}}$$
+| Feature | Stommel 1961 (Relaxation) | Simplified (Constant F) |
+|---------|--------------------------|-------------------------|
+| **Forcing** | H_i = -λ(S_i - S_i⁰) | F = constant |
+| **Timescale** | ~1000 years | N/A |
+| **Bifurcation control** | Temperature difference ΔT | Freshwater flux F |
+| **Hysteresis** | Yes, as ΔT varies | Yes, as F varies |
+| **Physical meaning** | Atmospheric relaxation | Direct freshwater input |
 
-With a typical Atlantic box volume of ~7×10¹⁵ m³:
-
-$$q_{\text{Sv}} = q \times \frac{7 \times 10^{15}}{10^6} = q \times 7 \times 10^9$$
-
-So if $q \approx 2 \times 10^{-9}$ (1/s), then $q_{\text{Sv}} \approx 14$ Sv, matching observations.
-
-This scaling is baked into the simulator; all displayed values are in Sverdrups.
-
----
-
-## Non-Dimensionalization (Advanced)
-
-It's instructive to work with non-dimensional variables. Define:
-
-- $\tilde{S} = \Delta S / (\alpha \Delta T / \beta)$: normalized salinity difference
-- $\tilde{F} = F / (k \alpha \Delta T \cdot \alpha \Delta T / \beta)$: normalized freshwater flux
-
-Then the equilibrium quadratic becomes:
-
-$$(\tilde{\Delta S})^2 - \tilde{\Delta S} + \tilde{F} = 0$$
-
-The only control parameter that appears is $\tilde{F}$! This shows that once you fix the thermal forcing and physical coefficients, all behavior is captured by a single non-dimensional number: the ratio of freshwater forcing to thermal forcing.
-
-Alternatively, the **Stommel number** is sometimes defined:
-
-$$S = \frac{\beta F}{\alpha k (\Delta T)^2}$$
-
-For $S < S_c$ (critical value ≈ 1/4), the system is bistable.
+The relaxation model is closer to Stommel's original intent: capturing the slow adjustment of the ocean to atmospheric forcing via freshwater anomalies.
 
 ---
 
-## What the Model Captures and Misses
-
-### ✅ Model Strengths
-
-- **Bistability**: Two stable states exist under the same parameters.
-- **Hysteresis**: Transition path depends on history.
-- **Tipping points**: Saddle-node bifurcations occur at parameter values that can be computed.
-- **Analytical tractability**: ODEs are simple enough to analyze by hand and numerically integrate quickly.
-- **Scalability**: Captures the essential nonlinearity even when extended to 3–4 boxes or embedded in larger models.
-
-### ❌ Model Limitations
-
-- **No time delays**: Real ocean responds over decades; this model assumes instantaneous equilibration of circulation.
-- **No wind forcing**: The AMOC actually depends on both thermohaline and wind-driven components.
-- **No spatial structure**: Real THC has 3D structure, vertical mixing, and boundary layers.
-- **No biology**: Nutrient cycling and oxygen dynamics are omitted.
-- **No eddies**: Sub-grid turbulence is parameterized away.
-- **No ice sheet dynamics**: The only ice effect is freshwater input (not ice sheet slope, extent, or rebound).
-
----
-
-## Numerical Integration
-
-The simulator uses a **Radau solver** (a stiff, implicit Runge-Kutta method) to integrate the ODEs from $t=0$ to $t=t_{\max}$:
-
-$$\frac{dS_e}{dt} = -q(S_e - S_p) + F, \quad S_e(0) = S_{e0}$$
-
-$$\frac{dS_p}{dt} = +q(S_e - S_p) - F, \quad S_p(0) = S_{p0}$$
-
-Where $q(S_e, S_p) = k[\alpha \Delta T - \beta(S_e - S_p)]$.
-
-**With stochastic forcing** (noise_amplitude > 0), the solver switches to **Euler-Maruyama**:
-
-$$S_e(t + dt) = S_e(t) + [-q(S_e - S_p) + F] \, dt + \sigma_F \sqrt{dt} \, \xi$$
-
-Where $\sigma_F$ is the noise amplitude and $\xi \sim N(0, 1)$ is a Gaussian random variable.
-
----
-
-## Further Reading
-
-**Original source**:
-- Stommel, H. (1961). Thermohaline Convection with Two Stable Regimes of Flow. *Tellus*, 13(2), 224–230.
-
-**Extended reviews**:
-- Rahmstorf, S. (1996). On the freshwater forcing and transport of the Atlantic thermohaline circulation. *J. Phys. Oceanogr.*, 26, 435–456.
-- Dijkstra, H. A., & Molemaker, M. J. (1997). Symmetries and dynamics of rotating shallow-water vortices. *J. Fluid Mech.*, 331, 35–59.
-
----
-
-**Next**: Compute and analyze the [Steady States](/theory/steady-states), or dive into [Stability Analysis](/theory/stability-analysis).
+**Next**: Explore [Steady States & Bifurcations](/theory/bifurcations-hysteresis) to see how equilibria change with parameters.

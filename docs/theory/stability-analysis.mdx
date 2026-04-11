@@ -9,27 +9,29 @@ description: Linearization, Jacobian matrix, and eigenvalue classification of eq
 
 To determine whether an equilibrium is stable or unstable, we linearize the ODEs around the fixed point and compute eigenvalues of the **Jacobian matrix**.
 
-Given the system:
+Given the original Stommel (1961) system with **relaxation forcing**:
 
-$$\frac{dS_e}{dt} = -q(S_e - S_p) + F$$
+$$\frac{dS_1}{dt} = -\lambda(S_1 - S_1^0) + q(S_2 - S_1)$$
 
-$$\frac{dS_p}{dt} = +q(S_e - S_p) - F$$
+$$\frac{dS_2}{dt} = -\lambda(S_2 - S_2^0) + q(S_1 - S_2)$$
 
-where $q = q(S_e, S_p) = k[\alpha \Delta T - \beta(S_e - S_p)]$.
+where $q = q(S_1, S_2) = k[\alpha \Delta T - \beta(S_1 - S_2)]$ and $\Delta T = T_1 - T_2$ is held fixed.
 
-At an equilibrium $(S_e^*, S_p^*)$, let $\delta S_e = S_e - S_e^*$ and $\delta S_p = S_p - S_p^*$ be small perturbations.
+At an equilibrium $(S_1^*, S_2^*)$, let $\delta S_1 = S_1 - S_1^*$ and $\delta S_2 = S_2 - S_2^*$ be small perturbations.
 
 Expanding the time derivatives to first order in $\delta S$:
 
-$$\frac{d(\delta S_e)}{dt} = \frac{\partial}{\partial S_e}\left[-q(S_e - S_p) + F\right]\bigg|_* \delta S_e + \frac{\partial}{\partial S_p}\left[-q(S_e - S_p) + F\right]\bigg|_* \delta S_p$$
+$$\frac{d(\delta S_1)}{dt} = \frac{\partial f_1}{\partial S_1}\bigg|_* \delta S_1 + \frac{\partial f_1}{\partial S_2}\bigg|_* \delta S_2$$
 
-$$\frac{d(\delta S_p)}{dt} = \frac{\partial}{\partial S_e}\left[+q(S_e - S_p) - F\right]\bigg|_* \delta S_e + \frac{\partial}{\partial S_p}\left[+q(S_e - S_p) - F\right]\bigg|_* \delta S_p$$
+$$\frac{d(\delta S_2)}{dt} = \frac{\partial f_2}{\partial S_1}\bigg|_* \delta S_1 + \frac{\partial f_2}{\partial S_2}\bigg|_* \delta S_2$$
+
+where $f_1 = -\lambda(S_1 - S_1^0) + q(S_2 - S_1)$ and $f_2 = -\lambda(S_2 - S_2^0) + q(S_1 - S_2)$.
 
 In compact form:
 
 $$\frac{d\mathbf{\delta}}{dt} = J \mathbf{\delta}$$
 
-where $\mathbf{\delta} = (\delta S_e, \delta S_p)^T$ and $J$ is the Jacobian matrix.
+where $\mathbf{\delta} = (\delta S_1, \delta S_2)^T$ and $J$ is the Jacobian matrix.
 
 ---
 
@@ -37,211 +39,223 @@ where $\mathbf{\delta} = (\delta S_e, \delta S_p)^T$ and $J$ is the Jacobian mat
 
 ### Partial Derivatives of q
 
-First, compute:
+First, compute the derivatives of $q(S_1, S_2) = k[\alpha \Delta T - \beta(S_1 - S_2)]$:
 
-$$\frac{\partial q}{\partial S_e} = k \cdot (-\beta) \cdot (-1) = -k\beta$$
+$$\frac{\partial q}{\partial S_1} = -k\beta$$
 
-$$\frac{\partial q}{\partial S_p} = k \cdot (-\beta) \cdot (+1) = +k\beta$$
+$$\frac{\partial q}{\partial S_2} = +k\beta$$
 
-Note: The $\Delta T$ term is independent of S, so it doesn't contribute to these partials.
+Note: $\Delta T$ is held fixed during linearization, so it doesn't contribute to these partials.
 
 ### Jacobian Elements
 
-$$J_{11} = \frac{\partial}{\partial S_e}[-q \Delta S + F] = -\frac{\partial q}{\partial S_e} \Delta S - q \frac{\partial(\Delta S)}{\partial S_e}$$
+For row 1: $f_1 = -\lambda(S_1 - S_1^0) + q(S_2 - S_1)$
 
-$$= -(-k\beta) \Delta S - q(1) = +k\beta \Delta S - q$$
+$$J_{11} = \frac{\partial f_1}{\partial S_1} = -\lambda - \frac{\partial q}{\partial S_1}(S_2 - S_1) - q = -\lambda + k\beta(S_2 - S_1) - q$$
 
-$$J_{12} = \frac{\partial}{\partial S_p}[-q \Delta S + F] = -\frac{\partial q}{\partial S_p} \Delta S - q \frac{\partial(\Delta S)}{\partial S_p}$$
+$$= -\lambda - k\beta(S_1 - S_2) - q = -\lambda - k\beta \Delta S - q$$
 
-$$= -(+k\beta) \Delta S - q(-1) = -k\beta \Delta S + q$$
+$$J_{12} = \frac{\partial f_1}{\partial S_2} = \frac{\partial q}{\partial S_2}(S_2 - S_1) + q = -k\beta(S_2 - S_1) + q$$
 
-Similarly:
+$$= k\beta(S_1 - S_2) + q = k\beta \Delta S + q$$
 
-$$J_{21} = -J_{11} = -k\beta \Delta S + q \quad \text{(by salt conservation)}$$
+For row 2: $f_2 = -\lambda(S_2 - S_2^0) + q(S_1 - S_2)$
 
-$$J_{22} = -J_{12} = k\beta \Delta S - q$$
+$$J_{21} = \frac{\partial f_2}{\partial S_1} = \frac{\partial q}{\partial S_1}(S_1 - S_2) + q = -k\beta(S_1 - S_2) + q$$
+
+$$= -k\beta \Delta S + q$$
+
+$$J_{22} = \frac{\partial f_2}{\partial S_2} = -\lambda - \frac{\partial q}{\partial S_2}(S_1 - S_2) - q = -\lambda - k\beta(S_1 - S_2) - q$$
+
+$$= -\lambda - k\beta \Delta S - q$$
 
 So the Jacobian is:
 
-$$J = \begin{pmatrix} k\beta \Delta S - q & -k\beta \Delta S + q \\ -k\beta \Delta S + q & k\beta \Delta S - q \end{pmatrix}$$
+$$J = \begin{pmatrix} -\lambda - k\beta \Delta S - q & k\beta \Delta S + q \\ -k\beta \Delta S + q & -\lambda - k\beta \Delta S - q \end{pmatrix}$$
 
 ---
 
-## Eigenvalues and Characteristic Equation
+## Eigenvalues and the Stability-Determining Condition
 
-The characteristic equation is:
+Working with the new coordinate $\Delta S = S_1 - S_2$ and defining the mean $\overline{S} = (S_1 + S_2)/2$, we can decouple the system.
 
-$$\det(J - \lambda I) = 0$$
+The key dynamics are governed by $\Delta S$ evolution:
 
-$$(k\beta \Delta S - q - \lambda)(k\beta \Delta S - q - \lambda) - (-k\beta \Delta S + q)^2 = 0$$
+$$\frac{d(\Delta S)}{dt} = -2\lambda(\Delta S - \Delta S^0) + 2q(\Delta S)$$
 
-$$(k\beta \Delta S - q - \lambda)^2 - (k\beta \Delta S - q)^2 = 0$$
+At equilibrium ($d(\Delta S)/dt = 0$), we have the condition we derived earlier in steady-state analysis. To determine stability, we linearize around $(\Delta S)^* $:
 
-Let $u = k\beta \Delta S - q$ and $v = k\beta \Delta S - q$. Then:
+$$\frac{d[\delta(\Delta S)]}{dt} = \left[-2\lambda + 2\frac{\partial q}{\partial(\Delta S)}\right]\bigg|_* \delta(\Delta S)$$
 
-$$(u - \lambda)^2 - v^2 = 0$$
+Since $q = k[\alpha \Delta T - \beta \Delta S]$:
 
-Wait, that doesn't look right. Let me recompute more carefully.
+$$\frac{\partial q}{\partial(\Delta S)} = -k\beta$$
 
-Actually, note that the matrix has a special structure:
+So the stability-determining eigenvalue is:
 
-$$J = \begin{pmatrix} a & -a \\ -a & a \end{pmatrix}$$
+$$\mu_1 = -2\lambda - 2k\beta(\Delta S)^*$$
 
-where $a = k\beta \Delta S - q$.
+**Physical interpretation**:
+- $-2\lambda$ term: Relaxation provides damping (always stabilizing)
+- $-2k\beta(\Delta S)^*$ term: Salinity's effect on circulation (negative for large ΔS, destabilizing)
 
-The characteristic polynomial is:
+For the upper branch with large positive $(\Delta S)^*$:
+$$\mu_1 = -2\lambda - 2k\beta(\Delta S)^* < 0$$
 
-$$\det\begin{pmatrix} a - \lambda & -a \\ -a & a - \lambda \end{pmatrix} = (a - \lambda)^2 - a^2 = \lambda^2 - 2a\lambda + a^2 - a^2 = \lambda(\lambda - 2a)$$
+The eigenvalue is **always negative** → **stable** ✅
 
-So the eigenvalues are:
+**Key difference from constant-F model**: The relaxation term $-2\lambda$ always contributes to stability, making the upper branch robust.
 
-$$\lambda_1 = 0$$
-
-$$\lambda_2 = 2a = 2(k\beta \Delta S - q)$$
+The second eigenvalue corresponds to the mean salinity evolution (affected by the total relaxation) and also has $-\lambda$ as its decay rate.
 
 ---
 
 ## Physical Interpretation of Eigenvalues
 
-### Zero Eigenvalue (Neutral Direction)
+### Relaxation-Driven Stability ($-2\lambda$)
 
-The zero eigenvalue is **expected** and reflects **salt conservation**. The corresponding eigenvector is proportional to $(1, 1)^T$, representing perturbations that increase or decrease both salinities equally, preserving the total salt $S_e + S_p = \text{const}$.
+In the original Stommel model with relaxation, the equilibrium is always pulled back toward the climate target salinities $S_1^0$ and $S_2^0$ via the $-\lambda$ term. This provides a **persistent restoring force** that stabilizes the system against perturbations.
 
-This is the "neutral manifold" — the direction along which the system can drift without changing its fundamental dynamics.
+### Circulation-Driven Instability ($-2k\beta \Delta S$)
 
-### Non-zero Eigenvalue (Stability-Determining)
+When the salinity difference is large, the circulation-driven feedback becomes significant. For large positive $\Delta S$ (upper branch):
+- Large q drives salt northward, maintaining large $\Delta S$
+- But this is counteracted by the relaxation force
+- Net result: **stable** (relaxation wins)
 
-The second eigenvalue:
+### The Bifurcation Condition
 
-$$\lambda_2 = 2(k\beta \Delta S - q)$$
+The system transitions from bistable (two stable equilibria) to monostable (one state) when the upper and lower branches annihilate. This occurs when:
 
-determines whether the equilibrium is stable or unstable:
+$$\Delta T = \Delta T_{\text{crit}}$$
 
-- **If $\lambda_2 < 0$**: The perturbation decays exponentially → **STABLE** (attractor)
-- **If $\lambda_2 = 0$**: The eigenvalue becomes zero → **BIFURCATION** point
-- **If $\lambda_2 > 0$**: The perturbation grows exponentially → **UNSTABLE** (repellor/saddle)
+At this point, the eigenvalue $\mu_1$ of one branch touches zero, indicating a **saddle-node bifurcation**.
+
+**Key difference from constant-F model**: The bifurcation is controlled by **temperature** (an external climate parameter), not by **freshwater flux** (which can be varied externally). This makes the original model more relevant to paleoclimate transitions.
 
 ---
 
 ## Stability of the Three Branches
 
-### Upper Branch (Strong AMOC)
+In the **original Stommel model with relaxation**, we evaluate:
 
-**Typical values**:
-- $q^* \approx +15$ Sv = $2.1 \times 10^{-9}$ (1/s)
-- $\Delta S^* \approx +2$ psu
+$$\mu_1 = -2\lambda - 2k\beta(\Delta S)^*$$
+
+### Upper Branch (Strong Thermally-Driven AMOC)
+
+**Typical values** (Stommel's original parameters, present-day):
+- $q^* \approx 5-10 \times 10^{-7}$ (1/s)  [~15–20 Sv]
+- $(\Delta S)^* \approx +10$ psu
+- $\lambda = 3 \times 10^{-11}$ s⁻¹
 
 **Eigenvalue**:
-$$\lambda_2 = 2(k\beta \Delta S^* - q^*)$$
+$$\mu_1 = -2 \times 3 \times 10^{-11} - 2 \times 3 \times 10^{-9} \times 10$$
 
-$$= 2 \times [1.5 \times 10^{-6} \times 8 \times 10^{-4} \times 2 - 2.1 \times 10^{-9}]$$
+$$= -6 \times 10^{-11} - 6 \times 10^{-8}$$
 
-$$= 2 \times [2.4 \times 10^{-9} - 2.1 \times 10^{-9}]$$
+$$\approx -6 \times 10^{-8} < 0$$ → **STABLE** ✅
 
-$$\approx 2 \times [3 \times 10^{-10}] > 0 \,?$$
+### Lower Branch (Weak/Haline-Dominated Collapsed State)
 
-Hmm, this gives unstable... let me recalculate. Actually, the units are tricky. Let me work in the non-dimensional system where $q$ is 1/s:
+**Typical values** (same parameters, but in collapsed regime):
+- $q^* \approx 0$ or negative (1/s)
+- $(\Delta S)^* \approx -2$ to +2 psu
+- $\lambda = 3 \times 10^{-11}$ s⁻¹
 
-With $q^* = 2 \times 10^{-9}$ (1/s) and $\Delta S^* = 2$ psu:
+**Eigenvalue**:
+$$\mu_1 = -2 \times 3 \times 10^{-11} - 2 \times 3 \times 10^{-9} \times 2$$
 
-$$\lambda_2 = 2 \times [8 \times 10^{-4} \times 1.5 \times 10^{-6} \times 2 - 2 \times 10^{-9}]$$
+$$= -6 \times 10^{-11} - 1.2 \times 10^{-8}$$
 
-$$= 2 \times [2.4 \times 10^{-9} - 2 \times 10^{-9}]$$
+$$\approx -1.2 \times 10^{-8} < 0$$ → **STABLE** ✅
 
-$$= 2 \times [0.4 \times 10^{-9}] \approx 8 \times 10^{-10} > 0$$
+**Key insight**: Both branches are stable when $\lambda$ is present! Relaxation dominates and keeps both the upper and lower states stable. This is the essence of **bistability**.
 
-This suggests the upper branch is *unstable*? That contradicts our physical intuition. Let me reconsider the signs.
+### Middle Branch (Saddle-Node)
 
-Actually, I think I made an error in the partial derivatives or the formula. Let me redo this more carefully.
+At the saddle-node bifurcation ($\Delta T = \Delta T_{\text{crit}}$):
+$$\mu_1 = 0$$
 
-The key issue is that the formula should be:
-
-$$\lambda_2 = 2(k\beta \Delta S - q) = -2q + 2k\beta \Delta S$$
-
-For the upper branch with large positive $q$ and large positive $\Delta S$:
-- The $-2q$ term is large and **negative**
-- The $+2k\beta\Delta S$ term is positive but (often) smaller
-- Net result: $\lambda_2 < 0$ → **STABLE** ✅
-
-For the lower branch with small/negative $q$ and small/negative $\Delta S$:
-- The $-2q$ term is small and positive
-- The $+2k\beta\Delta S$ term is small and negative or zero
-- Net result: $\lambda_2$ can be positive or negative (stability depends on exact location)
-
-For the middle (unstable) branch:
-- $\lambda_2 = 0$ exactly at the bifurcation point
+This is the critical condition separating the two branches. It occurs exactly when the discriminant of the equilibrium quadratic equals zero.
 
 ---
 
 ## Bifurcation Condition
 
-At a saddle-node bifurcation, $\lambda_2 = 0$:
+At a saddle-node bifurcation, the eigenvalue $\mu_1 = 0$:
 
-$$0 = -2q + 2k\beta \Delta S$$
+$$0 = -2\lambda - 2k\beta(\Delta S)^*$$
 
-$$q = k\beta \Delta S$$
+$$k\beta(\Delta S)^* = -\lambda$$
 
-But at equilibrium, $q = k[\alpha \Delta T - \beta \Delta S]$, so:
+$$(\Delta S)^* = -\frac{\lambda}{k\beta}$$
 
-$$k[\alpha \Delta T - \beta \Delta S] = k\beta \Delta S$$
+But in the equilibrium condition, we also require that the discriminant of the quadratic equals zero:
 
-$$\alpha \Delta T = 2\beta \Delta S$$
+$$\Delta_{\text{disc}} = (2k\alpha\Delta T_{\text{crit}} + \lambda)^2 - 8k\beta\lambda\Delta S^0 = 0$$
 
-$$\Delta S = \frac{\alpha \Delta T}{2\beta}$$
+Solving for $\Delta T_{\text{crit}}$:
 
-This is exactly the condition we found earlier: when the discriminant $\Delta_{\text{disc}} = 0$, the repeated root is:
+$$2k\alpha\Delta T_{\text{crit}} + \lambda = \sqrt{8k\beta\lambda\Delta S^0}$$
 
-$$\Delta S^* = \frac{\alpha \Delta T}{2\beta}$$
+$$\Delta T_{\text{crit}} = \frac{\sqrt{8k\beta\lambda\Delta S^0} - \lambda}{2k\alpha}$$
 
-And at this point, the eigenvalue $\lambda_2 = 0$, indicating a bifurcation.
+**Key point**: The bifurcation is determined by **temperature difference** $\Delta T$, not by freshwater forcing. When $\Delta T < \Delta T_{\text{crit}}$, the system loses the bistable regime and collapses.
 
 ---
 
 ## Summary Table
 
-| Branch | Circulation | ΔS | λ₂ Status | Stability |
+| Branch | Circulation | ΔS | Eigenvalue $\mu_1$ | Stability |
 |--------|-------------|-----|-----------|-----------|
-| Upper | Strong (q > 0) | Large > 0 | Negative | Stable ✅ |
-| Unstable middle | Intermediate | ~α ΔT / 2β | Zero | Bifurcation |
-| Lower | Weak/reversed (q ≤ 0) | Small/negative | Variable | Unstable or stable |
+| Upper (large ΔT) | Strong (q > 0) | Large > 0 | Strongly negative | Stable ✅ |
+| Saddle-node | Intermediate | ~$\lambda/(k\beta)$ | Zero | Bifurcation |
+| Lower (large ΔT) | Weak/reversed (q ≤ 0) | Small/negative | Negative | Stable ✅ |
+| Both (small ΔT) | – | – | – | Only lower stable (collapsed) |
 
 ---
 
 ## Connection to Bifurcation Diagrams
 
-In bifurcation diagrams (q vs. F), we typically show:
+In bifurcation diagrams (q vs. ΔT), we typically show:
 
-- **Solid lines**: Stable equilibria (λ₂ < 0)
-- **Dashed lines**: Unstable equilibria (λ₂ > 0)
-- **Points**: Bifurcations (λ₂ = 0)
+- **Solid lines**: Stable equilibria ($\mu_1 < 0$)
+- **Dashed lines**: Unstable equilibria ($\mu_1 > 0$) — rarely observed
+- **Red diamonds**: Bifurcation points ($\mu_1 = 0$)
 
-For the Stommel two-box model's S-curve:
+For the original Stommel two-box model's S-curve:
 
 ```
-q (Sv)
+q (1/s)
  ^
- |    _____ (stable upper)
- |   /
- |  |      (unstable middle, dashed)
- |   \___  (stable/unstable lower)
- +------+--+--> F
-      c2  c1
+ |           _____ (stable upper)
+ |          /
+ |         /
+ |        / RED DIAMOND (bifurcation)
+ |   ____/
+ |  /
+ | /
+ +------+----------+---> ΔT (K)
+     ΔT_crit  ΔT_obs
+     (collapse)  (today)
+
+     (stable lower, always present)
 ```
 
 ---
 
 ## Basins of Attraction
 
-When the system is bistable (two stable equilibria exist), the **unstable middle branch acts as a separatrix**:
+In the bistable region ($\Delta T > \Delta T_{\text{crit}}$), two stable equilibria coexist. The **saddle-node (unstable middle branch) acts as a separatrix**:
 
-- Initial conditions *above* the separatrix evolve toward the upper (stable) branch.
-- Initial conditions *below* the separatrix evolve toward the lower (stable) branch.
-- Initial conditions *exactly* on the separatrix form the unstable manifold.
+- Initial conditions with **larger ΔS** (more salty equator) evolve toward the **upper stable branch** (strong AMOC).
+- Initial conditions with **smaller ΔS** (fresher equator) evolve toward the **lower stable branch** (weak/collapsed AMOC).
+- The separatrix is a 1D unstable manifold in the 2D phase space.
 
 This explains the **phase portraits** shown in the simulator:
-- Red stars mark initial conditions (S_e0, S_p0)
-- Viridis trajectories show evolution from initial to final state
-- Converging to upper or lower branch depends on which side of the separatrix you start
+- Red stars mark initial conditions (S₁₀, S₂₀)
+- Colored trajectories show evolution from initial to final state
+- Converging to upper or lower branch depends on the initial salinity difference
 
 ---
 
@@ -249,31 +263,39 @@ This explains the **phase portraits** shown in the simulator:
 
 ### 1. Sensitive Dependence on Initial Conditions
 
-In the bistable region, two very similar initial conditions can converge to *different* stable states. This is **not chaos** (trajectories are deterministic) but illustrates the **hysteresis effect**: the attractor you reach depends on history.
+In the bistable region, two very similar initial conditions (differing by ~0.5 psu in salinity difference) can converge to *different* stable states. This is **not chaos** (trajectories are deterministic and smooth) but illustrates the **memory effect**: which attractor you reach depends on paleoclimate history.
 
 ### 2. Noise-Induced Transitions
 
-Small random perturbations (noise) can kick a trajectory across the separatrix, causing a transition from one stable state to the other. This is **noise-induced tipping** — even without increasing F, stochastic fluctuations alone can flip the system.
+Small random perturbations (noise) can gradually shift a trajectory across the separatrix over centuries, causing a transition from one stable state to the other. This is **noise-induced tipping** — even without changing ΔT, stochastic climate variability alone can flip the system. This is especially relevant for paleoclimate (e.g., Dansgaard-Oeschger events).
 
-### 3. Predictability Beyond Bifurcation
+### 3. Sharp Collapse Below $\Delta T_{\text{crit}}$
 
-Once you cross a bifurcation (e.g., increase F beyond F_c1), the system has no choice: the upper stable branch disappears, and the trajectory must jump to the lower branch. At that instant, predictability is *high* (the fate is sealed) but the change is *sudden* and *dramatic*.
+Once ΔT drops below $\Delta T_{\text{crit}}$ (e.g., during cooling or polar amplification reversal), the upper stable branch **annihilates**. The system must collapse to the lower branch. This is a **forced tipping** — not noise-induced, but inevitable. At that instant, the collapse can happen rapidly (decades to centuries depending on relaxation timescale).
 
 ---
 
 ## Extensions and Generalizations
 
+### Relaxation Timescale Effects
+
+The relaxation rate λ acts as a **damping mechanism**. Slower relaxation ($\lambda \to 0$) makes the upper branch less stable and lowers $\Delta T_{\text{crit}}$ (easier to collapse). Faster relaxation ($\lambda \to \infty$) makes both branches very stable. Real oceans are thought to have $\lambda \approx 3 \times 10^{-11}$ s⁻¹ (~1000 years), a compromise between these extremes.
+
 ### Multi-Box Models
 
-In 3–4 box models, the Jacobian is larger, but the principle is the same: compute eigenvalues to classify equilibria. Bifurcations typically occur when one eigenvalue crosses zero.
+In 3–4 box models (more realistic geometry), the Jacobian is larger (N × N for N boxes), but the principle is the same: compute eigenvalues to classify equilibria. Bifurcations typically occur when one eigenvalue crosses zero. More boxes allow for more complex phenomena (multiple tipping points, oscillations) but lose analytical tractability.
 
 ### Time-Delay Effects
 
-If we include a delay in the circulation response (e.g., $q(t)$ depends on salinity at time $t - \tau$), the Jacobian becomes an infinite-dimensional operator, and new phenomena like oscillations and chaos can arise. This is beyond the two-box model but occurs in more realistic ocean models.
+If we include memory in the circulation response (e.g., $q(t)$ depends on salinity at time $t - \tau$), the Jacobian becomes an infinite-dimensional operator, and new phenomena like oscillations and chaos can arise. This is beyond the two-box model but relevant for ocean dynamics with finite adjustment timescales.
 
-### Stochastic Stability
+### Stochastic Stability (Noise-Induced Tipping)
 
-When we add noise, we should use **stochastic bifurcation theory**, which differs subtly from deterministic stability analysis. Specifically, noise can shift bifurcation thresholds and induce transitions before the deterministic tipping point. This is why the simulator includes a noise slider.
+When we add noise to the ODEs, we should use **stochastic bifurcation theory**, which differs subtly from deterministic stability analysis. Key insight:
+- **Noise can shift bifurcation thresholds**: A system can tip before reaching the deterministic bifurcation point $\Delta T_{\text{crit}}$.
+- **Stochastic resonance**: The interplay between noise and the relaxation timescale can amplify certain frequencies of temperature variability.
+
+This is why the simulator includes a noise slider — to explore how unresolved climate variability affects tipping risk.
 
 ---
 

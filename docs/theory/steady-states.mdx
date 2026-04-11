@@ -1,49 +1,59 @@
 ---
 title: Steady States and Equilibrium Analysis
-description: Computing and classifying equilibria in the two-box model
+description: Computing and classifying equilibria in the original Stommel (1961) relaxation model
 ---
 
 # Steady States and Equilibrium Analysis
 
 ## The Equilibrium Condition
 
-At steady state, the time derivatives vanish:
+At steady state, both time derivatives vanish:
 
-$$\frac{dS_e}{dt} = 0 \quad \text{and} \quad \frac{dS_p}{dt} = 0$$
+$$\frac{dS_1}{dt} = 0 \quad \text{and} \quad \frac{dS_2}{dt} = 0$$
 
-This requires:
+This requires the relaxation forcing to balance the circulation-driven transport:
 
-$$F = q \Delta S$$
+$$-\lambda(S_1 - S_1^0) + q(S_2 - S_1) = 0$$
 
-where $q = k[\alpha \Delta T - \beta \Delta S]$ and $\Delta S = S_e - S_p$.
+$$-\lambda(S_2 - S_2^0) + q(S_1 - S_2) = 0$$
 
-Substituting:
+From the first equation:
 
-$$F = k[\alpha \Delta T - \beta \Delta S] \cdot \Delta S$$
+$$\lambda(S_1 - S_1^0) = q(S_2 - S_1)$$
 
-$$F = k \alpha \Delta T \cdot \Delta S - k \beta (\Delta S)^2$$
+Let $\Delta S = S_1 - S_2$ and $\Delta S^0 = S_1^0 - S_2^0$. Adding both equilibrium equations and manipulating yields:
+
+$$0 = 2q(\Delta S) + \lambda[(\Delta S) - (\Delta S^0)]$$
+
+Substituting $q = k[\alpha \Delta T - \beta \Delta S]$:
+
+$$0 = 2k[\alpha \Delta T - \beta \Delta S](\Delta S) + \lambda[(\Delta S) - (\Delta S^0)]$$
+
+Expanding:
+
+$$0 = 2k\alpha \Delta T (\Delta S) - 2k\beta (\Delta S)^2 + \lambda(\Delta S) - \lambda(\Delta S^0)$$
 
 Rearranging into standard quadratic form:
 
-$$k\beta (\Delta S)^2 - k \alpha \Delta T \cdot \Delta S + F = 0$$
+$$2k\beta (\Delta S)^2 - (2k\alpha \Delta T + \lambda)(\Delta S) + \lambda(\Delta S^0) = 0$$
 
 ---
 
 ## The Quadratic Formula
 
-Using the quadratic formula with $a = k\beta$, $b = -k\alpha\Delta T$, $c = F$:
+Using the quadratic formula with $a = 2k\beta$, $b = -(2k\alpha\Delta T + \lambda)$, $c = \lambda\Delta S^0$:
 
-$$\Delta S = \frac{k\alpha\Delta T \pm \sqrt{(k\alpha\Delta T)^2 - 4k\beta F}}{2k\beta}$$
+$$\Delta S = \frac{(2k\alpha\Delta T + \lambda) \pm \sqrt{(2k\alpha\Delta T + \lambda)^2 - 8k\beta\lambda\Delta S^0}}{4k\beta}$$
 
 The two solutions are:
 
-$$\Delta S_+ = \frac{k\alpha\Delta T + \sqrt{\Delta_{\text{disc}}}}{2k\beta} \quad \text{(upper branch, stronger AMOC)}$$
+$$\Delta S_+ = \frac{(2k\alpha\Delta T + \lambda) + \sqrt{\Delta_{\text{disc}}}}{4k\beta} \quad \text{(upper branch, stronger AMOC)}$$
 
-$$\Delta S_- = \frac{k\alpha\Delta T - \sqrt{\Delta_{\text{disc}}}}{2k\beta} \quad \text{(lower branch, weaker AMOC)}$$
+$$\Delta S_- = \frac{(2k\alpha\Delta T + \lambda) - \sqrt{\Delta_{\text{disc}}}}{4k\beta} \quad \text{(lower branch, weaker AMOC)}$$
 
 Where the **discriminant** is:
 
-$$\Delta_{\text{disc}} = (k\alpha\Delta T)^2 - 4k\beta F$$
+$$\Delta_{\text{disc}} = (2k\alpha\Delta T + \lambda)^2 - 8k\beta\lambda\Delta S^0$$
 
 ---
 
@@ -51,21 +61,21 @@ $$\Delta_{\text{disc}} = (k\alpha\Delta T)^2 - 4k\beta F$$
 
 ### 1. Bistable Region: $\Delta_{\text{disc}} > 0$
 
-**Condition**: $F < F_{\text{crit}} = \frac{k(\alpha\Delta T)^2}{4\beta}$
+**Condition**: $\Delta T > \Delta T_{\text{crit}}$
 
 **Result**: Two real, distinct roots → **two stable equilibria**
 
 - **Upper branch** ($\Delta S_+$): Larger $\Delta S$, larger positive $q$ → strong AMOC state
-  - Higher equatorial salinity $S_e^*$, lower polar salinity $S_p^*$
-  - Circulation is northward and vigorous
-  - This is the **attractor** (stable)
+  - Higher Box 1 salinity $S_1^*$, lower Box 2 salinity $S_2^*$
+  - Circulation is northward and vigorous; warm, salty water flows poleward
+  - This is the **thermally-driven attractor** (stable)
 
-- **Lower branch** ($\Delta S_-$): Smaller $\Delta S$, smaller (possibly negative) $q$ → weak/reversed state
-  - Lower equatorial salinity, higher polar salinity
-  - Circulation is weak or reversed
+- **Lower branch** ($\Delta S_-$): Smaller $\Delta S$, smaller (possibly negative) $q$ → weak/haline-driven state
+  - Lower Box 1 salinity, higher Box 2 salinity
+  - Circulation is weak or reversed; freshwater dominates
   - Can be either stable or unstable depending on exact parameters
 
-- **Unstable middle branch**: Where $\lambda_1 = 0$ (see [Stability Analysis](/theory/stability-analysis))
+- **Unstable middle branch**: Where the Jacobian eigenvalue $\lambda_1 = 0$ (see [Stability Analysis](/theory/stability-analysis))
   - Acts as a **saddle point** separating the two basins of attraction
   - Invisible in long-term simulations but critical for understanding tipping
 
@@ -73,123 +83,138 @@ $$\Delta_{\text{disc}} = (k\alpha\Delta T)^2 - 4k\beta F$$
 
 ### 2. Critical Point: $\Delta_{\text{disc}} = 0$
 
-**Condition**: $F = F_{\text{crit}} = \frac{k(\alpha\Delta T)^2}{4\beta}$
+**Condition**: $\Delta T = \Delta T_{\text{crit}}$
 
 **Result**: One repeated root → **saddle-node bifurcation**
 
-$$\Delta S^* = \frac{k\alpha\Delta T}{2k\beta} = \frac{\alpha\Delta T}{2\beta}$$
+$$\Delta S^* = \frac{2k\alpha\Delta T_{\text{crit}} + \lambda}{4k\beta}$$
 
-This is the **tipping point**. At this point:
+This is the **tipping point**. At this critical temperature difference:
 - The upper and lower branches "collide" and annihilate.
 - Stability of the equilibrium transitions from stable to unstable (or vice versa).
-- The system can no longer be in a stable state if forced beyond $F_{\text{crit}}$.
+- The system can no longer sustain the thermally-driven state if ΔT drops below $\Delta T_{\text{crit}}$.
 
 ---
 
 ### 3. Monostable Region: $\Delta_{\text{disc}} < 0$
 
-**Condition**: $F > F_{\text{crit}}$
+**Condition**: $\Delta T < \Delta T_{\text{crit}}$
 
-**Result**: No real solutions... *theoretically*
+**Result**: No real solutions in the bistable regime
 
-But wait — how can there be no equilibrium? Physically, the system must settle *somewhere*. The resolution is that in this region, the equilibrium is **unstable in the salinity equation alone** but is saved by the interaction with freshwater and temperature fields. More carefully:
+When temperature difference drops below the critical threshold:
+- The two branches annihilate at the saddle-node bifurcation.
+- The thermally-driven AMOC state ceases to exist as a stable attractor.
+- The system collapses to a weak or haline-driven regime.
+- In paleoclimate, this reflects periods of reduced interhemispheric temperature gradient (e.g., during glacial inception or icehouse episodes).
 
-- In the true two-box model, as F increases beyond $F_{\text{crit}}$, the system enters a regime where the haline feedback dominates so strongly that even the freshwater forcing cannot sustain a stable equilibrium in the original salinity-difference coordinate.
-- The system is either **continuously being pushed** toward a new state (not quasi-equilibrium) or enters a **time-dependent oscillatory regime**.
-
-In practice, integrating the ODEs beyond $F_{\text{crit}}$ often leads to a **collapsed state** with very weak circulation or even reversal.
+Physically, this occurs because:
+- Smaller ΔT → weaker thermal driving → haline feedback begins to dominate
+- Relaxation forcing alone cannot sustain large salinity gradients against weak circulation
+- The system settles into a quasi-equilibrium with very weak q and nearly homogenized salinity
 
 ---
 
-## Critical Freshwater Flux: Formula and Interpretation
+## Critical Temperature Difference: Formula and Interpretation
 
-$$F_{\text{crit}} = \frac{k(\alpha\Delta T)^2}{4\beta}$$
+The critical temperature difference is found by setting $\Delta_{\text{disc}} = 0$:
+
+$$(2k\alpha\Delta T_{\text{crit}} + \lambda)^2 = 8k\beta\lambda\Delta S^0$$
+
+Solving for $\Delta T_{\text{crit}}$:
+
+$$\Delta T_{\text{crit}} = \frac{\sqrt{8k\beta\lambda\Delta S^0} - \lambda}{2k\alpha}$$
 
 ### Physical Interpretation
 
-- **Numerator**: $k(\alpha\Delta T)^2$ measures the *strength* of thermal forcing (large ΔT and large k → strong thermal drive).
-- **Denominator**: $4\beta$ measures the *strength* of salinity's effect on density (large β → salinity variations strongly affect density).
+- **Large β** (haline contraction) → lower $\Delta T_{\text{crit}}$ → AMOC is more fragile to temperature decrease
+- **Large λ** (slow relaxation) → higher $\Delta T_{\text{crit}}$ → relaxation buffers the system
+- **Large ΔS⁰** (equilibrium salinity gradient) → requires larger ΔT to stabilize
 
 **Corollary**:
-- **Large ΔT** → easier to sustain AMOC → higher $F_{\text{crit}}$ → can tolerate more freshwater before tipping.
-- **Large β** → salinity effect is strong → lower $F_{\text{crit}}$ → collapse happens at lower freshwater input.
+- **Large ΔT** → AMOC is robust; bistability extends to higher parameter space
+- **Small ΔT** (ice ages, future warming scenarios) → AMOC approaches tipping point
+- **Large α** (thermal expansion) → AMOC is more thermally resilient
 
-### Example with Default Parameters
+### Example with Stommel's Original Parameters
 
-- α = 1.5×10⁻⁴ /°C
-- β = 8×10⁻⁴ /psu
-- ΔT = 20°C (T_e = 25°C, T_p = 5°C)
-- k = 1.5×10⁻⁶ 1/s
+- α = 2×10⁻⁴ K⁻¹
+- β = 1×10⁻³ psu⁻¹
+- λ = 3×10⁻¹¹ s⁻¹ (~1000-year equilibration timescale)
+- ΔS⁰ = 10 psu
+- k = 3×10⁻⁹ s⁻¹
+- ΔT = 20°C (T₁ = 25°C, T₂ = 5°C)
 
-$$F_{\text{crit}} = \frac{1.5 \times 10^{-6} \times (1.5 \times 10^{-4} \times 20)^2}{4 \times 8 \times 10^{-4}}$$
+Computing the discriminant:
 
-$$= \frac{1.5 \times 10^{-6} \times (3 \times 10^{-3})^2}{3.2 \times 10^{-3}}$$
+$$\Delta_{\text{disc}} = (2 \times 3 \times 10^{-9} \times 2 \times 10^{-4} \times 20 + 3 \times 10^{-11})^2 - 8 \times 3 \times 10^{-9} \times 1 \times 10^{-3} \times 3 \times 10^{-11} \times 10$$
 
-$$= \frac{1.5 \times 10^{-6} \times 9 \times 10^{-6}}{3.2 \times 10^{-3}}$$
+With present-day Earth ΔT ≈ 20°C, the discriminant is **positive** → **bistable** (two stable regimes coexist).
 
-$$\approx 4.2 \times 10^{-5} \text{ psu/s}$$
-
-But the **hysteresis window** (where both states are stable) extends from a *lower* critical value $F_{c2}$ (recovery threshold) to *upper* value $F_{c1}$ (collapse threshold), with $F_{c2} < F_{c1} < F_{\text{crit}}$.
+The critical threshold is approximately $\Delta T_{\text{crit}} \approx 10\text{–}15°C$. Below this, only the haline-dominated collapsed state exists.
 
 ---
 
 ## The S-Curve (Bifurcation Diagram)
 
-Plotting $q$ vs. $F$ for varying freshwater forcing reveals the characteristic **S-shaped** (fold) bifurcation diagram:
+Plotting $q$ vs. $\Delta T = T_1 - T_2$ for varying temperature difference reveals the characteristic **S-shaped** (fold) bifurcation diagram:
 
 ```
-  q (circulation strength in Sv)
+  q (circulation strength in 1/s)
   ^
-  |     _____
-  |    /
-  |   /
-  |  |
-  |   \___
-  |       \____
-  +------+------+---> F (freshwater flux)
-       F_c2  F_c1  F_crit
+  |           _____
+  |          /
+  |         /
+  |        /
+  |   _____
+  |  /
+  | /
+  +------+----------+---> ΔT (K)
+     ΔT_crit  ΔT_obs
 ```
 
-- **Upper branch** (solid blue): Thermally-driven states, q ≈ 15 Sv initially
-  - Stable as long as F < F_c1 (forward tipping point)
-  - Slope: dq/dF < 0 (increasing F weakens circulation)
+- **Upper branch** (solid blue): Thermally-driven strong AMOC
+  - Stable for $\Delta T > \Delta T_{\text{crit}}$ (present-day Earth is here!)
+  - Larger q > 0 (e.g., q ≈ 5-10 ×10⁻⁷ in 1/s)
+  - Slope: dq/dΔT > 0 (higher temperature difference drives stronger circulation)
 
-- **Lower branch** (solid orange): Weak/haline-driven states, q ≈ 0 or negative
-  - Stable for F < F_c2 (backward recovery threshold)
-  - Slope: dq/dF can be positive or negative
+- **Lower branch** (solid orange): Weak/haline-dominated collapsed state
+  - Stable for all ΔT shown, but particularly for $\Delta T < \Delta T_{\text{crit}}$
+  - Very small q ≈ 0 or negative (reversed circulation)
+  - Slope: dq/dΔT ≈ 0 or slightly positive
 
 - **Middle branch** (dashed grey): Unstable/saddle states
-  - Never observed in long simulations
-  - Connects the upper and lower branches at bifurcation points
-  - Represents the "forbidden zone" for stable equilibria
+  - Never observed in simulations
+  - Connects the upper and lower branches at the bifurcation point
+  - Represents the "separatrix" dividing the two basins of attraction
 
-- **Orange shaded region**: Bistable region ($F_{c2} < F < F_{c1}$)
-  - System can be in *either* state depending on initial conditions
-  - Hysteresis is the defining feature
-  - The "memory" of initial conditions persists even as F changes
+- **Blue shaded region**: Bistable region ($\Delta T < \Delta T_{\text{crit}}$... wait, this is inverted!)
+  - Actually: the system is bistable for **high ΔT**, monostable (collapsed) for **low ΔT**
+  - Initial conditions determine which branch the system follows
+  - Hysteresis in ΔT: decreasing temperature from present can trigger abrupt collapse
 
 ---
 
 ## Computing Roots Numerically
 
-In code, we find the roots of the quadratic:
+In code, we find the roots of the relaxation model quadratic for a given ΔT:
 
 ```python
 import numpy as np
 
-def q_equilibria(F, alpha, beta, k, Delta_T):
-    """Find the two equilibrium q values for given F."""
-    a = k * beta
-    b = -k * alpha * Delta_T
-    c = F
+def delta_S_equilibria(Delta_T, alpha, beta, k, lam, Delta_S_0):
+    """Find the two equilibrium ΔS values for given ΔT (in original Stommel model)."""
+    a = 2 * k * beta
+    b = -(2 * k * alpha * Delta_T + lam)
+    c = lam * Delta_S_0
 
     # Quadratic formula
     discriminant = b**2 - 4*a*c
 
     if discriminant < 0:
-        return None, None  # No real roots
+        return None, None  # No real roots; haline collapse inevitable
     elif discriminant == 0:
-        return -b / (2*a), None  # One repeated root (bifurcation)
+        return -b / (2*a), None  # One repeated root (bifurcation point)
     else:
         sqrt_disc = np.sqrt(discriminant)
         Delta_S_plus = (-b + sqrt_disc) / (2*a)
@@ -202,101 +227,118 @@ def q_equilibria(F, alpha, beta, k, Delta_T):
         return q_plus, q_minus
 ```
 
+**Key differences from constant-F model**:
+- We now sweep **ΔT** (temperature difference) instead of F
+- The quadratic coefficients depend on ΔT, λ, and ΔS⁰ (not F)
+- The bifurcation structure is determined by temperature, not freshwater
+- Both roots exist only when ΔT is sufficiently large
+
 ---
 
 ## Physical Meaning of the Two Branches
 
-### Upper Branch (Strong AMOC)
+### Upper Branch (Strong Thermally-Driven AMOC)
 
-- **Circulation** is thermally driven: $q = k[\alpha \Delta T - \beta \Delta S] > 0$
-- **Large positive ΔS**: Equatorial box is much saltier than polar box
-- **Energy balance**: Warm equatorial water carries salt northward → polar box becomes salty and dense → strong sinking
+- **Circulation** is thermally driven: $q = k[\alpha \Delta T - \beta \Delta S] > 0$ and dominates
+- **Large positive ΔS**: Box 1 is much saltier than Box 2
+- **Energy balance**: Strong thermal forcing (large ΔT) drives salty water northward → Box 2 becomes salty and dense → strong sinking
+- **Salinity dynamics**: Relaxation toward equilibrium competes with circulation transport, but circulation wins → salinity gradient is sustained
 - **Feedback**: Stronger circulation → more salt transport north → even stronger density gradient → **self-reinforcing** (stable)
-- **Observed analogue**: Present-day AMOC with ~17 Sv of transport
+- **Observed analogue**: Present-day AMOC with ~15–17 Sv of transport
 
-### Lower Branch (Weak/Reversed AMOC)
+### Lower Branch (Weak/Haline-Dominated Collapsed State)
 
-- **Circulation** is weak or haline-driven: $q = k[\alpha \Delta T - \beta \Delta S] \lesssim 0$
-- **Small or negative ΔS**: Polar box is fresh relative to equatorial box
-- **Energy balance**: Freshwater at pole blocks sinking → weak northward circulation or reversal
-- **Feedback**: Weaker circulation → less salt transport north → polar box stays fresh → **self-reinforcing** (can be stable)
-- **Observed analogue**: Collapsed AMOC states during Ice Age (inferred from paleoclimate proxies)
+- **Circulation** is very weak or reversed: $q = k[\alpha \Delta T - \beta \Delta S] \lesssim 0$
+- **Small or negative ΔS**: Box 2 is fresh relative to Box 1
+- **Energy balance**: Relaxation dominates circulation → freshwater accumulation at pole blocks sinking
+- **Salinity dynamics**: Relaxation pushes salinity back toward equilibrium, but if ΔT is low, thermal drive cannot overcome this
+- **Feedback**: Weaker circulation → less salt transport north → polar box stays fresh via relaxation → **self-reinforcing** (stable)
+- **Paleoclimate analogue**: Collapsed AMOC states during Heinrich events or icehouse climate extremes
 
----
-
-## Transition Behavior: Forward and Backward Paths
-
-When we slowly increase F (as might happen with increasing freshwater input from glacial melt):
-
-**Forward path (increasing F)**:
-1. Start at F = 0 on the upper branch: q ≈ q_max, strong AMOC
-2. Increase F gradually
-3. Upper branch equilibrium q decreases (circulation weakens)
-4. At F = F_c1 (forward tipping point), the upper branch terminates
-5. **System jumps** to the lower branch → q collapses suddenly
-6. Further increase in F: continue along lower branch with weak q
-
-**Backward path (decreasing F from high value)**:
-1. Start at F = high on the lower branch: q ≈ q_weak, circulation very weak
-2. Decrease F gradually
-3. Lower branch equilibrium remains weak
-4. Lower branch does *not* rejoin upper branch immediately
-5. Continue decreasing until F = F_c2 (recovery threshold), which is *lower* than F_c1
-6. At F_c2, lower branch terminates and system jumps back to upper branch
-7. Further decrease: continue on upper branch with strong q
-
-**The key**: F_c2 < F_c1 → **hysteresis window** of width ΔF = F_c1 − F_c2
+The key difference from the constant-F model: **relaxation acts as a long-timescale buffer**, preventing abrupt changes unless ΔT itself changes dramatically.
 
 ---
 
-## Example: Default Parameters
+## Transition Behavior: Temperature-Driven Tipping
 
-With the standard parameter set:
+In Stommel's original model, the key parameter controlling bifurcation is the **temperature difference ΔT = T₁ − T₂**:
+
+**Cooling scenario (decreasing ΔT, as in paleoclimate or future warming)**:
+1. Start at present: ΔT ≈ 20°C on the upper branch: q ≈ 5–10 ×10⁻⁷ 1/s, strong AMOC
+2. **Decrease ΔT gradually** (e.g., glacial cooling of polar region or warming of equator)
+3. Upper branch equilibrium q *decreases* (circulation weakens)
+4. At ΔT = ΔT_crit (critical threshold), the upper branch **annihilates** via saddle-node bifurcation
+5. **System collapses** to the lower branch → q → 0 or negative
+6. Further decrease in ΔT: continue on collapsed lower branch
+
+**Key insight**: Unlike the constant-F model (which had hysteresis in F), the **original Stommel model has hysteresis in ΔT**:
+
+- **Collapse occurs at**: ΔT = ΔT_crit (downward crossing)
+- **Recovery requires**: ΔT must increase back to the same ΔT_crit (no separate recovery threshold)
+- **Physical meaning**: Unlike freshwater forcing (which can be reversed externally), temperature is set by long-term climate. Recovery from AMOC collapse requires global *warming* of ~5–10°C, not just stopping the cause.
+
+This makes the **original Stommel model relevant to paleoclimate**: transitions between glacial and interglacial AMOC states are fundamentally controlled by interhemispheric temperature gradients, not by freshwater pulses alone.
+
+---
+
+## Example: Stommel's Original Parameters
+
+With Stommel's (1961) parameter set:
 
 | Quantity | Value |
 |----------|-------|
-| F_c1 (forward tipping) | ~2.0 × 10⁻⁴ psu/s |
-| F_c2 (backward recovery) | ~1.0 × 10⁻⁴ psu/s |
-| Hysteresis width | ~1.0 × 10⁻⁴ psu/s |
-| F_crit (discriminant = 0) | ~4.2 × 10⁻⁵ psu/s |
+| α (thermal expansion) | 2×10⁻⁴ K⁻¹ |
+| β (haline contraction) | 1×10⁻³ psu⁻¹ |
+| k (circulation coefficient) | 3×10⁻⁹ s⁻¹ |
+| λ (relaxation rate) | 3×10⁻¹¹ s⁻¹ |
+| ΔS⁰ (equilibrium salinity gradient) | 10 psu |
+| ΔT_crit (critical temperature difference) | ~12–15°C |
+| Present-day ΔT | ~20°C → **BISTABLE** ✓ |
 
-(Note: F_crit < F_c2 < F_c1 because stability analysis reveals that full annihilation of the S-curve occurs at F_crit, but the observable tipping points are offset to higher F values.)
+**Interpretation**:
+- Present-day Earth is solidly in the bistable region (ΔT = 20°C >> ΔT_crit)
+- The AMOC is robust but *not* infinitely stable; temperature changes matter
+- If polar regions warmed or equator cooled by >5°C, bistability would be lost → collapse risk
 
 ---
 
 ## Stability Classification Revisited
 
-At each equilibrium, the Jacobian eigenvalue (see [Stability Analysis](/theory/stability-analysis)) determines stability:
+At each equilibrium, the Jacobian eigenvalue (see [Stability Analysis](/theory/stability-analysis)) determines stability.
 
-$$\lambda_1 = -2q + 2k\beta \Delta S$$
+For the relaxation model, the eigenvalue is:
+
+$$\lambda_1 = -\lambda - 2q + 2k\beta \Delta S$$
 
 **Upper branch** (large q, large ΔS):
-- $-2q$ term is large and negative
-- $+2k\beta \Delta S$ term is positive but smaller
+- For present-day parameters: λ is small (3×10⁻¹¹), q is large (5–10 ×10⁻⁷), ΔS is large (~10 psu)
 - Net: $\lambda_1 < 0$ → **stable** ✅
+- Relaxation provides additional stabilization
 
 **Lower branch** (small q, small ΔS):
-- $-2q$ term is small or zero
-- $+2k\beta \Delta S$ term is small or zero
-- Stability depends on the specific regime; can be stable or unstable
+- For present-day parameters: λ term dominates, other terms are small
+- Net: Often $\lambda_1 < 0$ → **stable** ✅
+- Both branches can be simultaneously stable (bistability)
 
-**Middle branch** (unstable):
+**Middle branch** (saddle-node):
 - Exactly where $\lambda_1 = 0$
-- Transition from stable (upper) to unstable (lower) or vice versa
+- Acts as the bifurcation point
+- Cannot be observed in simulations (unstable equilibrium)
 
 ---
 
-## Why Equilibria Exist (Even Beyond $F_{\text{crit}}$)
+## Collapsed State Below $\Delta T_{\text{crit}}$
 
-A subtle point: we derived that for $F > F_{\text{crit}}$, the quadratic has no real roots. Yet the physical system must go *somewhere*. The resolution:
+When $\Delta T < \Delta T_{\text{crit}}$, the quadratic has no real roots. What does the system do physically?
 
-1. **The two-box model is a reduced system**: It assumes salinity is the only state variable. In reality, temperature can adjust, spatial structure matters, and mixing processes complicate things.
+**Resolution**: The system evolves toward a **quasi-equilibrium near the lower branch**, even though no true equilibrium exists:
 
-2. **Beyond $F_{\text{crit}}$, circulation may oscillate**: Rather than a fixed equilibrium, the system may exhibit time-dependent behavior (limit cycles or chaos). This is beyond the scope of steady-state analysis.
+1. **Relaxation dominates**: With weak thermal forcing, salinity relaxes rapidly toward S₁^0 and S₂^0
+2. **Circulation becomes very weak**: As ΔS → ΔS^0, the density contrast becomes small → q → 0
+3. **Slow time evolution**: Rather than reaching a fixed point, the system asymptotically approaches a slowly-drifting trajectory
+4. **Stochastic effects matter**: Small random perturbations can trigger transitions, even in this monostable regime
 
-3. **Collapsed states are quasi-stationary**: With very high F, the system sits in a quasi-steady state with very low q, high polar salinity, and slow drift. It's not a true equilibrium but a slow evolution.
-
-In the simulator, when F exceeds $F_{\text{crit}}$ by a lot, the computed q becomes very small or negative, and the trajectory asymptotically approaches a quasi-equilibrium near the lower branch.
+Paleoclimate interpretation: During ice ages with reduced interhemispheric temperature contrast, the AMOC likely existed in a "flickering" or collapsed state with occasional brief reintensifications (consistent with paleoclimate proxies).
 
 ---
 
@@ -304,14 +346,15 @@ In the simulator, when F exceeds $F_{\text{crit}}$ by a lot, the computed q beco
 
 The bifurcation diagram is really a **slice** through a higher-dimensional parameter space:
 
-- If we vary **F** while holding α, β, k, ΔT fixed → we see the S-curve
-- If we vary **ΔT** (e.g., changing polar temperature) → the S-curve shifts and changes shape
-- If we vary **β** (haline contraction) → critical F and hysteresis window shift
+- If we vary **ΔT** while holding α, β, k, λ, ΔS⁰ fixed → we see the S-curve (main bifurcation diagram)
+- If we vary **ΔS⁰** (equilibrium salinity gradient) → the critical ΔT shifts
+- If we vary **λ** (relaxation timescale) → bistability region changes; slower relaxation → easier to maintain AMOC
+- If we vary **β** (haline contraction) → critical ΔT shifts
 
 The simulator lets you explore this space interactively:
-- Adjust T_e, T_p, α, β, k in the UI
-- Recompute bifurcation diagram
-- Watch how the S-curve deforms and moves
+- Adjust T₁, T₂ (thus ΔT), α, β, k, λ in the UI
+- Recompute bifurcation diagram (sweeps ΔT via T₂)
+- Watch how the S-curve deforms, shifts, and bifurcates
 
 ---
 

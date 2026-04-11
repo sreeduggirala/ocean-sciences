@@ -58,23 +58,34 @@ The Atlantic Meridional Overturning Circulation carries approximately **1.3 peta
 
 ## The Core Physics
 
-At the heart of the simulator lies one deceptively simple equation: the **circulation strength driven by density gradients**.
+At the heart of the simulator lies **Stommel's (1961) two-box model** with relaxation-toward-equilibrium freshwater forcing. The circulation strength is driven by density gradients:
 
-$$q = k[\alpha(T_e - T_p) - \beta(S_e - S_p)]$$
+$$q = k[\alpha(\Delta T) - \beta(\Delta S)]$$
 
-Where:
-- **q**: circulation strength (positive = northward, thermally driven AMOC-like flow)
-- **T_e, T_p**: equatorial and polar temperatures (fixed; represent fast atmospheric scales)
-- **S_e, S_p**: equatorial and polar salinity (evolve slowly; the model's state variables)
-- **α ≈ 1.5 × 10⁻⁴ /°C**: thermal expansion coefficient
-- **β ≈ 8 × 10⁻⁴ /psu**: haline contraction coefficient
-- **k ≈ 1.5 × 10⁻⁶ 1/s**: circulation efficiency constant
+where $\Delta T = T_1 - T_2$ and $\Delta S = S_1 - S_2$.
 
-The equation captures two competing feedbacks:
+**Circulation equation:**
+- **q**: circulation strength (positive = northward, thermally driven AMOC; negative = reversed)
+- **T₁, T₂**: Box 1 (equatorial) and Box 2 (polar) temperatures (fixed)
+- **S₁, S₂**: Box 1 and Box 2 salinity (evolve via relaxation + transport)
+- **α ≈ 2 × 10⁻⁴ /°C**: thermal expansion coefficient (Stommel original)
+- **β ≈ 1 × 10⁻³ /psu**: haline contraction coefficient (Stommel original)
+- **k ≈ 3 × 10⁻⁹ 1/s**: circulation efficiency constant (Stommel original)
 
-1. **Thermal feedback** (positive, stabilizing): Warm equatorial water is less dense, driving a northward surface flow that transports heat and salt to the pole — a self-reinforcing circulation.
+**Relaxation forcing (original Stommel model):**
+$$H_i = -\lambda(S_i - S_i^0)$$
 
-2. **Haline feedback** (negative, destabilizing): Freshwater input at the pole reduces salinity and density, weakening the sinking that sustains the circulation. The weaker circulation transports less salt northward, making the pole fresher still — a positive feedback that can flip the system entirely.
+where **λ ≈ 3 × 10⁻¹¹ /s** is the relaxation rate (~1000-year equilibration timescale) and **S₁⁰, S₂⁰** are equilibrium salinities.
+
+**Governing equations:**
+$$\frac{dS_1}{dt} = -\lambda(S_1 - S_1^0) + q(S_2 - S_1)$$
+$$\frac{dS_2}{dt} = -\lambda(S_2 - S_2^0) + q(S_1 - S_2)$$
+
+**Two competing feedbacks:**
+
+1. **Thermal feedback** (stabilizing): Larger temperature difference (ΔT) drives stronger density gradients and circulation. Thermally-driven flow transports salt northward, reinforcing the circulation.
+
+2. **Haline feedback** (destabilizing when dominant): Freshwater input weakens salinity gradients. The weaker circulation transports less salt poleward, allowing freshwater to accumulate—a runaway positive feedback that can trigger sudden collapse.
 
 ---
 

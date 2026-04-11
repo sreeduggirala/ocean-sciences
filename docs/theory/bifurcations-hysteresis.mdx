@@ -7,313 +7,415 @@ description: Saddle-node bifurcations, catastrophic transitions, and irreversibi
 
 ## Bifurcation: A Change in System Behavior
 
-A **bifurcation** occurs when the number or stability of equilibria changes as a parameter varies. In the Stommel model, as freshwater forcing **F** increases, the system undergoes a **saddle-node (fold) bifurcation** — the defining feature of tipping points and hysteresis.
+A **bifurcation** occurs when the number or stability of equilibria changes as a parameter varies. In the **original Stommel model with relaxation forcing**, the key bifurcation parameter is the **temperature difference ΔT = T₁ − T₂**. As ΔT *decreases* (due to cooling of polar regions or warming of the equator), the system undergoes a **saddle-node (fold) bifurcation** — the defining feature of tipping points in thermohaline circulation.
 
 ---
 
 ## The S-Curve and Fold Bifurcation
 
-When we plot the equilibrium circulation strength **q** against the bifurcation parameter **F**, we get the characteristic **S-shaped curve**:
+When we plot the equilibrium circulation strength **q** against the **temperature difference ΔT**, we get the characteristic **S-shaped curve**:
 
 ```
-q (circulation strength, Sv)
+q (circulation strength, 1/s)
  ^
- |    ______ (upper branch, stable AMOC)
- |   /
- |  |        (middle branch, unstable)
- |   \_____
- |         \______ (lower branch, weak/collapsed)
- |
- +-------+-------+------+-----> F (freshwater flux)
-      F_c2    F_c1   F_crit
-         ↑       ↑
-      (backward) (forward)
-      recovery   collapse
-        point    point
+ |            _______ (upper branch, stable AMOC)
+ |           /
+ |          /
+ |  RED •  / (bifurcation point at ΔT_crit)
+ |   _____
+ |  /
+ | /
+ +------+----------+---> ΔT (K)
+     ΔT_crit   ΔT_obs
+    (collapse) (today)
+
+    (lower branch, stable collapsed state, always present)
 ```
 
 ### Three Regimes
 
-1. **For F < F_c2** (low freshwater):
-   - Only one stable equilibrium: the upper branch (strong AMOC)
-   - System stays in strong state
-
-2. **For F_c2 < F < F_c1** (intermediate, bistable regime):
+1. **For ΔT > ΔT_crit** (large temperature difference, like present-day):
    - **TWO** stable equilibria coexist (upper and lower branches)
-   - **Hysteresis region**: Which state you're in depends on history
-   - An unstable middle branch separates the two basins of attraction
+   - Upper branch: strong thermally-driven AMOC
+   - Lower branch: weak haline-dominated collapsed state
+   - **Bistable region**: Which state you're in depends on paleoclimate history
+   - An unstable saddle-node (middle branch) separates the two basins
 
-3. **For F > F_c1** (high freshwater):
+2. **For ΔT = ΔT_crit** (critical temperature):
+   - One equilibrium at the saddle-node bifurcation
+   - Marginal stability; critical slowing down
+
+3. **For ΔT < ΔT_crit** (small temperature difference, glacial-like):
    - Only one stable equilibrium: the lower branch (weak/collapsed AMOC)
-   - System must collapse; no stable strong state exists
+   - Upper branch no longer exists
+   - System is forced into collapsed state
 
 ---
 
-## Forward Tipping: Collapse
+## Forward Tipping: Collapse (ΔT Decreases)
 
-**Scenario**: Gradually increase freshwater forcing (e.g., Greenland melt).
+**Scenario**: Gradually decrease temperature difference ΔT (e.g., polar amplification, tropical warming, or ice age onset).
 
 **Dynamics**:
 
 1. **Initial state**: System is on the upper (strong AMOC) branch
-   - q ≈ 15 Sv (strong northward circulation)
+   - q ≈ 5-10 × 10⁻⁷ (1/s) [~15–20 Sv in realistic units]
+   - ΔT ≈ 20°C (present-day Earth)
 
-2. **Slow increase of F**:
+2. **Slow decrease of ΔT** (e.g., polar region cooling faster than equator, or equatorial warming):
    - Equilibrium moves along the upper branch toward the fold
    - q decreases gradually (circulation weakens)
-   - But the system remains stable; perturbations decay
+   - System remains stable; perturbations decay
 
-3. **Approaching F_c1** (forward tipping point):
+3. **Approaching ΔT_crit** (critical temperature difference):
    - Equilibrium q approaches the fold point
-   - Stability eigenvalue λ₂ → 0⁻ (marginal stability)
-   - System becomes increasingly "fragile": recovery from perturbations is slow
+   - Stability eigenvalue $\mu_1 = -2\lambda - 2k\beta(\Delta S)^* \to 0^-$ (marginal stability)
+   - System becomes increasingly "fragile": critical slowing down
+   - Recovery from perturbations becomes very slow (~centuries)
 
-4. **F exceeds F_c1**:
+4. **ΔT drops below ΔT_crit**:
    - Upper branch equilibrium no longer exists
    - The fold has been crossed
    - System **cannot stay** on upper branch
 
 5. **Collapse**:
    - Trajectory jumps discontinuously from upper branch to lower branch
-   - q drops rapidly from ~15 Sv to near 0 (or reverses)
-   - This is the **tipping event**: a sudden, catastrophic transition
+   - q drops rapidly toward 0 or reverses sign
+   - **This is the tipping event**: a sudden, catastrophic transition
+   - Happens on timescales of ~50–500 years depending on system parameters
 
 6. **Post-collapse state**:
-   - Now on the lower (weak/reversed) branch
-   - q ≈ 0–5 Sv or even negative
-   - Polar box becomes fresher (less salty) due to weak northward salt transport
+   - Now on the lower (weak/reversed) branch with ΔT < ΔT_crit
+   - q ≈ 0 or negative (weak or reversed circulation)
+   - Polar box becomes fresh; equatorial box becomes salty
+   - Heat transport to high latitudes drops → rapid cooling over decades
 
-### Key Feature: Irreversibility Forward Path Cannot Be Retraced
+### Key Feature: Irreversibility—Temperature Cannot Be Easily Reversed
 
-Once you've tipped, simply **reversing** the forcing does not restore the original state — this is hysteresis.
+Once you've tipped, simply **increasing ΔT back** to its original value does NOT restore the original state. This is the essence of **hysteresis**. Because ΔT is set by long-term climate (not easily reversed), recovery requires sustained warming to increase ΔT above ΔT_crit again.
 
 ---
 
-## Backward Recovery: The Hysteresis Loop
+## Backward Recovery: Temperature Must Rise to Escape Collapse
 
-**Scenario**: After collapse, gradually *reduce* freshwater forcing.
+**Scenario**: After collapse (system now on lower branch with ΔT < ΔT_crit), gradually *increase* ΔT (e.g., global warming).
 
 **Dynamics**:
 
-1. **Start on lower branch** with high F (post-collapse):
+1. **Start on lower branch** with ΔT < ΔT_crit (post-collapse):
    - q is weak or reversed
+   - System is trapped in collapsed state
 
-2. **Decrease F slowly**:
-   - Equilibrium moves along the lower branch
+2. **Increase ΔT slowly**:
+   - Equilibrium moves along the lower branch (both branches don't exist yet)
    - q remains weak; the system does not spontaneously recover
-   - The upper branch does not reappear yet
+   - Upper branch does not reappear until ΔT reaches ΔT_crit again
 
-3. **Continue decreasing F** past the original collapse point F_c1:
-   - Still no recovery! The lower branch is still stable
-   - The system "remembers" its collapsed state
+3. **Continue increasing ΔT** — in fact, you MUST increase ΔT all the way to **ΔT_crit** to escape:
+   - Below ΔT_crit: only lower branch exists (stable)
+   - System "remembers" its collapsed state
 
-4. **Approaching F_c2** (backward recovery threshold):
+4. **ΔT approaches ΔT_crit** (recovery threshold):
    - Lower branch equilibrium approaches its fold point
-   - Stability eigenvalue λ₂ → 0⁻ again
+   - Stability eigenvalue $\mu_1 \to 0^-$ again (critical slowing down)
 
-5. **F drops below F_c2**:
-   - Lower branch equilibrium vanishes
-   - System **cannot stay** on lower branch
+5. **ΔT increases past ΔT_crit**:
+   - Upper branch suddenly reappears
+   - System now has a choice between two stable branches
 
-6. **Recovery jump**:
-   - Trajectory jumps from lower branch back to upper branch
-   - q suddenly increases to ~15 Sv
-   - Circulation is restored
+6. **Recovery jump** (if noise or transient kicks system):
+   - Trajectory can jump from lower branch back to upper branch
+   - q suddenly increases
+   - Circulation is restored to strong state
 
-### The Hysteresis Window
+### The **No Hysteresis** Feature (Key Difference from Simplified Models)
 
-$$\text{Hysteresis width} = F_{c1} - F_{c2}$$
+**In the original Stommel model**, there is **NO hysteresis window** in the constant-temperature sense:
+- **Collapse occurs at**: ΔT_crit (when decreasing ΔT)
+- **Recovery occurs at**: ΔT_crit (when increasing ΔT back)
+- **Same threshold**: Both occur at the same ΔT
 
-Example with default parameters:
-- $F_{c1} \approx 2.0 \times 10^{-4}$ psu/s (collapse threshold)
-- $F_{c2} \approx 1.0 \times 10^{-4}$ psu/s (recovery threshold)
-- Hysteresis width ≈ $1.0 \times 10^{-4}$ psu/s
+This differs fundamentally from the **constant-F models** that show hysteresis in F (F_c1 ≠ F_c2).
 
-**Physical interpretation**: In the hysteresis window, the system "sticks" to whichever state it entered first. Reversing the cause (F) is insufficient to reverse the effect (AMOC state).
+**Physical interpretation**: In the relaxation model, the bistable region is created by the competition between thermal and haline feedbacks at fixed ΔT. As ΔT changes, the bistable region itself shifts. Recovery simply requires ΔT to return above the critical value.
+
+**Paleoclimate implication**: AMOC collapse and recovery are **not** separated by a "hysteresis gap" in temperature. Rather, they occur at the same critical ΔT threshold. This makes the model consistent with paleoclimate observations where AMOC toggling occurs during stable periods (via noise-induced transitions) or sharply during climate shifts (forced by rapid ΔT changes).
 
 ---
 
-## Why Hysteresis Matters for Climate Policy
+## Temperature Control and Tipping Risk
 
-### The Tipping Point Dilemma
+### The Critical Question: How Close Are We to ΔT_crit?
 
-If Earth's AMOC is currently in the bistable region (some evidence suggests it might be), then:
+In the original Stommel model, AMOC stability is fundamentally controlled by the **temperature difference ΔT**. Today:
 
-1. **If we reach F_c1**: AMOC will collapse even if we stabilize forcing at that level.
-2. **If we exceed F_c1 and then reduce forcing**: We must reduce all the way to F_c2 (much lower) to restore AMOC.
-3. **The cost of delay**: Every decade without reducing F increases the threshold we must overshoot to eventually recover.
+- **Present-day ΔT ≈ 20°C** (equator 25°C, polar 5°C)
+- **Estimated ΔT_crit ≈ 10–15°C** (from Stommel's parameters)
+- **Safety margin**: ~5–10°C above critical threshold
 
-### Paleoclimate Analogue: The Younger Dryas
+However, climate projections show:
+1. **Polar amplification**: High latitudes warm faster than tropics → ΔT could decrease
+2. **Equatorial convection**: Deep convection in tropics could warm faster → ΔT decreases
+3. **Risk timeline**: By 2100, some models project ΔT could drop by 2–4°C toward the critical range
 
-The **Younger Dryas** (12,900–11,700 years ago) is a dramatic example:
+### Paleoclimate Analogue: The Younger Dryas and Temperature Shifts
 
-- **Event**: After the last glaciation's warming trend, temperatures suddenly *dropped* back to near-glacial levels for ~1,200 years
-- **Suspected trigger**: Massive freshwater discharge from the melting North American ice sheet (Laurentide Ice Sheet collapse) into the Atlantic
-- **AMOC mechanism**: Freshwater input exceeded a critical threshold, collapsing the AMOC → reduced northward heat transport → rapid cooling over Europe and North Atlantic
-- **Recovery**: Gradual increase in salinity (as freshwater input ceased) allowed AMOC to recover after ~1,200 years
+The **Younger Dryas** (12,900–11,700 years ago) provides a natural laboratory:
 
-The Younger Dryas shows that:
-- **Hysteresis is real** in Earth's climate system
-- **Abrupt reversals are possible** on century timescales
-- **The ocean's memory** (in salinity structure) can trap the climate in an unfavorable state for centuries
+- **Context**: Northern Hemisphere was in rapid deglaciation (~0.5°C warming per century)
+- **Event**: Abrupt climate reversal: temperatures dropped ~5°C back toward glacial values for ~1,200 years
+- **Physical trigger**: Two factors likely converged:
+  1. Massive freshwater discharge from Laurentide Ice Sheet collapse (modified oceanic properties, especially salinity)
+  2. **Concurrent shift in ΔT**: With polar regions cooling (meltwater), the interhemispheric temperature gradient likely shifted toward smaller values
+- **AMOC collapse**: The combination of freshwater and reduced ΔT potentially crossed the bifurcation threshold
+- **Recovery**: Over centuries, freshwater input decreased and polar warming resumed → ΔT increased back above ΔT_crit → AMOC reinvigorated
+
+The Younger Dryas demonstrates:
+- **Temperature gradients matter critically**: Abrupt cooling at high latitudes is a major risk for AMOC collapse
+- **Rapid transitions are possible**: AMOC can weaken and collapse within 50–500 years
+- **Prolonged recovery**: Even after freshwater forcing reversed, AMOC took ~1,200 years to fully recover (long relaxation timescale)
 
 ---
 
 ## Bifurcation Diagram: Reading and Interpreting
 
-### Bifurcation Diagram in the Simulator
+### Bifurcation Diagram in the Simulator (ΔT Parameterization)
 
-When you click **"Compute Bifurcation"**, the simulator sweeps F from minimum to maximum in both directions:
+When you click **"Compute Bifurcation"**, the simulator sweeps **T₂ (polar temperature)** to vary **ΔT = T₁ − T₂** from maximum to minimum:
 
 ```
-Forward sweep (F increasing):
-    Start at F_min, find stable equilibria as F → F_max
-    Trace the upper branch until F_c1, then jump to lower branch
+Forward sweep (T₂ decreasing, ΔT increasing):
+    Start at T₂_max (low ΔT), find stable equilibria as T₂ → T₂_min
+    Trace the upper and lower branches as ΔT increases
+    Both branches are stable for ΔT > ΔT_crit (bistable region)
 
-Backward sweep (F decreasing):
-    Start at F_max, find stable equilibria as F → F_min
-    Trace the lower branch until F_c2, then jump to upper branch
+Backward sweep (T₂ increasing, ΔT decreasing):
+    Start at T₂_min (high ΔT), find stable equilibria as T₂ → T₂_max
+    Trace back along the same branches
+    Bifurcation occurs at ΔT_crit where branches meet (saddle-node)
 ```
 
 ### Visual Elements
 
-- **Blue upper branch**: Stable AMOC states; plotted from forward sweep
-- **Orange lower branch**: Stable weak/collapsed states; plotted from backward sweep
-- **Dashed grey middle branch**: Unstable saddle points (inferred from quadratic formula)
-- **Red diamonds**: Tipping points (F_c1 and F_c2)
-- **Orange shaded region**: Bistable (hysteresis) region
-- **Orange X marker**: Current F value (from slider); shows where you are on the diagram
+- **Blue upper branch**: Stable thermally-driven AMOC; exists for ΔT > ΔT_crit
+- **Orange lower branch**: Stable haline-dominated/collapsed state; exists for all ΔT
+- **Dashed grey middle branch** (rarely visible): Unstable saddle-node path (inferred from quadratic formula)
+- **Red diamond**: Bifurcation point where upper and lower branches meet at ΔT = ΔT_crit
+- **Blue shaded region**: Bistable region (ΔT > ΔT_crit)
+- **Blue triangle or X marker**: Current ΔT = T₁ − T₂ (from sliders); shows where you are on the diagram
 
 ### How to Use It
 
-1. **Identify hysteresis window**: Look for the gap between the forward and backward curves. The width of the gap is the hysteresis width.
-2. **Locate current state**: The orange X shows where your current F falls. Is it in the bistable region?
-3. **Estimate stability**: If you're in the monostable region (single stable branch), perturbations may not flip the system. In the bistable region, noise can tip you over.
-4. **Plan mitigation**: If F is approaching F_c1, reducing freshwater forcing becomes urgent to avoid collapse.
+1. **Find the critical point**: Locate the red diamond (bifurcation point) on the diagram. The ΔT-value at this point is ΔT_crit.
+2. **Assess safety margin**: Compare current ΔT (blue X) to ΔT_crit. If ΔT is only 5–10°C above ΔT_crit, the system is vulnerable.
+3. **Understand bistability**: For ΔT > ΔT_crit, both branches are stable. Which state AMOC occupies depends on paleoclimate history and noise.
+4. **Simulate cooling**: Decrease T₂ (increase ΔT) to move right on the diagram. Increase T₂ (decrease ΔT) to move left. Watch how the equilibrium moves along the branches.
+5. **Predict collapse risk**: As you decrease ΔT toward ΔT_crit, the upper branch weakens and approaches the bifurcation (critical slowing down). Below ΔT_crit, only the lower branch exists.
 
 ---
 
 ## Saddle-Node Bifurcation: The Mathematics
 
-A **saddle-node bifurcation** (also called a fold bifurcation) is a local bifurcation where two fixed points collide and annihilate as a parameter varies.
+A **saddle-node bifurcation** (also called a fold bifurcation) is a local bifurcation where the upper and lower branches of the equilibrium curve collide and annihilate as a parameter (ΔT) varies.
 
-### Normal Form
+### Geometry in the Stommel Model
 
-Near a saddle-node bifurcation, the dynamics can be reduced to the 1D "normal form":
+In the (ΔT, q) phase space:
+- **For ΔT > ΔT_crit**: The quadratic equilibrium equation has two real roots → two stable branches (plus an unstable middle branch)
+- **For ΔT = ΔT_crit**: The quadratic has one repeated root → one branch (saddle-node)
+- **For ΔT < ΔT_crit**: The quadratic has no real roots → no upper branch exists
 
-$$\frac{dx}{dt} = \mu + x^2$$
+The discriminant condition is:
 
-where:
-- $x$ represents the deviation of the state from the bifurcation
-- $\mu$ is the bifurcation parameter (shifted so $\mu = 0$ at the bifurcation)
+$$\Delta_{\text{disc}} = (2k\alpha\Delta T + \lambda)^2 - 8k\beta\lambda\Delta S^0 = 0$$
 
-**Behavior**:
-- For $\mu < 0$: Two equilibria exist at $x = \pm\sqrt{-\mu}$ (one stable, one unstable)
-- For $\mu = 0$: One equilibrium at $x = 0$ (saddle-node)
-- For $\mu > 0$: No equilibrium; trajectories escape to infinity
+### Normal Form Near Bifurcation
 
-This is exactly the behavior of the Stommel model's S-curve!
+Near ΔT = ΔT_crit, we can expand the equation to get:
+
+$$2k\beta (\Delta S)^2 - (2k\alpha\Delta T + \lambda)(\Delta S) + \lambda\Delta S^0 \approx 0$$
+
+The distance from bifurcation is measured by:
+
+$$\epsilon = \frac{\Delta T - \Delta T_{\text{crit}}}{\Delta T_{\text{crit}}}$$
+
+The two branch equilibria scale as:
+
+$$(\Delta S)_{\pm} \propto \sqrt{\epsilon}$$
 
 ### Stability Near Bifurcation
 
-At a saddle-node bifurcation:
-- The stable branch's eigenvalue λ₂ → 0⁻ (marginal stability)
-- Perturbation recovery time $\tau = -1/\lambda_2 \to \infty$ (critical slowing down)
+At the saddle-node bifurcation:
+- The stable branch's eigenvalue $\mu_1 \to 0^-$ (marginal stability)
+- Perturbation recovery time $\tau = -1/\mu_1 \to \infty$ (critical slowing down)
 - System becomes increasingly sluggish and sensitive to noise
+- Variance of fluctuations increases (incr autocorrelation)
 
-This is why **early-warning signals** of tipping can sometimes be detected: increased variability and autocorrelation in time series before a bifurcation.
+This is why **early-warning signals** of tipping can sometimes be detected: as ΔT approaches ΔT_crit, time series show increased variability, autocorrelation, and spectral reddening.
 
 ---
 
-## Stochastic Tipping
+## Stochastic Tipping and Noise-Induced Transitions
 
-Without noise, the deterministic forward and backward thresholds are F_c1 and F_c2. But add stochastic forcing:
+Without noise, the deterministic collapse occurs exactly at ΔT = ΔT_crit. But Earth's climate includes significant natural variability (stochastic forcing):
 
-$$\frac{dS_e}{dt} = -q(S_e - S_p) + F + \xi(t)$$
+$$\frac{dS_1}{dt} = -\lambda(S_1 - S_1^0) + q(S_2 - S_1) + \xi_1(t)$$
 
-$$\frac{dS_p}{dt} = +q(S_e - S_p) - F + \xi(t)$$
+$$\frac{dS_2}{dt} = -\lambda(S_2 - S_2^0) + q(S_1 - S_2) + \xi_2(t)$$
 
-where $\xi(t)$ is Gaussian white noise.
+where $\xi_i(t)$ represent stochastic fluctuations in salinity (due to weather, eddy variability, etc.).
 
-### Noise-Induced Transitions
+### Noise-Induced Transitions (Bistable Region)
 
-1. **Noise can trigger early tipping**: Even if F < F_c1, a large stochastic fluctuation can kick the system across the unstable manifold, causing it to escape to the lower branch.
+**In the bistable region** (ΔT > ΔT_crit, two stable branches coexist):
 
-2. **Noise can accelerate recovery**: With noise, recovery from the lower branch can occur before deterministically reaching F_c2.
+1. **Noise can trigger spontaneous transitions**: Even if ΔT is well above ΔT_crit, a large stochastic excursion can temporarily kick the system across the unstable manifold → AMOC collapses without any change in ΔT
+   - This is **spontaneous tipping** or **stochastic tipping**
+   - More likely when ΔT is close to ΔT_crit (critical slowing down makes noise more effective)
 
-3. **Mean transition time**: Depends on noise intensity and distance from the bifurcation. Very close to bifurcation, even tiny noise can cause occasional transitions.
+2. **Mean residence time in collapsed state**: Depends on noise intensity and distance from bifurcation
+   - Close to bifurcation: Even tiny noise causes occasional transitions
+   - Far from bifurcation: Transitions are rare
+
+3. **Paleoclimate application**: Dansgaard-Oeschger events (D-O) cycles during glacials may represent stochastic toggling between upper and lower branches
+
+### Noise Acceleration of Deterministic Tipping (Approaching Threshold)
+
+**Near ΔT_crit**:
+- Deterministic tipping occurs at ΔT_crit
+- Noise advances the tipping point: tipping can occur at ΔT > ΔT_crit (still above threshold)
+- Stochastic tipping time = **deterministic time + noise-shortened time**
 
 ### In the Simulator
 
 The **noise_amplitude** slider lets you:
-- Set noise = 0: See purely deterministic behavior
-- Increase noise: Watch occasional transitions appear before reaching the deterministic tipping point
-- Compare: Run the same parameters multiple times with noise; trajectories diverge, showing stochasticity
+- Set noise = 0: See purely deterministic behavior; AMOC collapses only at/below ΔT_crit
+- Increase noise: Watch spontaneous transitions appear even in the bistable region (ΔT > ΔT_crit)
+- High noise + near bifurcation: Frequent flipping between states (bistable chaos)
+- Compare: Run the same ΔT multiple times with noise enabled; some runs collapse, others don't (stochastic tipping risk)
 
-This demonstrates that the real climate system, with weather noise and natural variability, may be more fragile than deterministic models suggest.
+**Key insight**: The real climate system, with weather and natural variability, is more fragile than deterministic models predict.
 
 ---
 
-## Paleoclimate Oscillations: D-O Events
+## Paleoclimate Oscillations: Dansgaard-Oeschger (D-O) Events
 
-**Dansgaard-Oeschger (D-O) events** are rapid climate oscillations visible in Greenland ice cores during the last glaciation:
+**Dansgaard-Oeschger events** are the most prominent rapid climate oscillations recorded during the last ice age (Marine Isotope Stage 3, ~60–25 ka):
 
-- **Duration**: ~1,500–10,000 years each
-- **Temperature jump**: ~10°C warming in a few decades over Greenland
-- **Frequency**: Roughly every 1,500 years
-- **Cooling tail**: Gradual cooling back to glacial baseline after warming
+- **Duration**: ~200–2,000 years (typically ~1,500 years)
+- **Temperature jump**: ~10–15°C warming over Greenland in a few decades
+- **Characteristic profile**: Rapid warming, plateau or slow cooling, then gradual return to cool baseline
+- **Frequency**: Roughly every 1,500 years (not perfectly periodic)
+- **Spatial pattern**: Warming over North Atlantic, anti-correlated with Antarctic cold
 
-### AMOC Explanation (Stommel-Type Mechanism)
+### AMOC Explanation (Bistability + Stochasticity)
 
-Paleoceanographers propose that D-O events involve AMOC oscillations:
+In the context of the original Stommel model, D-O events can be understood as **stochastic oscillations in the bistable region**:
 
-1. **Warm mode**: AMOC is strong, carrying heat northward → Greenland warms by ~10°C relative to baseline
-2. **Transition**: Freshwater buildup (possibly from ice sheet surge) increases F
-3. **Collapse**: AMOC weakens and potentially reverses → heat transport drops → Greenland rapidly cools
-4. **Recovery**: Freshwater slowly decreases or salinity restabilizes → AMOC recovers → cycle repeats
+1. **Glacial background state**: ΔT is reduced compared to present (polar cold due to ice sheets), but may still be above ΔT_crit → bistable region
+2. **Spontaneous warm event**: Stochastic noise (weather, ocean eddies, salinity variability) kicks AMOC from lower (collapsed) branch to upper (strong) branch
+   - → AMOC suddenly strengthens → Northward heat transport increases → Greenland warms by ~10°C
+3. **Warm plateau**: AMOC sustains strong state for 200–2,000 years due to positive thermal feedback
+4. **Gradual cooling phase**: Slow salinity drift (via relaxation toward equilibrium, or ice sheet surges) weakens AMOC
+5. **Abrupt collapse**: Another stochastic fluctuation or slow parameter change triggers collapse back to lower branch
+   - → AMOC suddenly weakens → Heat transport drops → Greenland cools
+6. **Return to baseline**: System sits on collapsed lower branch for ~1,500 years until next stochastic kick
 
-This is **not quite hysteresis** in the Stommel two-box sense (which is static), but rather a **dynamic oscillation** around bistable thresholds, possibly driven by ice sheet feedbacks and stochastic variability.
+### Key Insights
+
+- **D-O events are NOT hysteresis** in the classical sense (no external parameter oscillation)
+- **D-O events ARE stochastic transitions** in a bistable system
+- **The 1,500-year periodicity** may reflect ocean relaxation timescale (~1,000 years) + stochastic forcing statistics
+- **Model predictions align with data**: Stommel-type models do produce D-O-like oscillations when noise and paleoclimate boundary conditions (reduced ΔT) are included
 
 ---
 
 ## Critical Slowing Down: An Early-Warning Signal
 
-As the system approaches a bifurcation, its response to perturbations slows:
+As ΔT approaches ΔT_crit, the system's response to perturbations slows dramatically. This **critical slowing down** is the hallmark of approaching a bifurcation.
 
-$$\tau = -\frac{1}{\lambda_2} \to \infty \text{ as } \lambda_2 \to 0$$
+### Mechanism
 
-This **critical slowing down** has consequences:
+The decay rate of perturbations is governed by the eigenvalue:
+
+$$\mu_1 = -2\lambda - 2k\beta(\Delta S)^* \to 0^- \text{ as } \Delta T \to \Delta T_{\text{crit}}$$
+
+The recovery timescale is:
+
+$$\tau = -\frac{1}{\mu_1} \to \infty \text{ as } \Delta T \to \Delta T_{\text{crit}}$$
+
+### Manifestations of Critical Slowing Down
 
 1. **Increased autocorrelation**: Time series becomes more "red" (power concentrated at low frequencies)
-2. **Increased variance**: System fluctuates more in response to noise
-3. **Slower recovery**: Perturbations take longer to decay
+   - Autocorrelation function decays more slowly
+   - Can be quantified by lag-1 autocorrelation: $\rho_1 \to 1$ near bifurcation
 
-### Observable Precursors
+2. **Increased variance**: System fluctuations amplify in response to noise
+   - Variance $\sim \sqrt{-1/\mu_1} \to \infty$
+   - Standard deviation of circulation or salinity rises
 
-In paleoclimate or observational data, we can sometimes detect:
-- Rising autocorrelation of temperature or salinity time series
-- Increasing standard deviation of fluctuations
-- Spectral shifts toward lower frequencies
+3. **Spectral reddening**: Frequency content shifts toward lower frequencies
+   - Power spectrum peaks at frequencies near $\mu_1$ (very low frequency near bifurcation)
+   - Harder to distinguish signal from noise
 
-These are the **canaries in the coal mine** — early warning that the system is approaching a bifurcation.
+### Observable Precursors in Climate Data
+
+In paleoclimate records or modern observations, we can potentially detect:
+- Rising autocorrelation of AMOC strength (if measured via proxies or models)
+- Increasing variability in Atlantic surface salinity or temperature
+- Spectral shifts toward interdecadal timescales
+- Increased occurrence of extreme events in circulation
+
+These are **early-warning signals** or **canaries in the coal mine** that the system is approaching ΔT_crit.
+
+### Detection Challenges
+
+- **Noise obscures signals**: Real climate has weather noise, making weak trends hard to detect
+- **Limited observational record**: AMOC observations (RAPID array) only ~20 years; paleoclimate resolution is coarse
+- **False alarms**: Other processes (wind-driven variability, coupled atmosphere-ocean oscillations) can mimic critical slowing down signatures
 
 ---
 
-## Can We Detect AMOC Approaching a Tipping Point?
+## Can We Detect AMOC Approaching the Critical ΔT?
 
-This is an **active research question**. Recent work:
+The key question is: **Is AMOC currently approaching ΔT_crit, or is there still a large safety margin?**
 
-- **Boers (2021)**: Analyzed Atlantic sea surface temperature anomalies and found indicators of critical slowing down, suggesting AMOC may be approaching a transition. *But*: Statistical significance is debated.
-- **RAPID-MOCHA data**: No definitive trend over 2004–2020, though decadal variations are significant.
-- **Paleoclimate**: Longer-term paleo records suggest AMOC has weakened ~15% since 1900 (Caesar et al. 2018).
+### Key Observations and Estimates
 
-### Consensus
+**Temperature gradient (the critical parameter)**:
+- **Present-day ΔT**: ~20°C (equator ~25°C, high latitude ~5°C)
+- **Estimated ΔT_crit**: ~10–15°C (from Stommel's original parameters)
+- **Safety margin**: ~5–10°C above critical threshold
 
-- AMOC is **likely** in the bistable region (theory predicts it is)
-- AMOC is **probably** weakening (observations suggest it)
-- Whether it is **near a tipping point** is uncertain (estimates range from "very unlikely this century" to "possible by 2100")
+However:
+- **Polar amplification**: Arctic warming 2–3× faster than global average → ΔT is *decreasing*
+- **Equatorial convection**: Tropical warming is also significant → net ΔT change is complex
+- **Projections by 2100**: Some models suggest ΔT could decrease by 2–4°C toward the critical range under high-warming scenarios
 
-This uncertainty underscores the importance of models like Stommel's: they help us understand the *mechanism* and *potential* for tipping, even if exact timing remains elusive.
+### Recent Evidence on AMOC Weakening
+
+- **Boers (2021)**: Atlantic sea surface temperature patterns show indicators of critical slowing down. *Statistical significance debated* by community.
+- **RAPID-MOCHA direct measurements** (2004–present): Show decadal variability; no definitive long-term trend yet (record too short).
+- **Paleoclimate consensus** (Caesar et al. 2018, Ditlevsen & Ditlevsen 2023): AMOC has weakened ~10–15% over the past ~150 years (since 1900), but mechanism is debated.
+
+### The ΔT-Based Interpretation
+
+From the Stommel model perspective:
+- AMOC is **likely in the bistable region** today (ΔT > ΔT_crit)
+- AMOC is **likely weakening** due to various causes (freshwater, heat redistribution)
+- **Tipping risk timeline**:
+  - Very unlikely this century if ΔT remains >15°C
+  - Moderate risk by 2100 if ΔT decreases to 12–15°C (low-confidence scenarios)
+  - Higher risk if polar regions cool faster (e.g., ice sheet dynamics, heat redistribution)
+
+### Paleoclimate Perspective
+
+During glacial periods (Last Glacial Maximum):
+- ΔT was smaller (~15–18°C, with polar ice cooling high latitudes relative to today)
+- AMOC was likely in a bistable or collapsed state
+- D-O events suggest frequent AMOC toggling, consistent with reduced ΔT and high stochastic tipping risk
+
+This underscores the importance of understanding **how climate change modifies ΔT**, not just how much CO₂ increases or freshwater flux changes.
 
 ---
 

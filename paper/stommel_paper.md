@@ -56,6 +56,8 @@ Recent statistical analyses (Ditlevsen & Ditlevsen, 2023; Boers, 2021) suggest t
 
 Stommel's (1961) two-box model divides the ocean into two well-mixed reservoirs: an equatorial box (subscript 1) representing warm, salty tropical waters, and a polar box (subscript 2) representing cold, fresh high-latitude waters. Each box has constant temperature T₁ and T₂ (maintained by atmospheric restoring), and the two boxes exchange water via a single overturning circulation of strength q.
 
+![Schematic of the two-box model showing equatorial and polar boxes with circulation and forcing](fig1_schematic.png)
+
 The density of seawater is approximated by a linearized equation of state:
 
 $$\rho = \rho_0 \left( 1 - \alpha T + \beta S \right)$$
@@ -235,7 +237,9 @@ where σᵢ is the noise amplitude (psu/s) and ξᵢ(t) represents independent G
 
 The Stommel model reveals that AMOC stability is fundamentally controlled by the meridional temperature difference ΔT. We compute steady-state equilibria across a range of temperatures (ΔT = 10–60°C) using the equilibrium formula from Section 3.3, with fixed ΔS₀ = 10 psu.
 
-*[Figure 2: Bifurcation Diagram (q vs ΔT)]* plots the equilibrium circulation strength against temperature difference. Two key features emerge:
+![Bifurcation Diagram showing equilibrium circulation strength vs temperature difference](fig4_bifurcation.png)
+
+The bifurcation diagram plots the equilibrium circulation strength against temperature difference. Two key features emerge:
 
 1. **Thermal (upper) branch:** For large ΔT (roughly > 30°C), the circulation is strong and stable, with q ≈ 15–20 Sv, corresponding to present-day AMOC conditions. This is the thermally-driven circulation where heat-driven density differences overcome salinity effects.
 
@@ -247,11 +251,13 @@ The bistability window—where both states coexist—spans roughly 5–10°C in 
 
 ### 5.2 Transient Dynamics and Equilibration
 
-*[Figure 3: Time Series—Relaxation to Equilibrium]* shows the evolution of salinity and circulation for a typical case. Starting from S₁ = 35 psu, S₂ = 34 psu, with ΔT = 40°C (thermal regime), the system relaxes to the thermal equilibrium over ~1000 years. The circulation q(t) rises from ~0 Sv to ~15 Sv as salinities adjust toward their equilibrium values. The slow timescale reflects the relaxation coefficient λ ≈ 3 × 10⁻¹¹ s⁻¹, corresponding to τ ~ 1000 years. This is physically meaningful: freshwater anomalies in the real ocean persist for centuries due to slow mixing and advection, and salinity equilibration occurs on similar timescales.
+![Time series showing relaxation to equilibrium with salinity and circulation evolution](fig2_timeseries_normal.png)
+
+The time series shows the evolution of salinity and circulation for a typical case. Starting from S₁ = 35 psu, S₂ = 34 psu, with ΔT = 40°C (thermal regime), the system relaxes to the thermal equilibrium over ~1000 years. The circulation q(t) rises from ~0 Sv to ~15 Sv as salinities adjust toward their equilibrium values. The slow timescale reflects the relaxation coefficient λ ≈ 3 × 10⁻¹¹ s⁻¹, corresponding to τ ~ 1000 years. This is physically meaningful: freshwater anomalies in the real ocean persist for centuries due to slow mixing and advection, and salinity equilibration occurs on similar timescales.
 
 ### 5.3 Stability and Approach to Bifurcation
 
-Near the bifurcation point, the system becomes susceptible to perturbations. *[Figure 4: Growth Rates]* shows the stability growth rate σ = -[λ + 2k(α ΔT - β ΔS*)] as a function of position on the thermal branch. As ΔT decreases toward the bifurcation:
+Near the bifurcation point, the system becomes susceptible to perturbations. The bifurcation diagram below shows the system's equilibrium structure and stability characteristics: As ΔT decreases toward the bifurcation:
 
 - Far from bifurcation (high ΔT): σ is large and negative; perturbations decay rapidly (very stable)
 - Near bifurcation (ΔT → critical): σ approaches zero; perturbations decay slowly (marginally stable)
@@ -261,20 +267,24 @@ This behavior is called "critical slowing down"—the system's response time div
 
 ### 5.4 Phase Space and Nullclines
 
-To understand the flow structure, we plot trajectories in (ΔS, q) phase space. *[Figure 5: Phase Space Portrait]* shows:
+To understand the flow structure, we plot trajectories in (ΔS, q) phase space. The phase space portrait shows:
 
 - The q-nullcline (where dq/dt = 0): This is an equilibrium curve given by the circulation formula q = k(α ΔT - β ΔS)
 - Multiple trajectories starting from different initial conditions, all converging to fixed points on or near the nullcline
 - The two branches of steady states (upper thermal, lower haline) as intersections with the dS/dt = 0 surface
 
+![Phase space portrait showing trajectory convergence and nullclines](fig3_phase_space.png)
+
 The phase space visualization makes clear that the flow is dissipative; trajectories converge to attractors and do not exhibit complex dynamics like limit cycles.
 
 ### 5.5 Model Calibration Against Observations
 
-How well does Stommel's simplified model match the real AMOC? *[Figure 6: AMOC Comparison]* compares:
+How well does Stommel's simplified model match the real AMOC? The comparison below shows the model's predictive accuracy:
 
 - **Model prediction:** Using ΔT = 40°C (difference between tropical ~25°C and polar ~5°C waters), the model yields q ≈ 15–17 Sv in the thermal regime
 - **Observed AMOC:** RAPID array mean (2004–2020) = 16.9 ± 4.2 Sv
+
+![Model AMOC strength compared to observations from the RAPID array](fig6_calibration.png)
 
 The agreement is remarkably close—within ~10%—despite the model's simplifications. This validates that the Stommel model captures the leading-order physics controlling AMOC strength. The remaining discrepancy likely reflects wind forcing (not in the model), spatial structure, and other omitted processes.
 
@@ -327,6 +337,10 @@ Despite its elegance and explanatory power, the Stommel model has significant li
 5. **No explicit meltwater:** The freshwater input is prescribed as a relaxation term. Real ice sheet discharge has geographical specificity and episodic character (Heinrich events, jökulhlaups) not captured here.
 
 Despite these limitations, Stommel's core prediction—**that AMOC bifurcates and exhibits hysteresis under freshwater forcing**—has proven remarkably robust. Comprehensive 3D ocean-atmosphere general circulation models (GCMs) consistently show bifurcations, though at different critical freshwater thresholds depending on geometry and physics included.
+
+![Comparison of normal thermally-driven AMOC versus collapsed circulation regimes](fig5_comparison.png)
+
+The figure above illustrates the stark contrast between the two regimes: in the normal state, the AMOC transports ~15 Sv and maintains northern hemisphere heat transport; in the collapsed state, the circulation weakens dramatically and heat transport reverses.
 
 ### 6.5 Relevance to Modern Climate Change and Paleoclimate
 
