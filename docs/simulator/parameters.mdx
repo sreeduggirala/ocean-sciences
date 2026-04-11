@@ -1,11 +1,11 @@
 ---
 title: Parameter Reference
-description: Complete guide to all simulator parameters with physical meaning and ranges
+description: Complete guide to all simulator parameters with physical meaning and ranges (Stommel 1961 relaxation model)
 ---
 
 # Parameter Reference
 
-This page explains every parameter in the simulator: its physical meaning, default value, range, and effect on simulations.
+This page explains every parameter in the **original Stommel (1961) two-box model with relaxation-toward-equilibrium forcing**. Its physical meaning, default value, range, and effect on simulations are detailed below.
 
 ---
 
@@ -13,14 +13,16 @@ This page explains every parameter in the simulator: its physical meaning, defau
 
 | Parameter | Symbol | Default | Units | Min | Max | Scale | Physical Meaning |
 |-----------|--------|---------|-------|-----|-----|-------|------------------|
-| Equatorial T | T_e | 25 | °C | 15 | 35 | Linear | Tropical Atlantic surface temp |
-| Polar T | T_p | 5 | °C | -2 | 15 | Linear | High-latitude surface temp |
-| Equatorial S (initial) | S_e0 | 36 | psu | 30 | 40 | Linear | Initial equatorial salinity |
-| Polar S (initial) | S_p0 | 34 | psu | 28 | 40 | Linear | Initial polar salinity |
-| Thermal expansion | α | 1.5e-4 | 1/°C | 0.5e-4 | 3e-4 | Linear | Density change per °C warming |
-| Haline contraction | β | 8e-4 | 1/psu | 2e-4 | 1.5e-3 | Linear | Density change per psu increase |
-| Circulation coeff. | k | 1.5e-6 | 1/s | 5e-8 | 1e-5 | Log | Coupling constant for q |
-| Freshwater flux | F | 1e-4 | psu/s | 0 | 5e-4 | Linear | Net freshwater input to polar box |
+| Box 1 Temperature | T₁ | 25 | °C | 15 | 35 | Linear | Equatorial surface temp |
+| Box 2 Temperature | T₂ | 5 | °C | -2 | 25 | Linear | Polar surface temp |
+| Box 1 Eq. Salinity | S₁ᵉᵍ | 36 | psu | 30 | 40 | Linear | Equatorial relaxation target |
+| Box 2 Eq. Salinity | S₂ᵉᵍ | 34 | psu | 28 | 40 | Linear | Polar relaxation target |
+| Box 1 Init. Salinity | S₁ᵢⁿⁱᵗ | 36 | psu | 30 | 40 | Linear | Initial Box 1 salinity |
+| Box 2 Init. Salinity | S₂ᵢⁿⁱᵗ | 34 | psu | 28 | 40 | Linear | Initial Box 2 salinity |
+| Thermal expansion | α | 2e-4 | 1/K | 0.5e-4 | 3e-4 | Log | Density change per °C (Stommel orig.) |
+| Haline contraction | β | 1e-3 | 1/psu | 2e-4 | 2e-3 | Log | Density change per psu (Stommel orig.) |
+| Circulation coeff. | k | 3e-9 | 1/s | 1e-10 | 1e-6 | Log | Circulation coupling (Stommel orig.) |
+| Relaxation rate | λ | 3e-11 | 1/s | 1e-12 | 1e-9 | Log | ~1000-year equilibration (Stommel orig.) |
 | Integration time | t_max | 3000 | years | 100 | 10000 | Linear | Total simulation duration |
 | Output interval | dt | 1.0 | years | 0.1 | 100 | Linear | Sampling interval (diagnostic only) |
 | Noise amplitude | σ | 0 | psu/s | 0 | 5e-5 | Linear | Gaussian noise std dev |
@@ -31,198 +33,343 @@ This page explains every parameter in the simulator: its physical meaning, defau
 
 ### Temperature Parameters
 
-#### Equatorial Temperature (T_e)
+#### Box 1 Temperature (T₁) — Equatorial
 
-**Physical Meaning**: The fixed surface temperature of the equatorial box, representing the Atlantic equatorial region (~5–20°N).
+**Physical Meaning**: The **fixed** surface temperature of Box 1 (equatorial), representing the Atlantic equatorial region (~5–20°N).
 
-**Default**: 25°C
+**Default**: 25°C (Stommel's original)
 
-**Typical Range**: 15–35°C (but realistically 20–28°C)
+**Typical Range**: 15–35°C (realistically 20–28°C)
 
-**Real-world context**: Atlantic equatorial sea surface temperature is typically 25–27°C.
+**Real-world context**: Atlantic equatorial sea surface temperature is typically 25–27°C. This is *held constant* during a simulation, representing fast atmospheric equilibration.
 
 **What it does**:
-- **Larger T_e** (e.g., 30°C): Increases thermal gradient ΔT = T_e − T_p → stronger thermal drive → AMOC is more stable and harder to tip
-- **Smaller T_e** (e.g., 18°C): Reduces ΔT → weaker thermal drive → AMOC is more fragile
+- **Larger T₁** (e.g., 30°C): Increases thermal gradient ΔT = T₁ − T₂ → stronger thermal drive → AMOC is more stable and harder to tip
+- **Smaller T₁** (e.g., 20°C): Reduces ΔT → weaker thermal drive → AMOC is more fragile → lower ΔT_crit
 
 **Effect on bifurcation diagram**:
-- Increasing T_e **shifts critical F higher** → larger freshwater forcing needed to cause tipping
-- Decreasing T_e **lowers critical F** → easier to tip
+- Increasing T₁ **raises ΔT_crit** → larger temperature difference needed before collapse
+- Decreasing T₁ **lowers ΔT_crit** → easier to trigger collapse via ΔT reduction
 
-**Validation constraint**: T_e > T_p (enforced by the model)
+**How to use**: Adjust T₁ to explore how equatorial warming affects AMOC stability.
 
-#### Polar Temperature (T_p)
+**Validation constraint**: T₁ > T₂ (enforced by the model)
 
-**Physical Meaning**: The fixed surface temperature of the polar box, representing high latitudes (>50°N in the North Atlantic).
+#### Box 2 Temperature (T₂) — Polar
 
-**Default**: 5°C
+**Physical Meaning**: The **fixed** surface temperature of Box 2 (polar), representing high latitudes (>50°N in the North Atlantic, including Nordic Seas and Labrador Sea).
 
-**Typical Range**: -2°C (near freezing/sea ice) to 15°C (unusual warm extremes)
+**Default**: 5°C (Stommel's original)
 
-**Real-world context**: Nordic Seas and Labrador Sea surface temperature ranges from -2°C (winter, with sea ice) to ~8°C (summer).
+**Typical Range**: -2°C (near freezing/sea ice) to 25°C (very warm, unrealistic)
+
+**Real-world context**: Nordic Seas/Labrador Sea surface temperature ranges from -2°C (winter, with sea ice) to ~8°C (summer). Present-day ≈ 5°C on average.
 
 **What it does**:
-- **Lower T_p** (e.g., 0°C): Increases ΔT → stronger thermal drive → AMOC more stable
-- **Higher T_p** (e.g., 10°C): Decreases ΔT → weaker thermal drive → AMOC more fragile
+- **Lower T₂** (e.g., 0°C): Increases ΔT = T₁ − T₂ → stronger thermal drive → AMOC more stable
+- **Higher T₂** (e.g., 15°C): Decreases ΔT → weaker thermal drive → AMOC more fragile → approaching collapse
 
-**Effect on bifurcation diagram**: Same as adjusting T_e in opposite direction
-- Lower T_p → higher critical F
-- Higher T_p → lower critical F
+**Effect on bifurcation diagram**:
+- Lowering T₂ → increases ΔT → raises ΔT_crit (moves away from tipping)
+- Raising T₂ → decreases ΔT → lowers ΔT_crit (approaches tipping)
 
-**Physical interpretation**: In a warming climate, polar regions warm faster than the equator (polar amplification). Higher T_p models this effect and makes tipping easier.
+**Physical interpretation**: **Polar amplification** (high-latitude warming faster than tropics) is modeled by increasing T₂ while keeping T₁ constant. This is a key climate risk: polar warming reduces ΔT and pushes AMOC toward the critical threshold.
 
-**Validation constraint**: T_p < T_e (enforced)
+**How to use**:
+- **Explore present-day**: T₁=25°C, T₂=5°C → ΔT=20°C (robust, far from tipping)
+- **Explore past glacials**: T₁=25°C, T₂=0°C → ΔT=25°C (strong AMOC)
+- **Explore future warming**: T₁=27°C, T₂=10°C → ΔT=17°C (approaching fragility)
+- **Find the tipping point**: Slowly adjust T₂ upward until ΔT ≤ ΔT_crit (use bifurcation diagram to find exact threshold)
+
+**Validation constraint**: T₂ < T₁ (enforced)
 
 ---
 
-### Salinity Parameters (Initial Conditions)
+### Salinity Parameters
 
-#### Equatorial Salinity (S_e0)
+In the **original Stommel relaxation model**, salinity evolves according to:
 
-**Physical Meaning**: The initial salinity in the equatorial box at t=0.
+$$\frac{dS_i}{dt} = -\lambda(S_i - S_i^0) + q(S_{j} - S_i)$$
 
-**Default**: 36 psu
+There are **two salinity components per box**:
+1. **Equilibrium salinity** ($S_i^0$): The relaxation target, representing long-term climatological values
+2. **Initial salinity** ($S_i^{\text{init}}$): The starting value at t=0, allowing exploration of different initial conditions
+
+#### Box 1 Equilibrium Salinity (S₁ᵉᵍ)
+
+**Physical Meaning**: The long-term equilibrium (relaxation target) salinity for Box 1 (equatorial region), set by atmospheric forcing.
+
+**Default**: 36 psu (Stommel's original)
 
 **Typical Range**: 30–40 psu (physically 35–37 psu)
 
-**Real-world context**: Atlantic equatorial surface salinity is 35–37 psu. High values can represent net evaporation zones.
+**Real-world context**: Tropical Atlantic surface salinity is typically 35–37 psu. Higher values represent net evaporation; lower values represent net precipitation.
 
 **What it does**:
-- **Larger S_e0** (e.g., 37 psu): More salt in equatorial box initially → larger initial ΔS → starts closer to upper branch
-- **Smaller S_e0** (e.g., 35 psu): Less salt → smaller initial ΔS → may start closer to lower branch
+- The relaxation term $-\lambda(S_1 - S_1^0)$ pulls Box 1 salinity toward this target over ~1000 years
+- **Larger S₁ᵉᵍ** (e.g., 37 psu): Higher equilibrium salinity for equatorial box (more evaporative)
+- **Smaller S₁ᵉᵍ** (e.g., 35 psu): Lower equilibrium salinity (more precipitation)
+
+**Effect on bifurcation diagram**:
+- Affects the equilibrium salinity difference ΔS⁰ = S₁ᵉᵍ − S₂ᵉᵍ
+- Changes the size of the bistable region and the location of ΔT_crit
+
+**How to use**: Adjust S₁ᵉᵍ to represent different climatic regimes (wet tropics vs. dry tropics).
+
+#### Box 2 Equilibrium Salinity (S₂ᵉᵍ)
+
+**Physical Meaning**: The long-term equilibrium (relaxation target) salinity for Box 2 (polar region), set by atmospheric forcing and ice sheet dynamics.
+
+**Default**: 34 psu (Stommel's original)
+
+**Typical Range**: 28–40 psu (physically 32–35.5 psu)
+
+**Real-world context**: North Atlantic polar surface is typically 33–34.5 psu. Ice melt and freshwater input can reduce this. High values represent saltier polar water.
+
+**What it does**:
+- The relaxation term $-\lambda(S_2 - S_2^0)$ pulls Box 2 salinity toward this target
+- **Larger S₂ᵉᵍ** (e.g., 34.5 psu): Higher equilibrium salinity (less freshwater input)
+- **Smaller S₂ᵉᵍ** (e.g., 33 psu): Lower equilibrium salinity (more freshwater/ice melt)
+
+**Effect on bifurcation diagram**:
+- ΔS⁰ = S₁ᵉᵍ − S₂ᵉᵍ determines the equilibrium salinity difference
+- Larger ΔS⁰ makes AMOC more stable (easier to maintain salt gradient)
+- Smaller ΔS⁰ makes AMOC more fragile
+
+**How to use**: Lower S₂ᵉᵍ to represent periods with high freshwater input (Greenland melt, ice sheet discharge).
+
+#### Box 1 Initial Salinity (S₁ᵢⁿⁱᵗ)
+
+**Physical Meaning**: The salinity in Box 1 at t=0 (start of simulation).
+
+**Default**: 36 psu
+
+**Typical Range**: 30–40 psu
+
+**What it does**:
+- Determines the initial condition in phase space
+- System evolves from this starting point toward an attractor (upper or lower branch)
+- Initial salinity difference ΔS(t=0) = S₁ᵢⁿⁱᵗ − S₂ᵢⁿⁱᵗ is crucial
 
 **Effect on simulation**:
-- Initial salinity determines initial condition in phase space
-- System relaxes toward its attractor (upper or lower branch) depending on which basin of attraction S_e0 is in
-- In bistable region, can "switch" between stable states by changing S_e0
+- **Large S₁ᵢⁿⁱᵗ** (e.g., 37 psu): Large initial ΔS → tends toward upper (strong AMOC) branch
+- **Small S₁ᵢⁿⁱᵗ** (e.g., 34 psu): Small initial ΔS → may approach lower (collapsed) branch
 
-#### Polar Salinity (S_p0)
+**How to use**: Adjust S₁ᵢⁿⁱᵗ (with S₂ᵢⁿⁱᵗ) to explore different initial conditions and demonstrate bistability:
+- Set S₁ᵢⁿⁱᵗ=36, S₂ᵢⁿⁱᵗ=34 (large ΔS) → evolves to upper branch
+- Set S₁ᵢⁿⁱᵗ=34.5, S₂ᵢⁿⁱᵗ=34 (small ΔS) → evolves to lower branch
 
-**Physical Meaning**: The initial salinity in the polar box at t=0.
+#### Box 2 Initial Salinity (S₂ᵢⁿⁱᵗ)
+
+**Physical Meaning**: The salinity in Box 2 at t=0.
 
 **Default**: 34 psu
 
-**Typical Range**: 28–40 psu (physically 32–35 psu)
-
-**Real-world context**: North Atlantic polar surface is fresher than equatorial due to ice melt and freshwater input; typical range 33–34.5 psu.
+**Typical Range**: 28–40 psu
 
 **What it does**:
-- **Larger S_p0** (e.g., 35 psu): Smaller initial ΔS → starts on upper branch (AMOC-like)
-- **Smaller S_p0** (e.g., 33 psu): Larger initial ΔS but with opposite sign → may start on lower branch or collapsed regime
+- Determines the initial polar salinity and thus the initial ΔS
+- Very low S₂ᵢⁿⁱᵗ (e.g., ≤32 psu) can initialize the system in a freshened, collapsed state
 
 **Effect on simulation**:
-- Initial ΔS = S_e0 − S_p0 determines starting point
-- Very low S_p0 (≤30 psu) can initialize the system in the collapsed state
+- Initial condition in phase space; system evolves from here
 
-**Physical interpretation**: Representing freshwater input by starting with lower polar salinity is a diagnostic tool. Real freshwater forcing evolves over time (parameter F), not just via initial conditions.
+**How to use**: Pair with S₁ᵢⁿⁱᵗ to create different bistable scenarios. In bistable region (ΔT > ΔT_crit), small differences in initial ΔS can lead to different equilibria.
 
 ---
 
-### Physical Coefficients
+### Physical Coefficients (Stommel's Original Values)
+
+The circulation strength is given by: $q = k[\alpha \Delta T - \beta \Delta S]$
 
 #### Thermal Expansion (α)
 
 **Physical Meaning**: The rate at which seawater density decreases with temperature increase.
 
-**Default**: 1.5 × 10⁻⁴ /°C
+**Default**: 2 × 10⁻⁴ K⁻¹ (**Stommel's original value**)
 
-**Typical Range**: 0.5–3.0 × 10⁻⁴ /°C
+**Typical Range**: 0.5–3.0 × 10⁻⁴ K⁻¹
 
-**Real-world context**: Typical seawater at 20°C has α ≈ 2 × 10⁻⁴ /°C. The value is temperature-dependent but this constant approximation is standard.
+**Real-world context**: Typical seawater at 20°C has α ≈ 2 × 10⁻⁴ K⁻¹. The value is temperature-dependent but this constant approximation is standard in oceanography.
 
 **What it does**:
-- Appears in thermal driving: q = k[α·ΔT − β·ΔS]
-- Larger α → stronger effect of temperature on density → stronger thermal drive → more stable AMOC
+- Appears in the thermal driving term of circulation: q = k[**α·ΔT** − β·ΔS]
+- Larger α → stronger effect of temperature on density → stronger thermal drive → AMOC more stable, harder to tip
+- Smaller α → weaker thermal sensitivity → easier to collapse via ΔT reduction
 
 **Effect on bifurcation diagram**:
-- Increasing α → shifts critical F *higher* (larger F needed to tip)
-- Decreasing α → shifts critical F *lower* (easier to tip)
+- Increasing α → raises ΔT_crit (larger ΔT needed before collapse)
+- Decreasing α → lowers ΔT_crit (easier to trigger collapse)
 
-**Physically meaningful range**: 0.5–3.0 × 10⁻⁴ represents different water masses and temperatures.
+**How to use**: α is typically fixed at Stommel's value. Vary it to explore sensitivity to thermal feedback strength.
+
+**Validation**: Stommel's original experiments used α = 2×10⁻⁴; this is the "best-fit" value for thermohaline dynamics.
 
 #### Haline Contraction (β)
 
 **Physical Meaning**: The rate at which seawater density increases with salinity increase.
 
-**Default**: 8 × 10⁻⁴ /psu
+**Default**: 1 × 10⁻³ psu⁻¹ (**Stommel's original value**)
 
-**Typical Range**: 2–15 × 10⁻⁴ /psu
+**Typical Range**: 2–15 × 10⁻⁴ psu⁻¹
 
-**Real-world context**: Typical seawater has β ≈ 7.6 × 10⁻⁴ /psu (nearly constant over oceanographic ranges).
+**Real-world context**: Typical seawater has β ≈ 7.6 × 10⁻⁴ psu⁻¹, but Stommel used 1×10⁻³ for his idealized two-box model.
 
 **What it does**:
-- Appears in both thermal and haline terms: q = k[α·ΔT − β·ΔS]
-- Larger β → salinity differences have bigger effect on density → haline feedback is stronger → easier to trigger collapse
+- Appears in both thermal and haline terms: q = k[α·ΔT − **β·ΔS**]
+- Larger β → salinity differences have bigger effect on density → haline feedback is stronger → easier to collapse
+- Smaller β → salinity has weaker effect → AMOC more resilient
 
 **Effect on bifurcation diagram**:
-- Increasing β → shifts critical F *lower* (easier to tip)
-- Decreasing β → shifts critical F *higher* (harder to tip)
+- Increasing β → lowers ΔT_crit (easier to tip)
+- Decreasing β → raises ΔT_crit (harder to tip)
 
-**Physically meaningful range**: 2–15 × 10⁻⁴ captures variation across different water masses.
+**Interpretation**: β is the **"fragility" parameter**. A larger β means the ocean is more sensitive to salinity variations because salt has a strong density effect. This is why freshwater forcing (which reduces salinity) is so dangerous.
 
-**Interpretation**: β is the "fragility" parameter. A larger β means the ocean is more sensitive to freshwater forcing because salinity variations have a bigger density effect.
+**How to use**: β is typically fixed at Stommel's value. Vary to explore how salinity's density effect changes the bifurcation structure.
 
 #### Circulation Coefficient (k)
 
-**Physical Meaning**: An empirical coupling constant that converts density differences into circulation strength.
+**Physical Meaning**: An empirical coupling constant that converts density differences into circulation strength (units: inverse time).
 
-**Default**: 1.5 × 10⁻⁶ /s
+**Default**: 3 × 10⁻⁹ s⁻¹ (**Stommel's original value**)
 
-**Typical Range**: 5 × 10⁻⁸ to 1 × 10⁻⁵ /s (logarithmic scale)
+**Typical Range**: 1 × 10⁻¹⁰ to 1 × 10⁻⁶ s⁻¹ (logarithmic scale)
+
+**Real-world context**: Stommel calibrated k to match observed AMOC strength (~15–20 Sv); modern GCMs use various values depending on resolution and parameterization.
 
 **What it does**:
-- q = k[α·ΔT − β·ΔS]
-- Larger k → same ΔT difference produces faster circulation
-- Affects *rate* of approach to equilibrium but *not* the equilibrium value itself (at steady state, F = q·ΔS is independent of k if q is scaled appropriately)
+- q = **k**[α·ΔT − β·ΔS]
+- Larger k → same density difference produces faster/stronger circulation (higher q)
+- Affects the *magnitude* and *timescale* of circulation response
+
+**Effect on bifurcation diagram** (important!):
+- Increasing k → affects the **absolute magnitude** of q but NOT the critical ΔT (bifurcation threshold is independent of k!)
+- The equilibrium ΔS values DO depend on k, but the critical ΔT where branches collide does not
+
+**Why k doesn't affect ΔT_crit**: The critical condition from the relaxation model depends on k, but both the thermal and haline terms scale with k, so the bifurcation point is independent of k's absolute value.
+
+**How to use**:
+- Keep at default (Stommel's 3×10⁻⁹) for canonical two-box behavior
+- Increase k to see faster dynamics (reaches equilibrium quicker)
+- Decrease k for slower dynamics (longer transients)
+
+**Simulation behavior**: k affects integration timescale — larger k means faster evolution to equilibrium.
+
+#### Relaxation Rate (λ)
+
+**Physical Meaning**: The rate at which salinity relaxes toward its equilibrium value, representing long-timescale ocean-atmosphere interaction.
+
+**Default**: 3 × 10⁻¹¹ s⁻¹ (**Stommel's original value**)
+
+**Corresponding Equilibration Timescale**: τ = 1/λ ≈ **1000 years**
+
+**Typical Range**: 1 × 10⁻¹² to 1 × 10⁻⁹ s⁻¹ (logarithmic scale)
+
+**Real-world context**: The ~1000-year timescale represents:
+- Ocean mixing and diffusion of salinity anomalies
+- Slow adjustment of the thermocline to surface forcing
+- Paleoclimate observations suggest D-O events and glacial-interglacial cycles involve ~1000-year timescales
+
+**Physical Interpretation**: Salinity doesn't instantly adjust to the atmosphere. Rather, freshwater (or salt deficit) anomalies persist and decay slowly via ocean mixing and advection. The term $H_i = -\lambda(S_i - S_i^0)$ in the ODEs implements this.
+
+**What it does**:
+- Controls how fast salinity "forgets" its initial condition and returns to equilibrium
+- Larger λ (shorter τ) → faster relaxation → system adjusts quickly to equilibrium
+- Smaller λ (longer τ) → slower relaxation → system is sluggish, remembers initial conditions longer
 
 **Effect on bifurcation diagram**:
-- **Paradoxically, k affects neither equilibria nor critical F** (in the equilibrium sense)
-- Instead, k affects the **timescale**: larger k → faster dynamics → reaches steady state sooner
-- But note: the critical F formula involves k: $F_c = \frac{k(\alpha\Delta T)^2}{4\beta}$, so k does affect the bifurcation threshold!
+- Increasing λ → raises ΔT_crit (faster relaxation makes AMOC more stable)
+- Decreasing λ → lowers ΔT_crit (slower relaxation makes system more fragile)
 
-**Simulation behavior**:
-- Use a coarse dt to capture dynamics with small k
-- Use a fine dt to resolve fast dynamics with large k
+**Why λ matters for climate risk**:
+- If the real ocean has shorter relaxation timescale (larger λ, faster mixing), AMOC is more resilient
+- If relaxation is slow (small λ), salinity anomalies persist, making AMOC vulnerable to prolonged forcing
 
-**Default calibration**: Chosen so that with default parameters, q_sv ≈ 14.7 Sv, matching RAPID observations.
+**How to use**:
+- Default (3×10⁻¹¹, ~1000 years): Canonical Stommel model
+- Increase λ to explore faster ocean adjustment scenarios
+- Decrease λ to explore slow-response scenarios (relevant for deep ocean processes)
 
 ---
 
-### Freshwater Forcing (The Key Bifurcation Parameter)
+### The Bifurcation Parameter: Temperature Difference (ΔT)
 
-#### Freshwater Flux (F)
+**In the original Stommel (1961) relaxation model, the KEY bifurcation parameter is the temperature difference:**
 
-**Physical Meaning**: Net freshwater input (or removal) to the polar box, in salinity units.
+$$\Delta T = T_1 - T_2$$
 
-**Default**: 1.0 × 10⁻⁴ psu/s
+**Not** freshwater flux (F) as in simplified models!
 
-**Typical Range**: 0 to 5 × 10⁻⁴ psu/s
+#### Understanding ΔT_crit: The Critical Temperature Difference
 
-**Physical interpretation**: F > 0 means net freshwater *input* to polar box (dilutes it):
-- Glacial melt from Greenland ice sheet
-- Excess precipitation minus evaporation at high latitudes
-- Melting sea ice (releases freshwater)
-- Arctic river discharge
+**Physical Meaning**: ΔT_crit is the threshold temperature difference below which the upper (strong AMOC) branch ceases to exist. When ΔT < ΔT_crit, the system is forced into the collapsed state.
 
-**What it does**: This is the **primary bifurcation parameter**
-- Small F: AMOC is strong and stable (upper branch)
-- F approaches F_c1: AMOC weakens gradually
-- F exceeds F_c1: AMOC collapses (jump to lower branch)
-- Very large F: AMOC stays collapsed
+**Estimated Value** (from Stommel's original parameters): ΔT_crit ≈ **10–15°C**
 
-**Hysteresis behavior**:
-- Forward tipping at F_c1 ≈ 2 × 10⁻⁴ psu/s
-- Backward recovery at F_c2 ≈ 1 × 10⁻⁴ psu/s
-- Bistable region: 1 × 10⁻⁴ < F < 2 × 10⁻⁴ psu/s
+**Present-day Earth**: ΔT ≈ **20°C** (T₁ = 25°C, T₂ = 5°C) → **Robust and far from tipping** ✓
 
-**Real-world context**:
-- Present-day Greenland mass loss: ~280 Gt/year ≈ 0.3 × 10⁻⁴ psu/s (very roughly)
-- The model suggests we're not yet at the tipping point (F < F_c1), but freshwater input is increasing
+**How to Find ΔT_crit**:
+1. Click **"Compute Bifurcation Diagram"**
+2. Look for the **red diamond** (bifurcation point) on the diagram
+3. Read the ΔT value at that point on the x-axis
+4. That is ΔT_crit for your chosen parameters
 
-**Experimentation**: This slider is the most important for exploring tipping points and hysteresis. Try:
-1. Set F to 0.8 × 10⁻⁴ (strong AMOC)
-2. Gradually increase to 2.5 × 10⁻⁴ (collapse)
-3. Decrease back to 0.5 × 10⁻⁴ (watch for hysteresis recovery at lower F than collapse)
+#### Effect on Bifurcation and Tipping
+
+**What happens as you adjust T₁ and T₂ (thus changing ΔT)**:
+
+- **Large ΔT** (e.g., 25°C): Two stable branches exist (upper and lower) — **bistable region**
+  - Upper branch: strong, thermally-driven AMOC
+  - Lower branch: weak or collapsed
+  - System's fate depends on initial conditions (history)
+
+- **Small ΔT** (e.g., ΔT ≈ ΔT_crit, maybe 12°C): Branches approach each other
+  - Upper branch is weakening and becoming less stable
+  - System shows critical slowing down (slower recovery from perturbations)
+  - Risk of noise-induced tipping increases
+
+- **Very small ΔT** (ΔT < ΔT_crit, e.g., 10°C): Upper branch **vanishes**
+  - Only the lower (collapsed) branch remains
+  - Strong AMOC is impossible — **system must collapse**
+
+#### Paleoclimate and Future Scenarios
+
+**Glacial Period Example** (Last Glacial Maximum, ~20,000 years ago):
+- Colder polar regions → lower T₂ (e.g., 0°C)
+- Similar or slightly cooler equator → similar T₁
+- Result: ΔT ≈ 20–25°C (or potentially higher)
+- **Paradox**: Glacial AMOC should be strong, but evidence suggests frequent collapse (D-O events)
+- **Resolution**: Bistability at glacial ΔT allows noise-induced transitions without forcing parameter change
+
+**Future Warming Scenario** (Representative Concentration Pathway 8.5, year 2100):
+- Arctic warming faster than tropics (polar amplification)
+- T₁ may increase to 27°C, T₂ to 10°C
+- Result: ΔT decreases to ~17°C (still above ΔT_crit for default parameters)
+- But approaching fragility region; closer to bifurcation → higher tipping risk
+
+#### How to Explore Tipping with Temperature
+
+**Experiment 1: Find the Critical Point**
+1. Set T₁ = 25°C, T₂ = 5°C (present-day, ΔT = 20°C)
+2. Run simulation: observe strong AMOC (upper branch)
+3. Click "Compute Bifurcation": find ΔT_crit
+4. Gradually increase T₂ until ΔT approaches ΔT_crit
+5. Watch AMOC weaken (critical slowing down)
+6. Cross ΔT_crit: AMOC collapses
+
+**Experiment 2: Bistability**
+1. Set ΔT > ΔT_crit to ensure bistability
+2. Start simulation with S₁ᵢⁿⁱᵗ = 36, S₂ᵢⁿⁱᵗ = 34 (large ΔS): → evolves to upper branch (strong AMOC)
+3. Run again with S₁ᵢⁿⁱᵗ = 34.5, S₂ᵢⁿⁱᵗ = 34 (small ΔS): → evolves to lower branch (weak AMOC)
+4. Same ΔT, same parameters, but different outcomes (bistability demonstrated!)
+
+**Experiment 3: Noise-Induced Tipping in Bistability**
+1. Set ΔT in bistable region (ΔT > ΔT_crit), but close to critical value (ΔT ≈ ΔT_crit + 3)
+2. Set initial condition on upper branch (strong AMOC)
+3. Run with noise = 0: AMOC stays on upper branch
+4. Run with noise = 3×10⁻⁵: occasionally jumps to lower branch (stochastic tipping)
+5. Run multiple times with same noise level: some runs collapse, some don't (probabilistic tipping)
 
 ---
 
@@ -291,12 +438,20 @@ This page explains every parameter in the simulator: its physical meaning, defau
 - **Moderate noise (σ = 3–5 × 10⁻⁵)**: Regular fluctuations; may see noise-induced transitions across basin boundary
 - **Large noise**: Transitions become very frequent; signal drowns in noise
 
-**Noise-induced tipping**: In the bistable region, even if F < F_c1 (deterministically no tipping), large enough noise can occasionally kick the system to the lower branch. Rerun the same parameters multiple times with noise to see stochastic variability.
+**Noise-induced tipping**: In the bistable region (ΔT > ΔT_crit), even if the system deterministically stays on the upper branch, large enough noise can occasionally kick the system across the unstable manifold to the lower (collapsed) branch. This is **stochastic tipping** — a key mechanism for paleoclimate transitions like D-O events.
+
+**How to observe it**:
+1. Set ΔT in bistable region, close to ΔT_crit (e.g., ΔT = ΔT_crit + 3°C)
+2. Initialize on upper branch (S₁ᵢⁿⁱᵗ large, S₂ᵢⁿⁱᵗ small)
+3. Run with σ = 0: stays on upper branch (deterministic)
+4. Run with σ = 3–5×10⁻⁵: occasionally jumps to lower branch (stochastic tipping)
+5. Run multiple times with same noise: probability of tipping increases near critical point
 
 **When to use**:
 - Set σ > 0 to explore how noise affects stability
 - Compare deterministic (σ=0) and stochastic (σ>0) simulations to quantify robustness
 - Study noise-induced tipping by running same parameters 5–10 times and watching for transitions
+- Understand paleoclimate variability: noise can explain D-O event-like oscillations
 
 ---
 
@@ -306,9 +461,11 @@ The simulator enforces the following constraints:
 
 | Constraint | Formula | Why |
 |-----------|---------|-----|
-| T_e > T_p | Always | Equator must be warmer than pole |
-| S_e + S_p = constant | Enforced | Salt conservation |
-| All parameters > 0 | Enforced | Physical quantities must be positive |
+| T₁ > T₂ | Always | Equator must be warmer than pole |
+| α, β, k, λ > 0 | Always | Physical coefficients must be positive |
+| S₁, S₂ can be any value | Flexible | Allows exploration of fresh and salty states |
+
+**Note on salt conservation**: The model does **not** enforce total salt conservation; instead, both boxes have independent relaxation dynamics $H_i = -\lambda(S_i - S_i^0)$ toward their respective equilibrium values. This is consistent with Stommel's original formulation where salinity relaxes toward atmospheric equilibrium targets.
 
 If you violate a constraint (e.g., set T_e < T_p), the simulator returns a **422 Validation Error** with a helpful message.
 
@@ -316,55 +473,68 @@ If you violate a constraint (e.g., set T_e < T_p), the simulator returns a **422
 
 ## Recommended Parameter Sets for Exploration
 
-### 1. Strong AMOC (Baseline)
+All presets use **Stommel's original coefficients** by default: α=2×10⁻⁴, β=1×10⁻³, k=3×10⁻⁹, λ=3×10⁻¹¹.
+
+### 1. **Normal AMOC** (Present-Day Earth)
 ```
-T_e: 25, T_p: 5, S_e0: 36, S_p0: 34
-α: 1.5e-4, β: 8e-4, k: 1.5e-6, F: 0.8e-4
-Result: q_sv ≈ 16 Sv (strong, stable)
+T₁: 25, T₂: 5, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, S₁ᵢⁿⁱᵗ: 36, S₂ᵢⁿⁱᵗ: 34
+Result: ΔT = 20°C (>> ΔT_crit), q ≈ 5–10×10⁻⁷ 1/s (strong, stable AMOC)
+Interpretation: Robust present-day state; far from bifurcation
 ```
 
-### 2. Near Tipping
+### 2. **Weakened AMOC** (Approaching Fragility)
 ```
-[Same as above but F: 1.8e-4]
-Result: q_sv ≈ 5 Sv (weak, marginal)
-```
-
-### 3. Collapsed State
-```
-[Same as above but F: 3e-4]
-Result: q_sv ≈ 0 Sv (collapsed)
+T₁: 26, T₂: 10, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, S₁ᵢⁿⁱᵗ: 36, S₂ᵢⁿⁱᵗ: 34
+Result: ΔT = 16°C (≈ 1–2°C above ΔT_crit), q ≈ 2–5×10⁻⁷ 1/s (weaker)
+Interpretation: Near critical region; critical slowing down observable; noise-induced tipping possible
 ```
 
-### 4. Fragile (Low Thermal Drive)
+### 3. **Collapsed AMOC** (Below Critical Threshold)
 ```
-T_e: 18, T_p: 8, S_e0: 36, S_p0: 34
-[Other params default]
-Result: Lower critical F (easier to tip)
+T₁: 25, T₂: 15, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, S₁ᵢⁿⁱᵗ: 34.5, S₂ᵢⁿⁱᵗ: 34
+Result: ΔT = 10°C (< ΔT_crit), q ≈ 0 or negative (collapsed)
+Interpretation: Only lower branch exists; AMOC is in haline-dominated state
 ```
 
-### 5. Robust (High Thermal Drive)
+### 4. **Fragile AMOC** (Low Thermal Drive)
 ```
-T_e: 30, T_p: 0, S_e0: 36, S_p0: 34
-[Other params default]
-Result: Higher critical F (harder to tip)
+T₁: 20, T₂: 8, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, [salinity defaults]
+Result: ΔT = 12°C (close to ΔT_crit), lower ΔT_crit due to weak thermal drive
+Interpretation: System is in a fragile state; small changes push toward collapse
+```
+
+### 5. **Robust AMOC** (High Thermal Drive)
+```
+T₁: 30, T₂: 0, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, [salinity defaults]
+Result: ΔT = 30°C (>> ΔT_crit), much higher ΔT_crit
+Interpretation: Thermally dominated; very stable; hard to collapse without huge forcing
+```
+
+### 6. **Stommel's Original (1961)**
+```
+T₁: 25, T₂: 5, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, S₁ᵢⁿⁱᵗ: 36, S₂ᵢⁿⁱᵗ: 34
+α: 2e-4, β: 1e-3, k: 3e-9, λ: 3e-11
+Result: Canonical two-box behavior; ΔT_crit ≈ 12–15°C
+Interpretation: The original Stommel parameters; use for publication-quality bifurcation curves
 ```
 
 ---
 
 ## Bifurcation Diagram Reading Tips
 
-When you compute a bifurcation diagram, the tipping points depend on parameters:
+When you compute a bifurcation diagram (sweeping T₂ to vary ΔT), the critical temperature difference depends on parameters:
 
-$$F_{c1} = \frac{k(\alpha\Delta T)^2}{4\beta} \cdot f(\text{stability})$$
+$$\Delta T_{\text{crit}} = \frac{\sqrt{8k\beta\lambda\Delta S^0} - \lambda}{2k\alpha}$$
 
-where f(·) is a factor accounting for stability. Roughly:
+**How the red diamond (bifurcation point) moves:**
 
-- **Increase ΔT** (e.g., lower T_p): F_c shifts *right* (need more F to tip)
-- **Increase β**: F_c shifts *left* (tip more easily)
-- **Increase k**: F_c shifts *right* (stabilizing)
-- **Increase α**: F_c shifts *right* (stabilizing)
+- **Increase α** (thermal expansion): ΔT_crit **decreases** (thermal drive stronger, harder to collapse)
+- **Increase β** (haline contraction): ΔT_crit **increases** (salinity effect stronger, easier to collapse)
+- **Increase k** (circulation strength): ΔT_crit changes slightly (non-monotonic dependence)
+- **Increase λ** (faster relaxation): ΔT_crit **decreases** (relaxation stabilizes, harder to collapse)
+- **Increase ΔS⁰** (equilibrium salinity difference): ΔT_crit **increases** (larger salt gradient to maintain, harder without strong circulation)
 
-Use this intuition to predict how the S-curve will move when you adjust a parameter, then recompute to verify!
+**Use this intuition** to predict where the bifurcation point will move, then recompute to verify!
 
 ---
 
