@@ -432,6 +432,3 @@ Weijer, W., et al. (2019). Stability of the Atlantic Meridional Overturning Circ
 
 **Figure 6:** Bar chart comparing model AMOC strength to observations. Using Stommel's original parameters and ΔT = 40°C (difference between tropical ~25°C and polar ~-5°C waters), the model predicts q ~ 15.5 Sv. This agrees with the RAPID array mean of 16.9 Sv (2004–2020), validating that the Stommel model captures the essential physics controlling modern AMOC transport despite neglecting wind forcing and spatial structure.
 
----
-
-**Word Count (excluding abstract and references):** 3,487 words
