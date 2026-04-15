@@ -128,14 +128,14 @@ You should now see the Stommel Simulator UI:
 │  Controls    │       Visualizations                │
 │  (left)      │       (right: 6 panels)             │
 │              │                                      │
-│  T_e: ████   │  ┌──────┐ ┌──────┐                │
-│  T_p: ████   │  │Box   │ │AMOC  │                │
-│  S_e0: ████  │  │Model │ │vs.   │                │
-│  S_p0: ████  │  └──────┘ └──────┘                │
+│  T_1: ████   │  ┌──────┐ ┌──────┐                │
+│  T_2: ████   │  │Box   │ │AMOC  │                │
+│  S_1_eq:███  │  │Model │ │vs.   │                │
+│  S_2_eq:███  │  └──────┘ └──────┘                │
 │  ...         │  ┌────────────────────┐           │
 │              │  │   Time Series      │           │
 │  [Run]       │  │   (3 lines)        │           │
-│  [Export]    │  └────────────────────┘           │
+│  [Reset]     │  └────────────────────┘           │
 │              │  ┌──────┐ ┌──────┐                │
 │              │  │Phase │ │Bifur │                │
 │              │  │Space │ │cation│                │
@@ -145,14 +145,14 @@ You should now see the Stommel Simulator UI:
 
 ### Click "Run Simulation"
 
-1. Leave all parameters at defaults
-2. Click the **"Run Simulation"** button
+1. Leave all parameters at defaults (the app auto-runs once on page load anyway)
+2. Click the green **"Run Simulation"** button
 3. Watch the visualizations populate:
-   - **Top-left**: Two-box ocean diagram with animated arrows
-   - **Top-right**: Comparison of model's q_sv vs. observed RAPID mean
-   - **Middle**: Time series of q, S_e, S_p vs. time (years)
+   - **Top-left**: Two-box ocean diagram with an arrow showing flow direction/strength
+   - **Top-right**: Comparison of model's q_sv vs. observed RAPID-MOCHA mean
+   - **Middle**: Time series of q, S₁, S₂ vs. time (years)
    - **Bottom-left**: Phase space portrait (ΔS vs. q)
-   - **Bottom-right**: [empty until you click "Compute Bifurcation"]
+   - **Bottom-right**: [empty until you click "Compute Bifurcation Diagram"]
 
 The simulation took ~1–2 seconds. The system quickly equilibrated to a steady state (note the flat time series near t=3000 years).
 
@@ -162,12 +162,16 @@ The simulation took ~1–2 seconds. The system quickly equilibrated to a steady 
 
 ### Left Panel: Controls
 
-- **Parameters sliders**: Adjust T_e, T_p, S_e0, S_p0, α, β, k, F, t_max, dt, noise_amplitude
-- **Log scale toggle**: k has a logarithmic slider (exponential scale)
-- **Preset buttons**: Load "Normal AMOC", "Weakened AMOC", "Collapsed AMOC", "Stommel 1961"
-- **Run Simulation**: Execute the simulation with current parameters
-- **Compute Bifurcation**: (advanced) Sweep F to generate bifurcation diagram
-- **Export**: Download current result as JSON
+- **Preset buttons** (top): "Normal AMOC", "Weakened", "Collapsed", "Stommel 1961"
+- **Temperature & Salinity sliders**: T₁, T₂, S₁ᵉᵍ, S₂ᵉᵍ, S₁ᵢⁿⁱᵗ, S₂ᵢⁿⁱᵗ
+- **Physics Parameters sliders**: α, β, k, λ — k and λ are on **logarithmic** sliders
+- **Stochastic Forcing**: noise_amplitude
+- **Integration**: t_max, dt
+- **Run Simulation** (green): Execute one simulation with current parameters
+- **Reset** (red): Restore all sliders to Stommel 1961 defaults
+- **Compute Bifurcation Diagram** (blue): Sweep T₂ to generate the S-curve
+
+> There is no "Export" button and no freshwater forcing (F) slider in this version. The bifurcation parameter is **ΔT = T₁ − T₂**, controlled by the T₂ slider. To get raw data, hit the API directly (see [API Reference](/api-reference/overview)).
 
 ### Right Panel: Visualizations (6 panels)
 
@@ -182,40 +186,42 @@ Run these commands to confirm the full stack is operational:
 ### Backend Health
 
 ```bash
-curl -s http://localhost:8000/health | jq .
-# Expected: {"status": "ok", "uptime_seconds": ...}
+curl -s http://localhost:8000/api/health | jq .
+# Expected: {"status": "ok"}
 ```
 
 ### API Simulation Endpoint
 
 ```bash
-curl -s -X POST http://localhost:8000/simulate \
+curl -s -X POST http://localhost:8000/api/simulate \
   -H "Content-Type: application/json" \
   -d '{
-    "T_e": 25,
-    "T_p": 5,
-    "S_e0": 36,
-    "S_p0": 34,
-    "alpha": 1.5e-4,
-    "beta": 8e-4,
-    "k": 1.5e-6,
-    "F": 1e-4,
-    "t_max": 100,
+    "T_1": 25,
+    "T_2": 5,
+    "S_1_eq": 36,
+    "S_2_eq": 34,
+    "S_1_init": 36,
+    "S_2_init": 34,
+    "alpha": 2.0e-4,
+    "beta": 1.0e-3,
+    "k": 3.0e-9,
+    "lam": 3.0e-11,
+    "t_max": 3000,
     "dt": 1,
     "noise_amplitude": 0
-  }' | jq '.q_sv_final'
-# Expected: ~14.7
+  }' | jq '.q_sv[-1]'
+# Expected: ~15 (final circulation in Sv)
 ```
 
 ### API Presets Endpoint
 
 ```bash
-curl -s http://localhost:8000/presets | jq '.[] | .name'
+curl -s http://localhost:8000/api/presets | jq '.presets[].name'
 # Expected:
-# "Normal AMOC"
-# "Weakened AMOC"
-# "Collapsed AMOC"
-# "Stommel 1961 Original"
+# "normal_amoc"
+# "weakened_amoc"
+# "collapsed_amoc"
+# "stommel_original"
 ```
 
 ### Frontend Page Load
@@ -303,10 +309,10 @@ cd backend
 uv run uvicorn api:app --reload
 
 # Check connectivity
-curl http://localhost:8000/health
+curl http://localhost:8000/api/health
 ```
 
-The frontend expects the backend at `http://localhost:8000`. If using a different port, update the Vite config or backend server URL.
+The frontend expects the backend at `http://localhost:8000` (the Vite dev server proxies `/api/*` requests to it). If using a different port, update the Vite config or backend server URL.
 
 ---
 
