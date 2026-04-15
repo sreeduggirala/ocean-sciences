@@ -71,12 +71,12 @@ The `--reload` flag enables hot-reloading during development; remove it for prod
 In a third terminal, test connectivity:
 
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8000/api/health
 ```
 
 **Expected response**:
 ```json
-{"status": "ok", "uptime_seconds": 2.34}
+{"status": "ok"}
 ```
 
 ---
