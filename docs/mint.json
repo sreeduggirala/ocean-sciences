@@ -39,7 +39,8 @@
     {
       "group": "Overview",
       "pages": [
-        "index"
+        "index",
+        "how-to-use"
       ]
     },
     {

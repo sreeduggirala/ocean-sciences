@@ -1,0 +1,338 @@
+---
+title: How To Use (Spoonfeed Edition)
+description: Zero-knowledge walkthrough — from a fresh terminal to interpreting your first AMOC collapse.
+---
+
+# How To Use This Thing
+
+This page assumes you know **nothing** about the project, the model, the code, or oceanography. By the end of it you will:
+
+1. Have the app running locally.
+2. Understand every button and slider on the screen.
+3. Know how to run a simulation, read the output, and reproduce the famous "AMOC collapse" experiment.
+
+If at any point something doesn't match what you see on screen, you're probably looking at an outdated browser tab — hard refresh with `Cmd+Shift+R`.
+
+---
+
+## Part 1 — Get It Running (One-Time Setup)
+
+You need **two terminals open at the same time**: one for the backend (Python), one for the frontend (Node). Don't close either of them — if you do, the app stops working.
+
+### Terminal 1 — start the backend
+
+```bash
+cd /Users/sree/Python/ocean-sciences/backend
+uv sync          # only needed the very first time
+uv run uvicorn api:app --reload
+```
+
+When you see this line, the backend is alive:
+
+```
+INFO:     Uvicorn running on http://0.0.0.0:8000
+```
+
+**Leave this terminal open.** Don't type anything else into it.
+
+### Terminal 2 — start the frontend
+
+```bash
+cd /Users/sree/Python/ocean-sciences/frontend
+npm install      # only needed the very first time
+npm run dev
+```
+
+When you see this line, the frontend is alive:
+
+```
+➜  Local:   http://localhost:5173/
+```
+
+**Leave this terminal open too.**
+
+### Open the app
+
+Open your browser and go to **http://localhost:5173**.
+
+You should immediately see the simulator. It auto-runs one simulation on load, so the panels on the right will already be filled in.
+
+### How to stop everything
+
+In each terminal, press `Ctrl+C`. That's it.
+
+### How to start it again next time
+
+You don't need `uv sync` or `npm install` again. Just:
+
+```bash
+# Terminal 1
+cd /Users/sree/Python/ocean-sciences/backend && uv run uvicorn api:app --reload
+
+# Terminal 2
+cd /Users/sree/Python/ocean-sciences/frontend && npm run dev
+```
+
+---
+
+## Part 2 — Anatomy of the Screen
+
+When the page loads you see two columns:
+
+```
+┌───────────────────┬──────────────────────────────────────┐
+│  CONTROL PANEL    │   VISUALIZATIONS (2 × 3 grid)        │
+│  (left, narrow)   │   ┌──────────┬──────────────┐        │
+│                   │   │ Two-Box  │ AMOC vs.     │        │
+│   Preset buttons  │   │ Diagram  │ Observations │        │
+│   ▼ Temperature   │   ├──────────┴──────────────┤        │
+│   ▼ Physics       │   │ Time Series (full row)  │        │
+│   ▶ Stochastic    │   ├──────────┬──────────────┤        │
+│   ▶ Integration   │   │ Phase    │ Bifurcation  │        │
+│                   │   │ Space    │ Diagram      │        │
+│   [Run] [Reset]   │   └──────────┴──────────────┘        │
+│   [Compute Bif]   │                                       │
+└───────────────────┴──────────────────────────────────────┘
+```
+
+### The Control Panel (left column)
+
+From top to bottom:
+
+1. **Four green Preset buttons** — Normal AMOC, Weakened, Collapsed, Stommel 1961. Click one to instantly load a known parameter set.
+2. **▼ Temperature & Salinity** (open by default) — six sliders for the two boxes' temperatures and salinities.
+3. **▼ Physics Parameters** (open by default) — α, β, k, λ. The constants in the Stommel equation. Most users leave these alone.
+4. **▶ Stochastic Forcing** (collapsed by default) — click the arrow to expand. One slider for noise amplitude.
+5. **▶ Integration** (collapsed by default) — t_max (how many years to simulate) and dt (output sampling interval).
+6. **[Run Simulation]** (green) — runs a single simulation with the current sliders.
+7. **[Reset]** (red) — restores all sliders to the original Stommel 1961 defaults.
+8. **[Compute Bifurcation Diagram]** (blue) — runs ~80–200 mini-simulations to draw the S-curve. Takes 10–30 seconds.
+
+> **Note:** There is **no Freshwater (F) slider** and **no Export button**, even though some other doc pages mention them. The bifurcation parameter in this model is **ΔT = T₁ − T₂**, which you control by moving the T₂ slider.
+
+### The Six Visualizations (right column)
+
+| # | Panel | What it shows | Updates when |
+|---|-------|---------------|--------------|
+| 1 | **Two-Box Ocean Diagram** | A cartoon of the equator (Box 1) and pole (Box 2) with an arrow showing flow direction & strength. | Run Simulation |
+| 2 | **AMOC Comparison** | A bar chart: your model's final flow strength next to the real-world RAPID-MOCHA observed value (~16.9 Sv). | Run Simulation |
+| 3 | **Time Series** | How q (flow strength), S₁, and S₂ evolve over time. | Run Simulation |
+| 4 | **Phase Space** | The trajectory of the system in (ΔS, q) coordinates. Useful for spotting "tipping". | Run Simulation |
+| 5 | **Bifurcation Diagram** | The S-curve showing all stable states across a range of ΔT. **Empty until you click "Compute Bifurcation Diagram".** | Compute Bifurcation |
+
+---
+
+## Part 3 — Your First Simulation (60 seconds)
+
+You don't have to do anything to run your first simulation — the app does it on load. But let's run one explicitly so you can feel the loop:
+
+1. Click the green **Normal AMOC** preset button. All sliders snap to known values.
+2. Click the green **Run Simulation** button. The button briefly says "Running…" then snaps back.
+3. Look at panel 2 (**AMOC Comparison**): the blue bar should be roughly the same height as the grey "Observed" bar. Congratulations, you've simulated the modern Atlantic.
+4. Look at panel 3 (**Time Series**): you'll see one blue line (q) and two yellowish lines (S₁, S₂). They start somewhere, wiggle for a few hundred years, and then go flat. That flat part is **steady state** — the ocean has reached equilibrium.
+
+That's it. That's a simulation.
+
+---
+
+## Part 4 — Reading the Output (What Am I Looking At?)
+
+### Panel 1 — Two-Box Ocean Diagram
+
+- **Box 1** is the equatorial box. **Box 2** is the polar box.
+- The arrow between them is the circulation **q**. Thick arrow = strong flow. Reversed arrow = haline-driven (collapsed) state.
+- Color of each box encodes salinity (saltier = more red).
+
+This is your at-a-glance "is the AMOC alive?" indicator.
+
+### Panel 2 — AMOC Comparison
+
+Two bars. Left is your model. Right is the observed RAPID-MOCHA average (~16.9 Sv).
+- Roughly equal height = realistic.
+- Your bar near zero = collapsed AMOC.
+- Your bar negative = reversed flow (haline-dominated).
+
+### Panel 3 — Time Series
+
+Three curves on one plot:
+- **Blue (left axis, Sv)** — circulation strength q. The thing you actually care about.
+- **Yellow / orange** — Box 1 salinity (S₁).
+- **Cyan** — Box 2 salinity (S₂).
+
+What to look for:
+- **Curves go flat after ~500 years** → far from a tipping point, system is robust.
+- **Curves take >2000 years to flatten** → "critical slowing down" — you're near a tipping point.
+- **A sudden drop or cliff in q** → you crossed a bifurcation or noise tipped you across.
+
+### Panel 4 — Phase Space
+
+This is harder to read but very useful. The axes are:
+- **x-axis**: ΔS = S₁ − S₂ (psu)
+- **y-axis**: q (Sv)
+
+You'll see:
+- A **red star** = where the simulation started.
+- A coloured curve = the trajectory through (ΔS, q) over time.
+- A **green circle** = where it ended up.
+- A **dashed curve** = the "nullcline" (the curve where q is in equilibrium with ΔS).
+
+If the green circle is far from the red star, the system moved a lot. If they're on opposite sides of the dashed nullcline, you tipped.
+
+### Panel 5 — Bifurcation Diagram
+
+Empty until you click **Compute Bifurcation Diagram**. After that:
+- **Blue curve** = upper branch (strong AMOC), traced by sweeping T₂ from low to high.
+- **Orange curve** = lower branch (collapsed AMOC), traced by sweeping T₂ in reverse.
+- **Grey shaded region** between them = the **bistable / hysteresis window**. Inside this region, two stable states exist for the same parameters — which one you end up in depends on history.
+- **Red diamonds** = the two tipping points, ΔT_crit (where the upper branch dies) and the recovery point (where the lower branch dies).
+- **Orange X** = your current ΔT setting from the sliders.
+
+This single plot summarises the entire dynamical landscape.
+
+---
+
+## Part 5 — The Sliders (What Each One Actually Does)
+
+You only need to remember three things to be dangerous:
+
+1. **T₁ and T₂ are the bifurcation knobs.** Increasing T₂ (warming the pole) shrinks ΔT and weakens the AMOC. Decreasing T₂ strengthens it.
+2. **S_init sliders set the starting condition.** Different starts can land you in different stable states (in the bistable window).
+3. **Everything else is "physics constants"** that you usually leave alone.
+
+### Temperature & Salinity (the section you actually use)
+
+| Slider | Plain English | Try changing it to… |
+|--------|---------------|---------------------|
+| **T₁** (Box 1 °C) | Equator surface temperature | 25 (default), bump to 27 to simulate equatorial warming |
+| **T₂** (Box 2 °C) | Pole surface temperature | 5 (default), bump to 12 to simulate polar warming → AMOC collapse |
+| **S₁ᵉᵍ** | Long-term salinity target for Box 1 | Leave at 36 |
+| **S₂ᵉᵍ** | Long-term salinity target for Box 2 | Leave at 34. Lower it to 33 to simulate Greenland melt input |
+| **S₁ᵢⁿⁱᵗ** | Where Box 1 salinity starts | Same as eq value usually |
+| **S₂ᵢⁿⁱᵗ** | Where Box 2 salinity starts | Crank to 36+ to start in the collapsed state |
+
+### Physics Parameters (advanced — usually leave alone)
+
+| Slider | What it is | Default |
+|--------|------------|---------|
+| **α** | Thermal expansion coefficient (how much density changes per °C) | 2 × 10⁻⁴ |
+| **β** | Haline contraction coefficient (how much density changes per psu) | 1 × 10⁻³ |
+| **k** | Circulation efficiency (log scale!) | 3 × 10⁻⁹ |
+| **λ** | Salinity relaxation rate, sets the ~1000-year timescale (log scale!) | 3 × 10⁻¹¹ |
+
+**k** and **λ** are on **logarithmic** sliders — moving the slider a tiny bit changes the value by a factor of 10. Be careful.
+
+### Stochastic Forcing
+
+| Slider | What it does |
+|--------|--------------|
+| **noise_amplitude** | Adds Gaussian random noise to the salinity equations. 0 = perfectly deterministic. Crank up to ~3 × 10⁻⁵ to see "noise-induced tipping". |
+
+### Integration
+
+| Slider | What it does |
+|--------|--------------|
+| **t_max** | How many years to simulate. Default 3000 is enough for steady state. |
+| **dt** | How often to record a data point for plotting. Doesn't affect accuracy — only plot resolution. |
+
+---
+
+## Part 6 — The Three Experiments You Should Actually Try
+
+### Experiment A — "Make the AMOC collapse by warming the pole"
+
+This takes about 90 seconds and is the single most important demo in this app.
+
+1. Click **Normal AMOC** preset → **Run Simulation**. Note q ≈ 15 Sv on the AMOC bar chart. Healthy.
+2. In the Temperature section, slowly drag the **T₂** slider upward: 5 → 8 → 10 → 12 → 14. After **each** change, click **Run Simulation** and watch the AMOC bar.
+3. Somewhere around T₂ = 12–14 °C the bar will drop dramatically. That's the AMOC tipping over.
+4. Now drag T₂ back down to 5 and click Run again. **The AMOC does not recover** — it's stuck in the collapsed state. That's hysteresis.
+
+### Experiment B — "Draw the S-curve"
+
+1. Click **Stommel 1961** preset.
+2. Click **Compute Bifurcation Diagram** (the blue button). Wait ~15 seconds.
+3. Look at panel 5. You should see two curves making an "S" shape with a grey band between them. That band is where the AMOC is bistable.
+4. Move the T₂ slider around. The orange X marker on the diagram will move. Drag T₂ until the X is inside the grey band — you're now in the bistable region.
+
+### Experiment C — "Stochastic tipping"
+
+1. Click **Weakened AMOC** preset. Run. q is small but positive.
+2. Open the **Stochastic Forcing** section. Drag noise_amplitude to 3 × 10⁻⁵.
+3. Click Run Simulation **five times in a row**. Each run is a different random realisation.
+4. On at least one of them you should see the q curve in panel 3 suddenly fall off a cliff partway through. That's noise tipping the system across the unstable boundary.
+
+---
+
+## Part 7 — Troubleshooting
+
+| Problem | Cause | Fix |
+|---------|-------|-----|
+| Page loads but visualisations are blank | Backend isn't running | Check Terminal 1 for `Uvicorn running on…`. Restart if needed. |
+| Red "Failed to fetch" banner at top | Backend died or wrong port | Restart the backend (`uv run uvicorn api:app --reload`) |
+| "Run Simulation" stays stuck on "Running…" | Backend crashed mid-request | Check Terminal 1 for the error. Often it's an invalid parameter combo. Click Reset. |
+| Bifurcation never finishes | Normal — it can take 30s. Wait. | Be patient. |
+| Numbers look completely wrong / nonsensical | You moved a log-scale slider (k or λ) into a wild value | Click **Reset** to restore defaults. |
+| Page is frozen / tab unresponsive | You probably clicked Run while a previous run was still going | Wait, then reload the tab |
+| Port 8000 already in use | Old backend still running | `lsof -ti:8000 \| xargs kill -9` |
+| Port 5173 already in use | Old frontend still running | `lsof -ti:5173 \| xargs kill -9` |
+
+---
+
+## Part 8 — FAQ
+
+**Q: Where's the freshwater (F) slider that the other docs mention?**
+A: It doesn't exist in this version. This app uses the **original Stommel 1961 relaxation model**, where freshwater forcing is implicit in the equilibrium salinities (S₁ᵉᵍ, S₂ᵉᵍ) and the relaxation rate λ. The bifurcation parameter is **ΔT = T₁ − T₂**, which you control with the temperature sliders.
+
+**Q: Where's the Export button?**
+A: It doesn't exist either. If you need the raw data, hit the API directly:
+```bash
+curl -X POST http://localhost:8000/api/simulate \
+  -H "Content-Type: application/json" \
+  -d @your_params.json > result.json
+```
+See [API Reference](/api-reference/overview) for the request schema.
+
+**Q: What does "Sv" mean?**
+A: Sverdrup. 1 Sv = one million cubic metres of water per second. The real Atlantic AMOC is about 17 Sv.
+
+**Q: What does "psu" mean?**
+A: Practical Salinity Unit. Roughly equivalent to grams of salt per kilogram of water. Ocean water is typically 33–37 psu.
+
+**Q: My simulation says steady_state_reached: false. Is that bad?**
+A: It just means the system was still drifting at the end of t_max. Either crank up t_max (e.g. to 6000 years) or accept it — you may genuinely be in a slow transient near a tipping point.
+
+**Q: What's the right reading order if I want to actually understand the science?**
+A: 1) [Stommel 1961](/theory/stommel-1961) for context, 2) [Two-Box Model](/theory/two-box-model) for the equations, 3) [Bifurcations & Hysteresis](/theory/bifurcations-hysteresis) for why collapse happens. Then come back here and the experiments will make a lot more sense.
+
+**Q: Is this a real climate model?**
+A: No. It's the simplest possible model of thermohaline circulation — two well-mixed boxes and four numbers. It's a *conceptual* model. Real AMOC projections come from coupled GCMs that are millions of times more complex. The point of this simulator is to build intuition for *why* tipping points exist, not to predict the real ocean's future.
+
+---
+
+## Part 9 — Cheat Sheet
+
+```
+START:    Terminal 1: cd backend  && uv run uvicorn api:app --reload
+          Terminal 2: cd frontend && npm run dev
+          Browser:    http://localhost:5173
+
+DEFAULTS: Click [Reset] (red button) to restore Stommel 1961 defaults
+
+PRESETS:  Normal AMOC      → strong, modern Atlantic
+          Weakened         → near tipping, fragile
+          Collapsed        → tipped over, stuck
+          Stommel 1961     → bistable, classic textbook setup
+
+TIP IT:   Move T_2 from 5 °C up to ~12 °C → run → watch q crash
+
+S-CURVE:  Click [Compute Bifurcation Diagram] (blue) → wait 15s
+
+NOISE:    Open Stochastic Forcing → set noise_amplitude ~3e-5 → run
+          several times to see different realisations
+
+STOP:     Ctrl+C in each terminal
+```
+
+---
+
+**Next**: Once you can run the app comfortably, jump to [Running Experiments](/simulator/running-experiments) for more guided investigations, or [Parameters](/simulator/parameters) for the full reference.

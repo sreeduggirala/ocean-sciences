@@ -1,8 +1,13 @@
 """
 FastAPI application for Stommel model.
 """
-from fastapi import FastAPI
+import os
+from pathlib import Path
+
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from concurrent.futures import ThreadPoolExecutor
 import asyncio
 
@@ -19,10 +24,15 @@ from schemas import (
 
 app = FastAPI(title="Stommel Circulation Model", version="0.1.0")
 
-# CORS middleware for development (allows requests from frontend on localhost:5173)
+# CORS: only needed when frontend is hosted on a different origin (dev or split deploy).
+# In single-service production deploys, the frontend is served from the same origin.
+_cors_origins = os.environ.get(
+    "CORS_ALLOW_ORIGINS",
+    "http://localhost:5173,http://localhost:3000",
+).split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[o.strip() for o in _cors_origins if o.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -30,6 +40,10 @@ app.add_middleware(
 
 # Thread pool for long-running computations
 executor = ThreadPoolExecutor(max_workers=2)
+
+# API routes are mounted under /api so the frontend (which calls /api/*) works
+# whether served by the dev Vite proxy or by this app in production.
+api_router = APIRouter(prefix="/api")
 
 
 def _create_model_from_request(req: SimulationRequest | BifurcationRequest) -> StommelModel:
@@ -48,13 +62,13 @@ def _create_model_from_request(req: SimulationRequest | BifurcationRequest) -> S
     )
 
 
-@app.get("/health")
+@api_router.get("/health")
 async def health():
     """Health check endpoint."""
     return {"status": "ok"}
 
 
-@app.post("/simulate", response_model=SimulationResponse)
+@api_router.post("/simulate", response_model=SimulationResponse)
 async def simulate(request: SimulationRequest):
     """
     Run a time integration of the Stommel model.
@@ -103,7 +117,7 @@ async def simulate(request: SimulationRequest):
     )
 
 
-@app.post("/bifurcation", response_model=BifurcationResponse)
+@api_router.post("/bifurcation", response_model=BifurcationResponse)
 async def bifurcation(request: BifurcationRequest):
     """
     Compute bifurcation diagram by sweeping temperature difference ΔT = T_1 - T_2.
@@ -138,7 +152,7 @@ async def bifurcation(request: BifurcationRequest):
     return BifurcationResponse(**result)
 
 
-@app.get("/presets", response_model=PresetsResponse)
+@api_router.get("/presets", response_model=PresetsResponse)
 async def get_presets():
     """
     Get named experiment configurations.
@@ -227,7 +241,35 @@ async def get_presets():
     return PresetsResponse(presets=presets)
 
 
+app.include_router(api_router)
+
+
+# Serve the built React frontend (single-service deployment).
+# FRONTEND_DIST may be set explicitly; otherwise we look for ../frontend/dist
+# relative to this file (works in the Docker image where the dist is copied in).
+_default_dist = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+_frontend_dist = Path(os.environ.get("FRONTEND_DIST", _default_dist))
+
+if _frontend_dist.is_dir():
+    assets_dir = _frontend_dist / "assets"
+    if assets_dir.is_dir():
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/")
+    async def index():
+        return FileResponse(_frontend_dist / "index.html")
+
+    @app.get("/{full_path:path}")
+    async def spa_fallback(full_path: str):
+        # Serve a real file if it exists (favicon, etc.), otherwise fall back to index.html
+        candidate = _frontend_dist / full_path
+        if candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(_frontend_dist / "index.html")
+
+
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", "8000"))
+    uvicorn.run(app, host="0.0.0.0", port=port)
