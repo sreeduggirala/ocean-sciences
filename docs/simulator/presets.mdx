@@ -5,298 +5,277 @@ description: Four curated parameter sets representing different AMOC regimes
 
 # Preset Scenarios
 
-The simulator includes **four preset parameter sets** representing distinct regimes of the Atlantic Meridional Overturning Circulation. Load them with one click and immediately see their behavior.
+The simulator includes **four preset parameter sets** representing distinct regimes of the Atlantic Meridional Overturning Circulation. Click any of the green preset buttons at the top of the control panel to instantly load them.
+
+All four presets share the same **Stommel 1961 physical coefficients** — they differ primarily in **T₂** (the polar temperature), which sets the temperature gradient ΔT = T₁ − T₂ that drives circulation. This is the bifurcation parameter in the relaxation model.
+
+| Coefficient | All presets |
+|-------------|-------------|
+| α (thermal expansion) | 2 × 10⁻⁴ /°C |
+| β (haline contraction) | 1 × 10⁻³ /psu |
+| k (circulation) | 3 × 10⁻⁹ 1/s |
+| λ (relaxation rate) | 3 × 10⁻¹¹ 1/s (~1000-yr timescale) |
+| t_max | 3000 years |
+| dt | 1 year |
+| noise | 0 |
 
 ---
 
 ## Preset 1: Normal AMOC
 
-**Description**: Baseline present-day circulation. Strong, stable, and similar to observations.
+**Backend name**: `normal_amoc`
+**Description**: Stable thermally-driven AMOC. The original Stommel (1961) baseline.
 
-### Parameters
+### Parameters (only what differs from the shared coefficients above)
 
 | Parameter | Value |
 |-----------|-------|
-| T_e | 25°C |
-| T_p | 5°C |
-| S_e0 | 36 psu |
-| S_p0 | 34 psu |
-| α | 1.5 × 10⁻⁴ /°C |
-| β | 8 × 10⁻⁴ /psu |
-| k | 1.5 × 10⁻⁶ /s |
-| **F** | **8 × 10⁻⁵ psu/s** |
-| t_max | 3000 years |
-| dt | 1 year |
-| noise | 0 |
+| T₁ | 25 °C |
+| T₂ | 5 °C |
+| **ΔT** | **20 °C** |
+| S₁ᵉᵍ | 36 psu |
+| S₂ᵉᵍ | 34 psu |
+| S₁ᵢⁿⁱᵗ | 36 psu |
+| S₂ᵢⁿⁱᵗ | 34 psu |
 
 ### What to Observe
 
 **Time series**:
-- Fast equilibration: Within ~500 years, system reaches steady state
-- Final q_sv ≈ **15–16 Sv** (strong AMOC)
-- Salinity difference ΔS ≈ **2 psu** (equator much saltier than pole)
-- Flat asymptote: System converges to stable equilibrium
+- Quick equilibration to a strong steady state
+- Final q_sv typically ~15 Sv (matches RAPID-MOCHA observations)
+- Salinity difference ΔS settles at ~2 psu
 
 **Phase portrait**:
-- Initial condition (red star) at ΔS ≈ 2 psu
-- Trajectory spirals toward green circle (attractor) on upper branch
-- No crossing of separatrix; stays in upper basin
+- Trajectory from (S₁ᵢⁿⁱᵗ, S₂ᵢⁿⁱᵗ) = (36, 34) drifts a little, then settles on the upper-branch attractor
+- Red star and green circle both on upper branch
 
 **Two-box diagram**:
-- Thick northward arrow (large q > 0)
-- Warm equatorial box (red), cold polar box (blue)
-- Label: "Thermally Driven" or "Strong AMOC"
+- Thick northward arrow (large positive q)
 
 **AMOC comparison**:
-- Model q_sv ≈ 15–16 Sv
-- Observed mean (RAPID-MOCHA) ≈ 16.9 ± 4.4 Sv
-- **Match**: Excellent! This preset is calibrated to observations
+- Blue bar matches the RAPID-MOCHA grey bar (~16.9 Sv)
 
 **Bifurcation diagram**:
-- Current F marker is far from tipping points
-- Lots of "safety margin" to the left (collapse) and right (recovery)
-- System is stable to perturbations
+- Orange X marker sits at ΔT = 20 °C, well to the right of the collapse threshold
+- Lots of "safety margin"
 
 ### Physical Interpretation
 
-This represents the **current (2000s) state of the real AMOC**:
-- Strong thermal forcing from equator-to-pole temperature difference
-- Active salt transport maintains density gradient
-- Circulation is self-sustaining and resilient
+This represents the **modern Atlantic AMOC**: strong thermal forcing wins over haline freshening; circulation is self-sustaining and resilient.
 
 ### Experiments to Try
 
-1. **Perturb salinity**: Temporarily increase S_p0 to 35 psu (freshwater input), then click Run → watch system recover to same attractor
-2. **Run multiple times with noise**: Add noise = 1×10⁻⁵ psu/s, run several times → all trajectories converge to same state
-3. **Compute bifurcation**: Click "Compute Bifurcation" → see distance to tipping point F_c1
+1. **Verify robustness**: Crank up `noise_amplitude` to 1×10⁻⁵, run several times → all trajectories converge to the same state
+2. **Find the safety margin**: Click "Compute Bifurcation Diagram" → measure ΔT distance to the nearest tipping diamond
+3. **Slowly warm the pole**: Inch T₂ upward while running → watch q_sv drop in the AMOC bar chart
 
 ---
 
 ## Preset 2: Weakened AMOC
 
-**Description**: Near-present trajectory. Circulation is noticeably weaker, approaching a tipping point.
+**Backend name**: `weakened_amoc`
+**Description**: Reduced thermal forcing — circulation noticeably weaker.
 
 ### Parameters
 
 | Parameter | Value |
 |-----------|-------|
-| T_e | 25°C |
-| T_p | 5°C |
-| S_e0 | 36 psu |
-| S_p0 | 34 psu |
-| α | 1.5 × 10⁻⁴ /°C |
-| β | 8 × 10⁻⁴ /psu |
-| k | 1.5 × 10⁻⁶ /s |
-| **F** | **1.8 × 10⁻⁴ psu/s** |
-| t_max | 3000 years |
-| dt | 1 year |
-| noise | 0 |
+| T₁ | 25 °C |
+| **T₂** | **12 °C** |
+| **ΔT** | **13 °C** |
+| S₁ᵉᵍ | 36 psu |
+| S₂ᵉᵍ | 34 psu |
+| S₁ᵢⁿⁱᵗ | 36 psu |
+| S₂ᵢⁿⁱᵗ | 34 psu |
 
 ### What to Observe
 
 **Time series**:
-- Slower equilibration: Takes ~1500–2000 years to approach steady state
-- Final q_sv ≈ **5–8 Sv** (weak AMOC)
-- Circulation strength reduced by ~50% compared to Normal AMOC
-- Trajectory shows lingering approach to equilibrium (critical slowing down?)
+- Slower equilibration (the "critical slowing down" signal)
+- Final q_sv noticeably reduced from Normal AMOC
+- Salinity gradient shrinks compared to Normal
 
 **Phase portrait**:
-- Initial condition same as Normal AMOC
-- Trajectory moves along upper branch but stops closer to the fold
-- Starting to approach the separatrix (unstable middle branch)
+- Trajectory takes longer to settle; the attractor is closer to the unstable middle branch
 
 **Two-box diagram**:
-- Thinner northward arrow (smaller q)
-- Boxes still have temperature difference, but salinity difference smaller
-- Label: "Weakened AMOC" or "Marginal"
+- Thinner arrow
 
 **AMOC comparison**:
-- Model q_sv ≈ 5–8 Sv
-- Much lower than observed mean (16.9 Sv)
-- Suggests a weakening scenario
+- Bar is well below the RAPID observed mean
 
 **Bifurcation diagram**:
-- Current F marker ≈ 1.8 × 10⁻⁴ is now in the bistable region (between F_c2 and F_c1)
-- Closer to forward tipping point (F_c1)
-- Still stable but "fragile"
+- Orange X marker is at ΔT = 13 °C, much closer to the collapse diamond
+- May be inside or near the bistable window depending on chosen parameters
 
 ### Physical Interpretation
 
-This represents a **near-future projection** of the AMOC if freshwater forcing increases:
-- Thermal forcing still supports circulation but haline forcing opposes it
-- Increasing freshwater (e.g., Greenland melt) pushes the system toward collapse
-- The state is metastable; further perturbations could trigger tipping
+A **near-future projection** of the AMOC under polar amplification. Polar warming has shrunk ΔT, weakening the thermally-driven flow.
 
 ### Experiments to Try
 
-1. **Find the tipping point**: Compute bifurcation diagram → note distance to F_c1 ≈ 2.0 × 10⁻⁴
-2. **Test proximity to bifurcation**: Add noise = 2×10⁻⁵ psu/s, run multiple times → occasionally see jumps to lower branch (noise-induced tipping)
-3. **Slow approach**: Note the time series bends more gradually than Normal AMOC → suggests marginal stability
+1. **Find the tipping point**: Inch T₂ up further (12 → 14 → 16) and watch q crash
+2. **Stochastic tipping**: Set noise_amplitude to 3×10⁻⁵ and run 5–10 times — some runs will collapse, some won't
+3. **Compute bifurcation**: See exactly where ΔT_crit sits
 
 ---
 
 ## Preset 3: Collapsed AMOC
 
-**Description**: Post-tipping state. Circulation has collapsed to a weak or reversed regime.
+**Backend name**: `collapsed_amoc`
+**Description**: Near-collapsed state. ΔT is very small and the polar box starts fresher (lower salinity gradient).
 
 ### Parameters
 
 | Parameter | Value |
 |-----------|-------|
-| T_e | 25°C |
-| T_p | 5°C |
-| S_e0 | 36 psu |
-| S_p0 | 34.5 psu |
-| α | 1.5 × 10⁻⁴ /°C |
-| β | 8 × 10⁻⁴ /psu |
-| k | 1.5 × 10⁻⁶ /s |
-| **F** | **3 × 10⁻⁴ psu/s** |
-| t_max | 3000 years |
-| dt | 1 year |
-| noise | 0 |
+| T₁ | 25 °C |
+| **T₂** | **20 °C** |
+| **ΔT** | **5 °C** |
+| S₁ᵉᵍ | 36 psu |
+| S₂ᵉᵍ | 34 psu |
+| S₁ᵢⁿⁱᵗ | 36 psu |
+| **S₂ᵢⁿⁱᵗ** | **36.5 psu** (saltier than equator → reversed gradient) |
 
 ### What to Observe
 
 **Time series**:
-- q_sv approaches **0 or slightly negative** (circulation near-zero or reversed)
-- Initial drop suggests jump (or slow transition) to lower branch
-- System stays weak even over 3000 years
-- Polar salinity S_p rises (becomes less fresh) due to weak northward salt transport
+- q_sv ends up near zero or slightly negative (haline-driven reversal)
+- System never recovers a strong AMOC
 
 **Phase portrait**:
-- Initial condition on upper branch (ΔS ≈ 1.5)
-- Trajectory jumps or drifts to lower branch (small ΔS or negative)
-- Red star and green circle are far apart (different branches)
+- Trajectory pulled toward the lower (collapsed/haline) branch
 
 **Two-box diagram**:
-- Arrow is nearly horizontal or reversed (q ≈ 0 or q < 0)
-- Equatorial box warm but not saltier than polar box (ΔS < 0)
-- Label: "Collapsed" or "Reversed"
+- Arrow is small or reversed (q ≤ 0)
 
 **AMOC comparison**:
-- Model q_sv ≈ 0–2 Sv (or negative)
-- Drastically below observations (16.9 Sv)
-- Shows what the ocean would look like if AMOC tipped
+- Bar is near zero; dramatically below the observed value
 
 **Bifurcation diagram**:
-- Current F = 3 × 10⁻⁴ is well beyond F_c1 (collapse threshold)
-- Only lower branch is stable; upper branch is gone
-- No escape route without reducing F to F < F_c2
+- Orange X is at ΔT = 5 °C, well to the left of the collapse diamond — only the lower branch exists
 
 ### Physical Interpretation
 
-This represents a **collapsed AMOC state**, potentially resembling:
-- **Ice Age circulation** (inferred from paleoclimate)
-- **Younger Dryas** cooling event (1,200 years of disrupted AMOC)
-- **Worst-case future scenario** if tipping is triggered
+A **collapsed AMOC state**, qualitatively similar to:
+- Inferred glacial / Heinrich-event circulation
+- Worst-case future scenario after a tipping event
 
-**Key insight**: The circulation hasn't merely weakened — it's fundamentally reversed or shut down. The haline feedback dominates so strongly that thermal forcing cannot restore northward flow.
+The thermal drive is so weak (ΔT = 5 °C) that the haline mode dominates and the upper branch doesn't exist as a stable attractor.
 
 ### Experiments to Try
 
-1. **Test hysteresis**: Load this preset, note q_sv ≈ 0. Then:
-   - Reduce F slider to 1.5 × 10⁻⁴ (near F_c2) and run → still collapsed
-   - Reduce further to 0.5 × 10⁻⁴ (well below F_c2) and run → should suddenly recover to upper branch
-2. **Slow recovery**: Even after recovery, polar salinity S_p remains high initially; watch slow salinity adjustment
-3. **Compare with Normal AMOC**: Load Normal AMOC, compute bifurcation, then load Collapsed → visualize they're on different branches
+1. **Try to recover**: Drag T₂ back down to 5 °C → run → does it recover, or is it stuck? (Initial conditions matter near tipping.)
+2. **Cold start**: Set S₂ᵢⁿⁱᵗ back to 34 and re-run → see whether different initial conditions give different fates
+3. **Compare with Normal**: Load Normal AMOC, compute bifurcation, then load Collapsed → visualize they sit on different branches
 
 ---
 
 ## Preset 4: Stommel 1961 Original
 
-**Description**: Replica of the parameter values Stommel used in his seminal 1961 paper.
+**Backend name**: `stommel_original`
+**Description**: Stommel's 1961 parameter values with moderate thermal forcing (ΔT = 17.5 °C).
 
 ### Parameters
 
 | Parameter | Value |
 |-----------|-------|
-| T_e | 25°C |
-| T_p | 5°C |
-| S_e0 | 36 psu |
-| S_p0 | 34 psu |
-| α | 1.5 × 10⁻⁴ /°C |
-| β | 8 × 10⁻⁴ /psu |
-| k | 1.5 × 10⁻⁶ /s |
-| **F** | **1.0 × 10⁻⁴ psu/s** |
-| t_max | 3000 years |
-| dt | 1 year |
-| noise | 0 |
+| T₁ | 25 °C |
+| **T₂** | **7.5 °C** |
+| **ΔT** | **17.5 °C** |
+| S₁ᵉᵍ | 36 psu |
+| S₂ᵉᵍ | 34 psu |
+| S₁ᵢⁿⁱᵗ | 36 psu |
+| S₂ᵢⁿⁱᵗ | 34 psu |
 
 ### What to Observe
 
 **Time series**:
-- Final q_sv ≈ **10–12 Sv** (intermediate strength)
-- Moderate equilibration time (~1000 years)
-- System reaches a stable intermediate state
-
-**Phase portrait**:
-- Upper branch, but closer to the separatrix than Normal AMOC
+- Intermediate equilibration time
+- Final q_sv between Normal and Weakened — moderate but stable
 
 **Bifurcation diagram**:
-- F ≈ 1 × 10⁻⁴ is *in the bistable region* (between F_c2 and F_c1)
-- Slightly closer to F_c2 (recovery threshold)
+- Orange X is at ΔT = 17.5 °C, often **inside the bistable region** depending on parameters
+- The classic regime in which Stommel originally demonstrated bistability and hysteresis
 
 ### Physical Interpretation
 
-Stommel's original parameters represent a state where **bistability is clearly present**:
-- Two stable equilibria exist (upper and lower branches)
-- The system can tip if pushed past F_c1 or recover if reduced past F_c2
+The setup Stommel used in his 1961 *Tellus* paper to demonstrate that two stable circulation regimes can coexist. Use this preset to reproduce the famous S-curve.
 
 ### Experiments to Try
 
-1. **Reproduce Stommel's S-curve**: Compute bifurcation → see the classic fold bifurcation
-2. **Demonstrate hysteresis loop**:
-   - Start with this preset (F = 1 × 10⁻⁴) → run → note upper branch
-   - Increase F to 2.5 × 10⁻⁴ → run → collapse to lower branch
-   - Decrease F back to 1 × 10⁻⁴ → run → still on lower branch (hysteresis!)
-   - Continue decreasing to 0.5 × 10⁻⁴ → run → suddenly recover (beyond F_c2)
-3. **Historical significance**: Read [Stommel 1961](/theory/stommel-1961) and [Bifurcations & Hysteresis](/theory/bifurcations-hysteresis) to understand why these parameters are historically important
+1. **Reproduce Stommel's S-curve**: Click Compute Bifurcation Diagram → see the classic fold
+2. **Demonstrate hysteresis**:
+   - Start here → run → note upper branch
+   - Drag T₂ up to 20 °C → run → collapse to lower branch
+   - Drag T₂ back to 7.5 °C → run → still on the lower branch (hysteresis!)
+   - Drag T₂ even lower (e.g. 0 °C) → run → AMOC suddenly recovers
+3. **Read the original**: See [Stommel 1961](/theory/stommel-1961) and [Bifurcations & Hysteresis](/theory/bifurcations-hysteresis)
 
 ---
 
 ## Comparison: Presets at a Glance
 
 | Aspect | Normal | Weakened | Collapsed | Stommel 1961 |
-|--------|--------|----------|-----------|-------------|
-| **Freshwater F** | 0.8e-4 | 1.8e-4 | 3.0e-4 | 1.0e-4 |
-| **Final q_sv** | ~15 Sv | ~5 Sv | ~0 Sv | ~10 Sv |
-| **Regime** | Strong, stable | Weak, marginal | Collapsed | Intermediate, bistable |
-| **In bifurcation diagram** | Left (monostable) | Middle (bistable) | Right (monostable) | Middle (bistable) |
-| **Time to equilibrium** | ~500 years | ~1500 years | ~1000 years | ~800 years |
-| **Resembles** | Present AMOC | Near-future risk | Ice Age / worst-case | Stommel's setup |
+|--------|--------|----------|-----------|--------------|
+| **T₂ (°C)** | 5 | 12 | 20 | 7.5 |
+| **ΔT (°C)** | 20 | 13 | 5 | 17.5 |
+| **S₂ᵢⁿⁱᵗ (psu)** | 34 | 34 | 36.5 | 34 |
+| **Final q_sv** | ~15 Sv | weakened | ~0 Sv | intermediate |
+| **Regime** | Strong, stable | Marginal | Collapsed (haline) | Bistable, classic |
+| **In bifurcation diagram** | Right (monostable strong) | Near collapse | Left (monostable weak) | Inside bistable window |
+| **Resembles** | Present AMOC | Near-future risk | Glacial / worst-case | Stommel's textbook setup |
 
 ---
 
 ## Using Presets Effectively
 
 ### Quick Exploration
-- Click a preset name
-- Click "Run Simulation"
-- Observe the 6 visualizations populate
-- Compare to other presets
+
+1. Click a preset name → all sliders snap to that preset's values
+2. Click **Run Simulation**
+3. Observe the 5 visualization panels populate
+4. Compare to other presets
 
 ### Systematic Study
+
 1. Load **Normal AMOC** → run → note equilibrium q_sv
-2. Load **Weakened AMOC** → run → observe gradual weakening
-3. Load **Collapsed AMOC** → run → see near-zero circulation
-4. Try to recover: Reduce F slider manually and re-run to find F_c2
+2. Load **Weakened** → run → observe gradual weakening
+3. Load **Collapsed** → run → see near-zero circulation
+4. Try to recover from collapsed: lower T₂ slider manually and re-run
 
 ### Bifurcation Analysis
-1. Load **Stommel 1961 Original**
-2. Click **"Compute Bifurcation"**
+
+1. Load **Stommel 1961**
+2. Click **Compute Bifurcation Diagram**
 3. Observe the S-curve with hysteresis window shaded
-4. Load **Normal AMOC** and re-compute → see how S-curve shifts (F_c1, F_c2 both increase)
+4. Load **Normal AMOC** and re-compute → see how the curve looks at different starting ΔT
 
 ---
 
 ## Can I Modify a Preset?
 
 Yes! Load a preset, then:
-- Adjust any sliders (parameters)
-- Click "Run Simulation" again
-- The system uses your modified parameters, not the preset
+- Adjust any sliders
+- Click **Run Simulation** again — it uses your modified parameters
+- To revert to the preset's original values, click its button again
+- To restore the **factory defaults** (the StommelModel dataclass defaults), click the red **Reset** button
 
-To revert to the original preset, click its button again.
+---
+
+## Loading Presets via the API
+
+The presets endpoint returns a JSON object wrapping a `presets` list. Each preset has `name`, `description`, and `params`:
+
+```bash
+curl -s http://localhost:8000/api/presets | jq '.presets[].name'
+# "normal_amoc"
+# "weakened_amoc"
+# "collapsed_amoc"
+# "stommel_original"
+```
+
+See [GET /api/presets](/api-reference/presets) for the full schema.
 
 ---
 

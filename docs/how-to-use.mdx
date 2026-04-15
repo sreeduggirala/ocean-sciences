@@ -108,7 +108,7 @@ From top to bottom:
 7. **[Reset]** (red) — restores all sliders to the original Stommel 1961 defaults.
 8. **[Compute Bifurcation Diagram]** (blue) — runs ~80–200 mini-simulations to draw the S-curve. Takes 10–30 seconds.
 
-> **Note:** There is **no Freshwater (F) slider** and **no Export button**, even though some other doc pages mention them. The bifurcation parameter in this model is **ΔT = T₁ − T₂**, which you control by moving the T₂ slider.
+> **Note:** There is **no Freshwater (F) slider** and **no Export button** in this app. Many textbook treatments of Stommel's model use an explicit `F` parameter, but this implementation uses the original 1961 *relaxation* formulation. The bifurcation parameter is **ΔT = T₁ − T₂**, which you control by moving the T₂ slider.
 
 ### The Six Visualizations (right column)
 
@@ -280,7 +280,7 @@ This takes about 90 seconds and is the single most important demo in this app.
 
 ## Part 8 — FAQ
 
-**Q: Where's the freshwater (F) slider that the other docs mention?**
+**Q: Where's the freshwater (F) slider that I've seen in other Stommel-model writeups?**
 A: It doesn't exist in this version. This app uses the **original Stommel 1961 relaxation model**, where freshwater forcing is implicit in the equilibrium salinities (S₁ᵉᵍ, S₂ᵉᵍ) and the relaxation rate λ. The bifurcation parameter is **ΔT = T₁ − T₂**, which you control with the temperature sliders.
 
 **Q: Where's the Export button?**

@@ -60,27 +60,27 @@ Stommel showed mathematically that the answer is **neither straightforward nor r
 
 ### The Mathematics (Sketch)
 
-Stommel's two-box model can be summarized as:
+Stommel's original (1961) two-box model uses a **relaxation-toward-equilibrium** salinity forcing rather than a constant freshwater flux:
 
-$$\frac{dS_e}{dt} = -q(S_e - S_p) + F$$
+$$\frac{dS_1}{dt} = -\lambda(S_1 - S_1^0) + q(S_2 - S_1)$$
 
-$$\frac{dS_p}{dt} = +q(S_e - S_p) - F$$
+$$\frac{dS_2}{dt} = -\lambda(S_2 - S_2^0) + q(S_1 - S_2)$$
 
-Where $q = k[\alpha \Delta T - \beta \Delta S]$ is the circulation strength, and $F$ is freshwater forcing.
+Where $q = k[\alpha \Delta T - \beta \Delta S]$ is the circulation strength, $\lambda$ is the salinity relaxation rate (~1000-year timescale), and $S_i^0$ are equilibrium target salinities. (Many later papers use a simplified constant-flux variant $\dot S_e = -q\Delta S + F$; this simulator implements the relaxation form.)
 
-At steady state ($\frac{dS_e}{dt} = 0$), this yields a **quadratic equation** in the salinity difference:
+At steady state ($\frac{dS_i}{dt} = 0$), the system yields a **quadratic equation** in the salinity difference:
 
-$$k\beta(\Delta S)^2 - k\alpha\Delta T \cdot \Delta S + F = 0$$
+$$2k\beta(\Delta S)^2 - (2k\alpha\Delta T + \lambda)\Delta S + \lambda \Delta S^0 = 0$$
 
 A quadratic can have **0, 1, or 2 real roots**:
 - **2 roots** → two stable states (bistable)
 - **1 root** → saddle-node bifurcation (tipping point)
-- **0 roots** → no equilibrium (physically impossible in this model)
+- **0 roots** → no equilibrium
 
-The discriminant $\Delta = (k\alpha\Delta T)^2 - 4k\beta F$ determines which regime:
-- $\Delta > 0$: bistable (hysteresis region)
-- $\Delta = 0$: at the tipping point
-- $\Delta < 0$: theoretically impossible, but mathematically this never happens because one branch always exists
+The discriminant $\mathcal{D} = (2k\alpha\Delta T + \lambda)^2 - 8k\beta\lambda\Delta S^0$ determines which regime:
+- $\mathcal{D} > 0$: two equilibria (bistable / hysteresis region)
+- $\mathcal{D} = 0$: at the saddle-node bifurcation
+- $\mathcal{D} < 0$: only one equilibrium (the haline / collapsed branch)
 
 ---
 

@@ -1,20 +1,22 @@
 ---
-title: "POST /bifurcation"
-description: Compute a bifurcation diagram by sweeping freshwater forcing
+title: "POST /api/bifurcation"
+description: Compute the Stommel S-curve by sweeping the polar temperature T₂
 ---
 
-# POST /bifurcation
+# POST /api/bifurcation
 
-Compute a **bifurcation diagram** by sweeping freshwater forcing (F) in both directions (forward and backward) and tracking equilibrium circulation strength.
+Compute a **bifurcation diagram** by sweeping the polar temperature `T_2` in both directions (forward and backward) and recording the steady-state circulation strength at each value.
 
-This is the endpoint used by the "Compute Bifurcation" button in the UI.
+This is the endpoint invoked by the **Compute Bifurcation Diagram** button in the UI.
+
+> The bifurcation parameter in the original Stommel (1961) relaxation model is the temperature difference **ΔT = T₁ − T₂**. The endpoint sweeps `T_2` while holding `T_1` fixed, which is equivalent to sweeping ΔT.
 
 ---
 
 ## Endpoint
 
 ```
-POST /bifurcation
+POST /api/bifurcation
 ```
 
 ---
@@ -29,52 +31,58 @@ Content-Type: application/json
 
 ### Body (JSON)
 
+All fields are optional.
+
 ```json
 {
-  "T_e": 25,
-  "T_p": 5,
-  "S_e0": 36,
-  "S_p0": 34,
-  "alpha": 1.5e-4,
-  "beta": 8e-4,
-  "k": 1.5e-6,
-  "F_min": 0,
-  "F_max": 5e-4,
+  "T_1": 25.0,
+  "T_2": 5.0,
+  "S_1_eq": 36.0,
+  "S_2_eq": 34.0,
+  "alpha": 2.0e-4,
+  "beta": 1.0e-3,
+  "k": 3.0e-9,
+  "lam": 3.0e-11,
+  "T_2_min": 0.0,
+  "T_2_max": 20.0,
   "n_points": 200
 }
 ```
 
-### Parameter Descriptions
+### Field Reference
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| T_e | float | 25 | Equatorial temperature (°C) |
-| T_p | float | 5 | Polar temperature (°C) |
-| S_e0 | float | 36 | Initial equatorial salinity (psu) |
-| S_p0 | float | 34 | Initial polar salinity (psu) |
-| alpha | float | 1.5e-4 | Thermal expansion (1/°C) |
-| beta | float | 8e-4 | Haline contraction (1/psu) |
-| k | float | 1.5e-6 | Circulation coefficient (1/s) |
-| **F_min** | float | 0 | Minimum freshwater flux (psu/s) |
-| **F_max** | float | 5e-4 | Maximum freshwater flux (psu/s) |
-| **n_points** | int | 200 | Number of F values to sample |
+| Field | Type | Default | Units | Range | Description |
+|-------|------|---------|-------|-------|-------------|
+| `T_1` | float | 25.0 | °C | 15 – 35 | Box 1 temperature (held fixed during sweep) |
+| `T_2` | float | 5.0 | °C | -2 – 25 | Initial T₂ (only used to seed the model) |
+| `S_1_eq` | float | 36.0 | psu | 30 – 40 | Box 1 relaxation target |
+| `S_2_eq` | float | 34.0 | psu | 28 – 40 | Box 2 relaxation target |
+| `alpha` | float | 2.0e-4 | 1/°C | 0.5e-4 – 3e-4 | Thermal expansion |
+| `beta` | float | 1.0e-3 | 1/psu | 2e-4 – 2e-3 | Haline contraction |
+| `k` | float | 3.0e-9 | 1/s | 1e-10 – 1e-6 | Circulation coefficient |
+| `lam` | float | 3.0e-11 | 1/s | 1e-12 – 1e-9 | Salinity relaxation rate |
+| **`T_2_min`** | float | 0.0 | °C | -5 – 25 | Minimum T₂ in the sweep |
+| **`T_2_max`** | float | 20.0 | °C | 0 – 30 | Maximum T₂ in the sweep |
+| **`n_points`** | int | 200 | – | 10 – 500 | Number of T₂ samples (used for *each* of the forward and backward sweeps) |
+
+### Validation Rules
+
+- `T_2_min < T_2_max` enforced
+- `T_1 > T_2_min` enforced
+- All `ge`/`le` bounds enforced
 
 ### Algorithm
 
-1. **Forward sweep** (F increasing):
-   - Sample F from F_min to F_max in n_points equally-spaced steps
-   - For each F, run simulation with t_max=100 years
-   - Track equilibrium circulation q_sv_final
-   - Returns: `q_forward` array
+1. Build `n_points` values of `T_2` linearly spaced in `[T_2_min, T_2_max]`.
+2. **Forward sweep** (T₂ ↑, ΔT ↓):
+   - Start state: `[S_1_eq, S_2_eq]` (relaxation equilibrium, near upper branch)
+   - For each T₂ in increasing order: build a fresh `StommelModel`, integrate for 100 years, record the final `q`, then carry the final state into the next iteration as the new initial condition
+3. **Backward sweep** (T₂ ↓, ΔT ↑):
+   - Start state: `[S_1_eq, 38.0]` (very fresh polar box → forces lower / haline branch)
+   - For each T₂ in decreasing order: same procedure, results stored at the corresponding original index
+4. **Tipping-point detection**: scan adjacent `q` values; flag any jump with `|Δq| > 2 × 10⁻⁷ 1/s` as a tipping point.
 
-2. **Backward sweep** (F decreasing):
-   - Sample F from F_max to F_min in n_points equally-spaced steps
-   - For each F, run simulation with t_max=100 years
-   - Returns: `q_backward` array
-
-3. **Bifurcation point detection**:
-   - Identify sudden jumps in q between adjacent F values (magnitude > 2×10⁻⁷ 1/s)
-   - Mark these as tipping points
+This continuation strategy is what reveals hysteresis: forward sweep traces the upper branch until it dies, backward sweep traces the lower branch.
 
 ---
 
@@ -84,305 +92,221 @@ Content-Type: application/json
 
 ```json
 {
-  "parameters": {
-    "T_e": 25,
-    "T_p": 5,
-    "S_e0": 36,
-    "S_p0": 34,
-    "alpha": 1.5e-4,
-    "beta": 8e-4,
-    "k": 1.5e-6,
-    "F_min": 0,
-    "F_max": 5e-4,
-    "n_points": 200
-  },
-  "F_values": [0, 2.5e-5, 5e-5, ..., 5e-4],
-  "q_forward": [2.5e-9, 2.4e-9, 2.3e-9, ..., -1e-10],
-  "q_backward": [2.5e-9, 2.4e-9, 2.3e-9, ..., -5e-11],
-  "q_sv_forward": [17.5, 17.3, 17.1, ..., -0.7],
-  "q_sv_backward": [17.5, 17.3, 17.1, ..., -0.35],
-  "tipping_points": {
-    "F_c1": 2.0e-4,
-    "F_c2": 1.0e-4,
-    "q_at_F_c1": 2.1e-9,
-    "q_at_F_c2": 2.0e-9
-  },
-  "computation_time_sec": 25.4
+  "T_2_values": [0.0, 0.10, 0.20, ..., 20.0],
+  "delta_T_values": [25.0, 24.90, 24.80, ..., 5.0],
+  "q_forward": [3.5e-9, 3.48e-9, ..., 0.1e-9],
+  "q_backward": [3.5e-9, 3.48e-9, ..., 0.05e-9],
+  "tipping_points": [
+    {"T_2": 14.5, "delta_T": 10.5, "q": 0.2e-9, "direction": "forward"},
+    {"T_2": 3.0,  "delta_T": 22.0, "q": 3.0e-9, "direction": "backward"}
+  ]
 }
 ```
 
-### Field Descriptions
+### Field Reference
 
 | Field | Type | Description |
 |-------|------|-------------|
-| parameters | object | Echo of input parameters |
-| F_values | array | F points sampled (length = n_points) |
-| q_forward | array | Equilibrium q (1/s) for forward sweep |
-| q_backward | array | Equilibrium q (1/s) for backward sweep |
-| q_sv_forward | array | Same as q_forward but in Sverdrups |
-| q_sv_backward | array | Same as q_backward but in Sverdrups |
-| tipping_points | object | Detected bifurcation points |
-| tipping_points.F_c1 | float | Forward tipping point (collapse threshold) |
-| tipping_points.F_c2 | float | Backward tipping point (recovery threshold) |
-| tipping_points.q_at_F_c1 | float | q value at collapse point (1/s) |
-| tipping_points.q_at_F_c2 | float | q value at recovery point (1/s) |
-| computation_time_sec | float | Total wall-clock time |
+| `T_2_values` | array of float | The `n_points` T₂ values swept (°C, increasing order) |
+| `delta_T_values` | array of float | `T_1 − T_2_values` (°C, decreasing order) |
+| `q_forward` | array of float | Steady-state circulation `q` (1/s) from the forward (T₂ ↑) sweep at each `T_2` |
+| `q_backward` | array of float | Steady-state circulation `q` (1/s) from the backward (T₂ ↓) sweep at each `T_2` |
+| `tipping_points` | array of object | Detected jumps. Each item has `T_2`, `delta_T`, `q`, and `direction` ∈ `"forward"` / `"backward"` |
 
-### Interpretation
-
-- **F_c1**: Freshwater flux where upper branch ends; collapse occurs beyond this
-- **F_c2**: Freshwater flux where lower branch ends; recovery occurs beyond this
-- **Hysteresis width**: F_c1 − F_c2 (F range where two states coexist)
-- **Forward/backward**: Show both branches; difference reveals hysteresis
+> The response contains `q` in **1/s only**. To convert to Sverdrups multiply by `V_BOX / 1e6 = 7×10⁹`. There are no `q_sv_forward` / `q_sv_backward` fields, no `F_values`, no `F_c1` / `F_c2`, and no `computation_time_sec` — the older API docs were wrong about all of these.
 
 ---
 
 ## Examples
 
-### Minimal Request (Default Parameters)
+### Minimal request (defaults)
 
 ```bash
-curl -X POST http://localhost:8000/bifurcation \
+curl -X POST http://localhost:8000/api/bifurcation \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
 
-Uses default parameters and 200 F points.
-
-### Custom F Range and Resolution
+### Custom sweep range and resolution
 
 ```bash
-curl -X POST http://localhost:8000/bifurcation \
+curl -X POST http://localhost:8000/api/bifurcation \
   -H "Content-Type: application/json" \
   -d '{
-    "F_min": 0.5e-4,
-    "F_max": 3e-4,
+    "T_2_min": 5,
+    "T_2_max": 18,
     "n_points": 100
   }'
 ```
 
-Focuses on the bistable region with coarser resolution (faster).
-
-### Python Client Example
+### Python — plot the S-curve
 
 ```python
 import requests
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
-# Request bifurcation diagram
-response = requests.post('http://localhost:8000/bifurcation', json={
-    "F_min": 0,
-    "F_max": 5e-4,
-    "n_points": 200
+V_BOX = 7e15  # m^3, Sv conversion
+SV = V_BOX / 1e6
+
+r = requests.post('http://localhost:8000/api/bifurcation', json={
+    "T_2_min": 0,
+    "T_2_max": 20,
+    "n_points": 200,
 })
+data = r.json()
 
-data = response.json()
+dT = np.array(data['delta_T_values'])
+q_fwd = np.array(data['q_forward']) * SV
+q_bwd = np.array(data['q_backward']) * SV
 
-# Extract results
-F = np.array(data['F_values'])
-q_fwd = np.array(data['q_sv_forward'])
-q_bwd = np.array(data['q_sv_backward'])
-F_c1 = data['tipping_points']['F_c1']
-F_c2 = data['tipping_points']['F_c2']
-
-# Plot S-curve
 fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot(dT, q_fwd, 'b-', linewidth=2, label='Forward sweep (T₂↑, ΔT↓)')
+ax.plot(dT, q_bwd, 'o-', color='orange', linewidth=2, label='Backward sweep (T₂↓, ΔT↑)')
 
-ax.plot(F*1e4, q_fwd, 'b-', linewidth=2, label='Forward (increasing F)')
-ax.plot(F*1e4, q_bwd, 'o-', color='orange', linewidth=2, label='Backward (decreasing F)')
+for tp in data['tipping_points']:
+    ax.plot(tp['delta_T'], tp['q'] * SV, 'r*', markersize=15)
 
-# Mark bifurcation points
-ax.plot(F_c1*1e4, data['tipping_points']['q_at_F_c1']*7e15/1e6, 'r*',
-        markersize=15, label=f'F_c1 = {F_c1:.1e}')
-ax.plot(F_c2*1e4, data['tipping_points']['q_at_F_c2']*7e15/1e6, 'rs',
-        markersize=10, label=f'F_c2 = {F_c2:.1e}')
-
-# Shade bistable region
-ax.axvspan(F_c2*1e4, F_c1*1e4, alpha=0.2, color='yellow', label='Bistable region')
-
-ax.set_xlabel('Freshwater Flux (×10⁻⁴ psu/s)')
-ax.set_ylabel('Circulation (Sv)')
-ax.set_title('Bifurcation Diagram (S-Curve)')
-ax.legend()
-ax.grid(True, alpha=0.3)
-
+ax.set_xlabel('ΔT = T₁ − T₂ (°C)')
+ax.set_ylabel('Circulation q (Sv)')
+ax.set_title('Stommel S-Curve (relaxation model)')
+ax.invert_xaxis()  # Forward sweep direction
+ax.legend(); ax.grid(alpha=0.3)
 plt.tight_layout()
 plt.savefig('bifurcation.png', dpi=150)
 plt.show()
-
-print(f"Hysteresis width: {(F_c1 - F_c2)*1e4:.2f} × 10⁻⁴ psu/s")
 ```
 
-### JavaScript/Fetch Example
+### JavaScript / fetch
 
 ```javascript
-fetch('http://localhost:8000/bifurcation', {
+const r = await fetch('http://localhost:8000/api/bifurcation', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    F_min: 0,
-    F_max: 5e-4,
-    n_points: 200
+    T_2_min: 0, T_2_max: 20, n_points: 200,
   })
-})
-  .then(res => res.json())
-  .then(data => {
-    const F = data.F_values;
-    const q_fwd = data.q_sv_forward;
-    const q_bwd = data.q_sv_backward;
-    const F_c1 = data.tipping_points.F_c1;
-    const F_c2 = data.tipping_points.F_c2;
+});
+const data = await r.json();
 
-    console.log(`Forward tipping at F = ${F_c1.toExponential(2)} psu/s`);
-    console.log(`Backward recovery at F = ${F_c2.toExponential(2)} psu/s`);
-    console.log(`Hysteresis width: ${((F_c1 - F_c2)*1e4).toFixed(2)} × 10⁻⁴ psu/s`);
+const SV = 7e9;
+const dT = data.delta_T_values;
+const q_fwd_sv = data.q_forward.map(q => q * SV);
+const q_bwd_sv = data.q_backward.map(q => q * SV);
 
-    // Pass to plotting library (e.g., Plotly, D3)
-    plotBifurcation(F, q_fwd, q_bwd, F_c1, F_c2);
-  });
+console.log(`Tipping points: ${data.tipping_points.length}`);
+data.tipping_points.forEach(tp => {
+  console.log(`  ${tp.direction} jump at ΔT=${tp.delta_T.toFixed(1)}°C, q=${(tp.q*SV).toFixed(2)} Sv`);
+});
 ```
 
 ---
 
 ## Common Use Cases
 
-### 1. Analyze Sensitivity to Temperature
+### 1. Sensitivity to thermal expansion
 
 ```python
-# Baseline
-resp1 = requests.post('http://localhost:8000/bifurcation',
-                      json={"T_p": 5})
-data1 = resp1.json()
-F_c1_baseline = data1['tipping_points']['F_c1']
-
-# Warmer pole (polar amplification)
-resp2 = requests.post('http://localhost:8000/bifurcation',
-                      json={"T_p": 8})
-data2 = resp2.json()
-F_c1_warm = data2['tipping_points']['F_c1']
-
-print(f"ΔT=20°C: F_c1 = {F_c1_baseline:.1e}")
-print(f"ΔT=17°C: F_c1 = {F_c1_warm:.1e}")
-print(f"Effect: Warming pole lowers critical F by {(F_c1_baseline-F_c1_warm)*1e4:.2f}×10⁻⁴")
-```
-
-### 2. Compare Parameter Sets
-
-```python
-scenarios = {
-    "Current": {"alpha": 1.5e-4, "beta": 8e-4},
-    "High α": {"alpha": 2.5e-4, "beta": 8e-4},
-    "High β": {"alpha": 1.5e-4, "beta": 1.2e-3},
-}
-
 results = {}
-for name, params in scenarios.items():
-    resp = requests.post('http://localhost:8000/bifurcation', json=params)
-    data = resp.json()
-    F_c1 = data['tipping_points']['F_c1']
-    hysteresis = F_c1 - data['tipping_points']['F_c2']
-    results[name] = {"F_c1": F_c1, "hysteresis": hysteresis}
+for alpha in [1.0e-4, 2.0e-4, 3.0e-4]:
+    r = requests.post('http://localhost:8000/api/bifurcation',
+                      json={"alpha": alpha})
+    data = r.json()
+    fwd_tips = [tp for tp in data['tipping_points'] if tp['direction']=='forward']
+    if fwd_tips:
+        results[alpha] = fwd_tips[0]['delta_T']
 
-for name, vals in results.items():
-    print(f"{name}: F_c1={vals['F_c1']:.1e}, width={vals['hysteresis']:.1e}")
+for alpha, dT_crit in results.items():
+    print(f"α={alpha:.1e} → ΔT_crit ≈ {dT_crit:.2f}°C")
 ```
 
-### 3. Fine-Tune Around Tipping Point
+### 2. Compare presets
 
 ```python
-# Coarse sweep to find region
-resp = requests.post('http://localhost:8000/bifurcation',
-                     json={"n_points": 50})
-data = resp.json()
-F_c1_approx = data['tipping_points']['F_c1']
+# Fetch presets, then compute bifurcation for each
+presets = requests.get('http://localhost:8000/api/presets').json()['presets']
 
-# Fine sweep around tipping point
-resp_fine = requests.post('http://localhost:8000/bifurcation',
-                          json={
-                              "F_min": F_c1_approx - 1e-4,
-                              "F_max": F_c1_approx + 1e-4,
-                              "n_points": 200
-                          })
-data_fine = resp_fine.json()
-F_c1_precise = data_fine['tipping_points']['F_c1']
+for p in presets:
+    bif_params = {
+        k: v for k, v in p['params'].items()
+        if k in {'T_1', 'S_1_eq', 'S_2_eq', 'alpha', 'beta', 'k', 'lam'}
+    }
+    r = requests.post('http://localhost:8000/api/bifurcation', json=bif_params)
+    n_tips = len(r.json()['tipping_points'])
+    print(f"{p['name']:>20}: {n_tips} tipping points detected")
+```
 
-print(f"Refined F_c1: {F_c1_precise:.2e} psu/s")
+### 3. Refine around the collapse threshold
+
+```python
+# Coarse scan
+r = requests.post('http://localhost:8000/api/bifurcation',
+                  json={"n_points": 50})
+data = r.json()
+fwd_tips = [tp for tp in data['tipping_points'] if tp['direction']=='forward']
+if fwd_tips:
+    T2_approx = fwd_tips[0]['T_2']
+    # Fine scan
+    r2 = requests.post('http://localhost:8000/api/bifurcation', json={
+        "T_2_min": T2_approx - 1.0,
+        "T_2_max": T2_approx + 1.0,
+        "n_points": 200,
+    })
+    print("Refined collapse at T_2 =", r2.json()['tipping_points'][0]['T_2'])
 ```
 
 ---
 
-## Performance Characteristics
+## Performance
 
-| n_points | # Simulations | Time (typical) | Use Case |
-|----------|---------------|----------------|----------|
-| 50 | 100 | ~5 sec | Quick exploration |
-| 100 | 200 | ~10 sec | Standard |
-| 200 | 400 | ~20–30 sec | Publication quality |
-| 500 | 1000 | ~60+ sec | Very fine detail |
+| `n_points` | # mini-simulations | Wall time (typical) |
+|-----------:|-------------------:|--------------------:|
+| 50 | 100 | ~3 s |
+| 100 | 200 | ~6 s |
+| 200 (default) | 400 | ~12 s |
+| 500 | 1000 | ~30+ s |
 
-Computation time scales roughly linearly with n_points. Each simulation takes ~50–100 ms.
+Each mini-simulation uses `t_max = 100` years (hard-coded in `solver.compute_bifurcation`), which is enough to reach steady state at any single ΔT.
 
----
-
-## Output Units
-
-**Important**: The q values in the response are in **1/s** (dimensionless), not Sverdrups.
-
-To convert:
-```
-q_sv = q × (box_volume) / 10^6
-     = q × (7×10^15 m³) / 10^6
-     ≈ q × 7×10^9
-```
-
-The response includes both `q_forward/q_backward` (raw) and `q_sv_forward/q_sv_backward` (converted).
+The computation runs in a `ThreadPoolExecutor` so it doesn't block the FastAPI event loop.
 
 ---
 
-## Bifurcation Detection Algorithm
+## Tipping-Point Detection
 
-Tipping points are detected by:
+The threshold `2 × 10⁻⁷ 1/s` (≈ 1.4 Sv) is heuristic. Effects:
 
-1. Computing the magnitude of jumps between adjacent F values
-2. If |q(F_i+1) − q(F_i)| > **2×10⁻⁷** (1/s), flagging as a potential bifurcation
-3. Refining to the exact F value by bisection search
+- True saddle-node bifurcations create gigantic jumps and are reliably caught
+- Smooth transitions or very slow drifts are not flagged
+- Increase `n_points` to bracket the jump more precisely
 
-**Note**: This is a heuristic algorithm. Very close bifurcations or smooth transitions near criticality may not be precisely detected. For publication-quality bifurcation diagrams, increasing n_points improves precision.
+If you need exact threshold values, post-process the `q_forward` / `q_backward` arrays yourself (e.g. find the largest `|np.diff(q)|` index).
 
 ---
 
-## Error Handling
+## Error Cases
 
-### Invalid Parameters
+### `T_2_min >= T_2_max`
 
-```bash
-curl -X POST http://localhost:8000/bifurcation \
-  -H "Content-Type: application/json" \
-  -d '{"T_e": 10, "T_p": 20}'
-```
-
-Response (422):
-```json
-{"detail": [{"type": "value_error", "msg": "T_e must be greater than T_p"}]}
-```
-
-### F_min >= F_max
-
-```bash
-curl -X POST http://localhost:8000/bifurcation \
-  -H "Content-Type: application/json" \
-  -d '{"F_min": 3e-4, "F_max": 1e-4}'
-```
-
-Response (typically 200, but bifurcation diagram may be degenerate):
 ```json
 {
-  "parameters": {...},
-  "F_values": [3e-4, 2.5e-4, ..., 1e-4],
-  "q_forward": [...],
-  "q_backward": [...],
-  "tipping_points": null
+  "detail": [{
+    "type": "value_error",
+    "loc": ["body"],
+    "msg": "Value error, T_2_min must be less than T_2_max"
+  }]
+}
+```
+
+### `T_1 <= T_2_min`
+
+```json
+{
+  "detail": [{
+    "type": "value_error",
+    "loc": ["body"],
+    "msg": "Value error, T_1 must be greater than T_2_min"
+  }]
 }
 ```
 
@@ -390,11 +314,7 @@ Response (typically 200, but bifurcation diagram may be degenerate):
 
 ## Next Steps
 
-- See [POST /simulate](/api-reference/simulate) to run single simulations
-- See [GET /presets](/api-reference/presets) to load preset configurations
+- See [POST /api/simulate](/api-reference/simulate) for single simulations
+- See [GET /api/presets](/api-reference/presets) for preset configurations
 - Return to [Bifurcations & Hysteresis](/theory/bifurcations-hysteresis) for theory
 - See [Running Experiments](/simulator/running-experiments) for guided use
-
----
-
-**Tip**: Store bifurcation results in a database to avoid recomputing identical diagrams. The computation is deterministic (no noise) so caching is safe.

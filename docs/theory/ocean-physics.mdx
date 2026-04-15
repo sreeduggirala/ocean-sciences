@@ -109,7 +109,7 @@ Stommel's genius was recognizing that temperature and salinity represent **two a
 $$\text{Warm equatorial water} \to \text{Northward transport} \to \text{Polar warming} \to \text{Higher salinity from evaporation} \to \text{Denser water} \to \text{Stronger sinking} \to \text{Stronger circulation}$$
 
 **The loop**:
-1. The equator is warm (T_e = 25°C), the pole is cold (T_p = 5°C).
+1. The equator is warm (T₁ = 25°C), the pole is cold (T₂ = 5°C).
 2. This temperature contrast drives a density gradient that pulls warm surface water northward.
 3. As warm water moves north, it transports heat and **salt** (since warm water at the equator is salty).
 4. At the pole, this salt-enriched water sinks, strengthening the circulation.
@@ -135,7 +135,7 @@ $$\text{Freshwater input at pole} \to \text{Polar freshening} \to \text{Reduced 
 
 ## Freshwater Forcing: What It Represents
 
-In the simulator, the **freshwater flux F** is a control parameter representing:
+In **this simulator's relaxation model**, freshwater forcing is implicit in the equilibrium salinity targets (S₁ᵉᵍ, S₂ᵉᵍ) and the relaxation rate λ — there is no explicit `F` slider. A wetter polar region corresponds to a *lower* S₂ᵉᵍ. Conceptually, S₂ᵉᵍ represents the long-term net freshwater balance of the polar box, integrating:
 
 | Physical Process | What It Models |
 |------------------|----------------|
@@ -143,6 +143,8 @@ In the simulator, the **freshwater flux F** is a control parameter representing:
 | **Sea ice formation/melting** | Net freshwater from the ice-albedo feedback |
 | **Precipitation minus evaporation (P-E)** | Net moisture convergence at high latitudes |
 | **River discharge** | Arctic river runoff and estuarine freshwater flux |
+
+In simplified textbook treatments of Stommel's model, an explicit freshwater flux `F` (psu/s) replaces the relaxation forcing — that's the formulation many later papers and lecture notes use. Both forms produce the same qualitative bistability and hysteresis.
 
 Historically, at the end of the last ice age (11,700 years ago), massive freshwater influx from melting ice sheets and Lake Agassiz drainage are thought to have **triggered** (or at least amplified) the Younger Dryas cooling event — a sudden return to near-glacial conditions for ~1,200 years.
 
@@ -160,8 +162,8 @@ At the heart of the simulator is a simplified expression for how the **density d
 $$\frac{\Delta \rho}{\rho_0} = -\alpha \Delta T + \beta \Delta S$$
 
 Where:
-- $\Delta T = T_e - T_p$ (equatorial minus polar; always positive in our setup)
-- $\Delta S = S_e - S_p$ (equatorial minus polar salinity difference)
+- $\Delta T = T_1 - T_2$ (equatorial minus polar; always positive in our setup)
+- $\Delta S = S_1 - S_2$ (equatorial minus polar salinity difference)
 
 **Interpretation**:
 - When $\Delta \rho > 0$ (equatorial water is denser): Paradoxically, *lighter* polar water sinks and *heavier* equatorial water rises — no, wait. Actually, we're comparing the *same density reference*. The density difference drives a pressure gradient in the ocean interior.

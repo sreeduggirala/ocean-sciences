@@ -1,18 +1,18 @@
 ---
-title: "POST /simulate"
-description: Run a single thermohaline circulation simulation
+title: "POST /api/simulate"
+description: Run a single Stommel two-box simulation (relaxation model)
 ---
 
-# POST /simulate
+# POST /api/simulate
 
-Run a single simulation of the Stommel two-box model with specified parameters.
+Integrate the Stommel two-box thermohaline circulation model forward in time and return the full trajectory.
 
 ---
 
 ## Endpoint
 
 ```
-POST /simulate
+POST /api/simulate
 ```
 
 ---
@@ -27,45 +27,49 @@ Content-Type: application/json
 
 ### Body (JSON)
 
-All parameters are **optional** and use defaults if omitted.
+All fields are **optional** — defaults match Stommel's 1961 original parameters. Sending `{}` runs the canonical baseline simulation.
 
 ```json
 {
-  "T_e": 25,
-  "T_p": 5,
-  "S_e0": 36,
-  "S_p0": 34,
-  "alpha": 1.5e-4,
-  "beta": 8e-4,
-  "k": 1.5e-6,
-  "F": 1e-4,
+  "T_1": 25.0,
+  "T_2": 5.0,
+  "S_1_eq": 36.0,
+  "S_2_eq": 34.0,
+  "S_1_init": 36.0,
+  "S_2_init": 34.0,
+  "alpha": 2.0e-4,
+  "beta": 1.0e-3,
+  "k": 3.0e-9,
+  "lam": 3.0e-11,
   "t_max": 3000,
   "dt": 1.0,
-  "noise_amplitude": 0
+  "noise_amplitude": 0.0
 }
 ```
 
-### Parameter Descriptions
+### Field Reference
 
 | Field | Type | Default | Units | Range | Description |
 |-------|------|---------|-------|-------|-------------|
-| T_e | float | 25 | °C | 15–35 | Equatorial surface temperature |
-| T_p | float | 5 | °C | -2–15 | Polar surface temperature |
-| S_e0 | float | 36 | psu | 30–40 | Initial equatorial salinity |
-| S_p0 | float | 34 | psu | 28–40 | Initial polar salinity |
-| alpha | float | 1.5e-4 | 1/°C | 0.5e-4–3e-4 | Thermal expansion coefficient |
-| beta | float | 8e-4 | 1/psu | 2e-4–1.5e-3 | Haline contraction coefficient |
-| k | float | 1.5e-6 | 1/s | 5e-8–1e-5 | Circulation coefficient |
-| F | float | 1e-4 | psu/s | 0–5e-4 | Freshwater flux (bifurcation parameter) |
-| t_max | float | 3000 | years | 100–10000 | Total simulation duration |
-| dt | float | 1.0 | years | 0.1–100 | Output sampling interval |
-| noise_amplitude | float | 0 | psu/s | 0–5e-5 | Gaussian noise std dev (0 = deterministic) |
+| `T_1` | float | 25.0 | °C | 15 – 35 | Box 1 (equatorial) temperature |
+| `T_2` | float | 5.0 | °C | -2 – 25 | Box 2 (polar) temperature |
+| `S_1_eq` | float | 36.0 | psu | 30 – 40 | Box 1 relaxation-target salinity |
+| `S_2_eq` | float | 34.0 | psu | 28 – 40 | Box 2 relaxation-target salinity |
+| `S_1_init` | float | 36.0 | psu | 30 – 40 | Box 1 initial salinity (state at t = 0) |
+| `S_2_init` | float | 34.0 | psu | 28 – 40 | Box 2 initial salinity (state at t = 0) |
+| `alpha` | float | 2.0e-4 | 1/°C | 0.5e-4 – 3e-4 | Thermal expansion |
+| `beta` | float | 1.0e-3 | 1/psu | 2e-4 – 2e-3 | Haline contraction |
+| `k` | float | 3.0e-9 | 1/s | 1e-10 – 1e-6 | Circulation coefficient |
+| `lam` | float | 3.0e-11 | 1/s | 1e-12 – 1e-9 | Salinity relaxation rate (~1000-yr timescale) |
+| `t_max` | float | 3000 | years | 100 – 10000 | Total integration time |
+| `dt` | float | 1.0 | years | 0.1 – 100 | Output sampling interval |
+| `noise_amplitude` | float | 0.0 | psu/s | 0 – 5e-5 | Gaussian noise std (0 = deterministic) |
 
-### Validation Constraints
+### Validation Rules
 
-- `T_e > T_p` (enforced with validation error)
-- `S_e0 + S_p0 = constant` (salt conservation enforced internally)
-- All parameters within their bounds (422 error if violated)
+- All `ge`/`le` bounds enforced
+- `T_1 > T_2` enforced (custom validator)
+- Otherwise no constraints — total salt is **not** conserved (relaxation model)
 
 ---
 
@@ -75,62 +79,49 @@ All parameters are **optional** and use defaults if omitted.
 
 ```json
 {
-  "parameters": {
-    "T_e": 25,
-    "T_p": 5,
-    "S_e0": 36,
-    "S_p0": 34,
-    "alpha": 1.5e-4,
-    "beta": 8e-4,
-    "k": 1.5e-6,
-    "F": 1e-4,
-    "t_max": 3000,
-    "dt": 1.0,
-    "noise_amplitude": 0
-  },
-  "time": [0, 1, 2, 3, ..., 3000],
-  "S_e": [36.0, 35.99, 35.98, ..., 36.15],
-  "S_p": [34.0, 34.01, 34.02, ..., 33.85],
-  "q": [1.5e-9, 1.51e-9, 1.52e-9, ..., 2.1e-9],
-  "q_sv": [10.5, 10.57, 10.64, ..., 14.7],
-  "q_sv_final": 14.7,
-  "S_e_final": 36.15,
-  "S_p_final": 33.85,
+  "time": [0, 1, 2, 3, ...],
+  "S_1": [36.0, 35.99, 35.98, ...],
+  "S_2": [34.0, 34.01, 34.02, ...],
+  "q": [3.0e-9, 3.01e-9, ...],
+  "q_sv": [21.0, 21.07, ...],
   "steady_state_reached": true,
-  "computation_time_sec": 1.234
+  "final_state": [36.18, 33.82],
+  "metadata": {
+    "t_max_years": 3000,
+    "noise_amplitude": 0.0
+  }
 }
 ```
 
-### Field Descriptions
+### Field Reference
 
 | Field | Type | Description |
 |-------|------|-------------|
-| parameters | object | Echo of input parameters |
-| time | array | Time points (years), length = t_max/dt + 1 |
-| S_e | array | Equatorial salinity at each time point (psu) |
-| S_p | array | Polar salinity at each time point (psu) |
-| q | array | Circulation strength at each time point (1/s, dimensionless) |
-| q_sv | array | Circulation in Sverdrups at each time point (for convenience) |
-| q_sv_final | float | Final equilibrium circulation (Sv) |
-| S_e_final | float | Final equatorial salinity (psu) |
-| S_p_final | float | Final polar salinity (psu) |
-| steady_state_reached | bool | True if system converged to near-equilibrium by t_max |
-| computation_time_sec | float | Wall-clock time to run simulation (seconds) |
+| `time` | array of float | Time points (years) — length depends on `t_max/dt` and whether the steady-state event terminated early |
+| `S_1` | array of float | Box 1 salinity at each time point (psu) |
+| `S_2` | array of float | Box 2 salinity at each time point (psu) |
+| `q` | array of float | Circulation strength at each time point (1/s) |
+| `q_sv` | array of float | Same as `q` but converted to Sverdrups: `q × V_BOX / 1e6` where `V_BOX = 7e15 m³` |
+| `steady_state_reached` | bool | True if the integrator stopped early because `max\|dS/dt\| < 1e-10 psu/yr`. Always `false` for stochastic runs (no event detection). |
+| `final_state` | [float, float] | `[S_1_final, S_2_final]` |
+| `metadata` | object | Echoes `t_max_years` and `noise_amplitude` |
 
-### Conversion Notes
+> The response intentionally does not echo the request parameters (your client already knows them) and does not include a `computation_time_sec` field.
 
-- **q to q_sv**: `q_sv = q × (box_volume) / 10^6` where box_volume ≈ 7×10^15 m³
-- **time arrays**: Length = 1 + floor(t_max / dt); typically 3001 points for defaults
+### Conversion notes
 
-### Error Response (422 Validation Error)
+- `q_sv = q × 7×10⁹` approximately (with `V_BOX = 7 × 10¹⁵ m³` calibrated so default parameters give ~15 Sv)
+- The `time` array length is *at most* `floor(t_max / dt) + 1` for deterministic runs, but may be shorter if the steady-state event terminates early. Stochastic runs (`noise_amplitude > 0`) always return `int(t_max/dt) + 1` points.
+
+### Error Response (422)
 
 ```json
 {
   "detail": [
     {
       "type": "value_error",
-      "loc": ["body", "T_e"],
-      "msg": "T_e must be greater than T_p"
+      "loc": ["body"],
+      "msg": "Value error, T_1 must be greater than T_2"
     }
   ]
 }
@@ -140,176 +131,128 @@ All parameters are **optional** and use defaults if omitted.
 
 ## Examples
 
-### Minimal Request (Uses Defaults)
+### Minimal request (use all defaults)
 
 ```bash
-curl -X POST http://localhost:8000/simulate \
+curl -X POST http://localhost:8000/api/simulate \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
 
-Runs with all default parameters.
-
-### Full Request (Custom Parameters)
+### Custom parameters
 
 ```bash
-curl -X POST http://localhost:8000/simulate \
+curl -X POST http://localhost:8000/api/simulate \
   -H "Content-Type: application/json" \
   -d '{
-    "T_e": 25,
-    "T_p": 5,
-    "S_e0": 36,
-    "S_p0": 34,
-    "alpha": 1.5e-4,
-    "beta": 8e-4,
-    "k": 1.5e-6,
-    "F": 2.0e-4,
+    "T_1": 25,
+    "T_2": 12,
+    "S_1_eq": 36,
+    "S_2_eq": 34,
+    "S_1_init": 36,
+    "S_2_init": 34,
+    "alpha": 2.0e-4,
+    "beta": 1.0e-3,
+    "k": 3.0e-9,
+    "lam": 3.0e-11,
     "t_max": 5000,
     "dt": 2.0,
     "noise_amplitude": 1e-5
   }'
 ```
 
-### Python Client Example
+### Python client
 
 ```python
 import requests
-import json
+import matplotlib.pyplot as plt
 
-# Set up the request
-url = "http://localhost:8000/simulate"
 params = {
-    "T_e": 25,
-    "T_p": 5,
-    "S_e0": 36,
-    "S_p0": 34,
-    "alpha": 1.5e-4,
-    "beta": 8e-4,
-    "k": 1.5e-6,
-    "F": 1.5e-4,
-    "t_max": 3000,
-    "dt": 1.0,
-    "noise_amplitude": 0
+    "T_1": 25, "T_2": 5,
+    "S_1_eq": 36, "S_2_eq": 34,
+    "S_1_init": 36, "S_2_init": 34,
+    "alpha": 2.0e-4, "beta": 1.0e-3,
+    "k": 3.0e-9, "lam": 3.0e-11,
+    "t_max": 3000, "dt": 1.0,
+    "noise_amplitude": 0.0,
 }
 
-# Make request
-response = requests.post(url, json=params)
+r = requests.post('http://localhost:8000/api/simulate', json=params)
+data = r.json()
 
-# Parse response
-data = response.json()
+print(f"Final AMOC strength: {data['q_sv'][-1]:.1f} Sv")
+print(f"Steady state: {data['steady_state_reached']}")
 
-# Extract results
-t = data['time']
-q_sv = data['q_sv']
-q_final = data['q_sv_final']
-
-print(f"Final AMOC strength: {q_final:.1f} Sv")
-print(f"Steady state reached: {data['steady_state_reached']}")
-print(f"Computation time: {data['computation_time_sec']:.2f} seconds")
-
-# Plot time series
-import matplotlib.pyplot as plt
-plt.plot(t, q_sv)
+plt.plot(data['time'], data['q_sv'])
 plt.xlabel('Time (years)')
 plt.ylabel('AMOC (Sv)')
 plt.show()
 ```
 
-### JavaScript/Fetch Example
+### JavaScript / fetch
 
 ```javascript
 const params = {
-  T_e: 25,
-  T_p: 5,
-  S_e0: 36,
-  S_p0: 34,
-  alpha: 1.5e-4,
-  beta: 8e-4,
-  k: 1.5e-6,
-  F: 1.5e-4,
-  t_max: 3000,
-  dt: 1,
-  noise_amplitude: 0
+  T_1: 25, T_2: 5,
+  S_1_eq: 36, S_2_eq: 34,
+  S_1_init: 36, S_2_init: 34,
+  alpha: 2e-4, beta: 1e-3,
+  k: 3e-9, lam: 3e-11,
+  t_max: 3000, dt: 1, noise_amplitude: 0
 };
 
-fetch('http://localhost:8000/simulate', {
+const r = await fetch('http://localhost:8000/api/simulate', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(params)
-})
-  .then(res => res.json())
-  .then(data => {
-    console.log(`Final AMOC: ${data.q_sv_final.toFixed(1)} Sv`);
-    console.log(`Steady state: ${data.steady_state_reached}`);
-    // Plot or analyze further
-  })
-  .catch(err => console.error(err));
+});
+const data = await r.json();
+console.log(`Final AMOC: ${data.q_sv.at(-1).toFixed(1)} Sv`);
 ```
 
 ---
 
 ## Common Use Cases
 
-### 1. Explore a Single Parameter Set
+### 1. Sweep T₂ to find the tipping point manually
 
 ```python
-response = requests.post('http://localhost:8000/simulate', json={
-    "F": 1.5e-4,
-    "t_max": 5000
-})
-data = response.json()
-print(f"AMOC: {data['q_sv_final']:.1f} Sv, Steady: {data['steady_state_reached']}")
+for T_2 in [5, 8, 10, 12, 14, 16, 18]:
+    r = requests.post('http://localhost:8000/api/simulate',
+                      json={"T_2": T_2})
+    q_final = r.json()['q_sv'][-1]
+    print(f"T_2 = {T_2}°C (ΔT = {25 - T_2}°C) → q = {q_final:.2f} Sv")
 ```
 
-### 2. Run Multiple Scenarios to Find Tipping Point
+### 2. Stochastic ensemble at a single parameter set
 
 ```python
-for F in [0.8e-4, 1.0e-4, 1.5e-4, 2.0e-4, 2.5e-4]:
-    response = requests.post('http://localhost:8000/simulate', json={"F": F})
-    q_final = response.json()['q_sv_final']
-    print(f"F = {F:.1e} psu/s → q = {q_final:.1f} Sv")
-```
-
-### 3. Study Stochastic Sensitivity
-
-```python
-# Run same parameters 10 times with noise
-F = 1.8e-4  # Near tipping
-noise = 2e-5
-
-results = []
-for i in range(10):
-    response = requests.post('http://localhost:8000/simulate', json={
-        "F": F,
-        "noise_amplitude": noise,
-        "t_max": 3000
-    })
-    q_final = response.json()['q_sv_final']
-    results.append(q_final)
-
-print(f"AMOC range: {min(results):.1f}–{max(results):.1f} Sv")
-print(f"Collapse fraction: {sum(1 for q in results if q < 5) / len(results):.1%}")
-```
-
-### 4. Long Time Series for Paleoclimate Analysis
-
-```python
-response = requests.post('http://localhost:8000/simulate', json={
-    "t_max": 20000,
-    "dt": 10,  # Coarser output
-    "F": 1.2e-4,
-    "noise_amplitude": 1e-5
-})
-
-data = response.json()
-t = data['time']
-q = data['q_sv']
-
-# Analyze variability over time
 import numpy as np
-window = 1000
-rolling_var = [np.var(q[i:i+window]) for i in range(len(q)-window)]
-print(f"Variance increasing toward end? {rolling_var[-1] > rolling_var[0]}")
+n_runs = 20
+finals = []
+for _ in range(n_runs):
+    r = requests.post('http://localhost:8000/api/simulate', json={
+        "T_2": 12, "noise_amplitude": 3e-5, "t_max": 3000
+    })
+    finals.append(r.json()['q_sv'][-1])
+
+print(f"Mean: {np.mean(finals):.2f} Sv, Std: {np.std(finals):.2f} Sv")
+print(f"Collapse fraction: {sum(1 for q in finals if q < 5) / n_runs:.0%}")
+```
+
+### 3. Long paleoclimate-style run
+
+```python
+r = requests.post('http://localhost:8000/api/simulate', json={
+    "t_max": 20000, "dt": 10,
+    "T_2": 11, "noise_amplitude": 1e-5
+})
+data = r.json()
+import numpy as np
+window = 100
+rolling_var = [np.var(data['q_sv'][i:i+window])
+               for i in range(0, len(data['q_sv']) - window, window)]
+print(f"Variance grew? {rolling_var[-1] > rolling_var[0]}")
 ```
 
 ---
@@ -317,26 +260,26 @@ print(f"Variance increasing toward end? {rolling_var[-1] > rolling_var[0]}")
 ## Notes on Stochastic Mode
 
 When `noise_amplitude > 0`:
-- Solver switches from **Radau** (deterministic) to **Euler-Maruyama** (stochastic)
-- Each run produces **different results** (different random seed each time)
-- Curves are noisier and may show transitions between branches
-- Rerun the same parameters to see stochastic variability
 
-To compare deterministic vs. stochastic:
+- The solver switches from `scipy.integrate.solve_ivp` (RK45, deterministic, with steady-state event detection) to a fixed-step **Euler-Maruyama** integrator
+- Each call uses a **fresh, unseeded** random draw — re-running with identical parameters produces a different trajectory each time
+- `steady_state_reached` is always `false` for stochastic runs (no event detection)
+- The output has exactly `int(t_max/dt) + 1` points
+
+To compare deterministic vs. stochastic, run twice:
+
 ```python
-# Deterministic
-resp_det = requests.post(url, json={**params, "noise_amplitude": 0})
-# Stochastic
-resp_sto = requests.post(url, json={**params, "noise_amplitude": 1e-5})
+det = requests.post(url, json={**params, "noise_amplitude": 0}).json()
+sto = requests.post(url, json={**params, "noise_amplitude": 1e-5}).json()
 ```
 
 ---
 
 ## Performance Tips
 
-1. **Large t_max with small dt**: Can be slow; use coarser dt if fine resolution not needed
-2. **Multiple sequential requests**: Consider batching or using /bifurcation if sweeping F
-3. **Stochastic mode**: Slightly slower than deterministic; run in parallel if comparing many realizations
+1. Large `t_max` with very small `dt` makes stochastic runs slow (linear in number of Euler steps). Deterministic RK45 uses adaptive stepping internally and ignores `dt` for accuracy — `dt` only controls the output grid.
+2. To sweep many parameter sets, batch the calls with `concurrent.futures` or `httpx.AsyncClient`. The backend serves up to 2 simulations in parallel via its `ThreadPoolExecutor`.
+3. For full S-curve studies, use [`/api/bifurcation`](/api-reference/bifurcation) instead of looping `/api/simulate`.
 
 ---
 
@@ -345,48 +288,42 @@ resp_sto = requests.post(url, json={**params, "noise_amplitude": 1e-5})
 ### Invalid JSON
 
 ```bash
-curl -X POST http://localhost:8000/simulate -d 'not json'
+curl -X POST http://localhost:8000/api/simulate -d 'not json'
 ```
+→ FastAPI returns 422 with a JSON-decode error.
 
-Response:
-```json
-{"detail": "Invalid request body"}
-```
-
-### Constraint Violation
+### Constraint violation
 
 ```bash
-curl -X POST http://localhost:8000/simulate \
+curl -X POST http://localhost:8000/api/simulate \
   -H "Content-Type: application/json" \
-  -d '{"T_e": 10, "T_p": 20}'
+  -d '{"T_1": 5, "T_2": 25}'
 ```
 
-Response (422):
 ```json
 {
   "detail": [{
     "type": "value_error",
     "loc": ["body"],
-    "msg": "T_e must be greater than T_p"
+    "msg": "Value error, T_1 must be greater than T_2"
   }]
 }
 ```
 
-### Out-of-Bounds Parameter
+### Out-of-bounds parameter
 
 ```bash
-curl -X POST http://localhost:8000/simulate \
+curl -X POST http://localhost:8000/api/simulate \
   -H "Content-Type: application/json" \
-  -d '{"F": 1.0}'
+  -d '{"alpha": 1.0}'
 ```
 
-Response (422):
 ```json
 {
   "detail": [{
     "type": "less_than_equal",
-    "loc": ["body", "F"],
-    "msg": "Input should be less than or equal to 5e-4"
+    "loc": ["body", "alpha"],
+    "msg": "Input should be less than or equal to 0.0003"
   }]
 }
 ```
@@ -395,11 +332,7 @@ Response (422):
 
 ## Next Steps
 
-- See [GET /presets](/api-reference/presets) to load preset configurations
-- See [POST /bifurcation](/api-reference/bifurcation) to compute full bifurcation diagrams
-- Return to [API Overview](/api-reference/overview) for general principles
-- See [Getting Started](/simulator/getting-started) for a complete example integration
-
----
-
-**Response time**: Typically 0.5–2 seconds for default parameters; longer for large t_max or small dt.
+- See [GET /api/presets](/api-reference/presets) for the four named configurations
+- See [POST /api/bifurcation](/api-reference/bifurcation) for full S-curve computation
+- Return to [API Overview](/api-reference/overview)
+- See [Getting Started](/simulator/getting-started) for setup

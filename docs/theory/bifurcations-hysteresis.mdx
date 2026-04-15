@@ -128,18 +128,17 @@ Once you've tipped, simply **increasing ΔT back** to its original value does NO
    - q suddenly increases
    - Circulation is restored to strong state
 
-### The **No Hysteresis** Feature (Key Difference from Simplified Models)
+### Hysteresis in the Relaxation Model
 
-**In the original Stommel model**, there is **NO hysteresis window** in the constant-temperature sense:
-- **Collapse occurs at**: ΔT_crit (when decreasing ΔT)
-- **Recovery occurs at**: ΔT_crit (when increasing ΔT back)
-- **Same threshold**: Both occur at the same ΔT
+The relaxation model **does** exhibit hysteresis in ΔT — that is exactly what the bifurcation diagram in the simulator shows:
 
-This differs fundamentally from the **constant-F models** that show hysteresis in F (F_c1 ≠ F_c2).
+- **Forward sweep** (ΔT decreasing): the upper (thermally driven) branch persists until it dies at the **collapse threshold** ΔT_collapse
+- **Backward sweep** (ΔT increasing, starting from a fresh polar box): the lower (collapsed / haline) branch persists until it dies at the **recovery threshold** ΔT_recovery
+- **Hysteresis window**: ΔT_collapse < ΔT < ΔT_recovery — two stable branches coexist; which one you're on depends on history (initial conditions)
 
-**Physical interpretation**: In the relaxation model, the bistable region is created by the competition between thermal and haline feedbacks at fixed ΔT. As ΔT changes, the bistable region itself shifts. Recovery simply requires ΔT to return above the critical value.
+The mechanism is the same as in constant-F models — competition between thermal and haline feedbacks creates a quadratic equilibrium equation in ΔS, whose two roots merge at saddle-node bifurcations. The only difference is the *control parameter*: ΔT here vs. F in the simplified versions.
 
-**Paleoclimate implication**: AMOC collapse and recovery are **not** separated by a "hysteresis gap" in temperature. Rather, they occur at the same critical ΔT threshold. This makes the model consistent with paleoclimate observations where AMOC toggling occurs during stable periods (via noise-induced transitions) or sharply during climate shifts (forced by rapid ΔT changes).
+**Paleoclimate implication**: a collapsed AMOC will not spontaneously recover when ΔT returns to the value at which it collapsed. Recovery requires either (a) ΔT growing past the larger recovery threshold, or (b) noise large enough to kick the trajectory across the unstable middle branch back into the upper basin.
 
 ---
 

@@ -1,30 +1,49 @@
 ---
 title: API Reference Overview
-description: Backend architecture, authentication, CORS, and general principles
+description: Backend architecture, endpoints, validation, and general principles
 ---
 
 # API Reference Overview
 
 ## Base URL
 
-All API endpoints are hosted at:
+When running the backend locally with `uvicorn api:app --reload`, all API endpoints are mounted under the **`/api`** prefix:
 
 ```
-http://localhost:8000
+http://localhost:8000/api
 ```
 
-In production, update to your deployment domain.
+When running through the Vite dev server (`npm run dev` on port 5173), Vite proxies `/api/*` to the backend, so the frontend uses paths like `/api/simulate` directly.
+
+In production deployments where the backend serves the built frontend on the same origin, the same `/api/*` paths apply.
 
 ---
 
 ## Architecture Overview
 
-The backend is built with **FastAPI** (modern, fast Python web framework) and provides:
+The backend is built with **FastAPI** and exposes:
 
 - **RESTful endpoints** for simulations and bifurcation analysis
-- **Pydantic v2 validation** for type safety and error handling
-- **Async/await** for non-blocking I/O
-- **ThreadPoolExecutor** for long-running simulations (doesn't block HTTP server)
+- **Pydantic v2 validation** on every request body
+- **async/await** non-blocking I/O
+- **`ThreadPoolExecutor(max_workers=2)`** so long-running simulations don't block the event loop
+
+The simulator is implemented in `backend/`:
+- `model.py` — the `StommelModel` dataclass with `q()` and `rhs_years()` for ODEs
+- `solver.py` — `run_simulation()` (RK45 deterministic + Euler-Maruyama stochastic) and `compute_bifurcation()` (forward + backward T₂ sweep)
+- `schemas.py` — Pydantic request/response models
+- `api.py` — FastAPI app
+
+---
+
+## Endpoints Summary
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/health` | GET | Health check |
+| `/api/simulate` | POST | Run a single simulation |
+| `/api/bifurcation` | POST | Compute the bifurcation S-curve (sweeps T₂) |
+| `/api/presets` | GET | List the four named preset configurations |
 
 ---
 
@@ -32,90 +51,86 @@ The backend is built with **FastAPI** (modern, fast Python web framework) and pr
 
 ### Request Format
 
-All POST requests use **JSON body**:
+POST endpoints accept JSON bodies:
 
 ```bash
-curl -X POST http://localhost:8000/endpoint \
+curl -X POST http://localhost:8000/api/simulate \
   -H "Content-Type: application/json" \
-  -d '{"param1": value1, "param2": value2}'
+  -d '{"T_1": 25, "T_2": 5}'
 ```
 
-GET requests typically use query parameters or no body.
+GET endpoints take no body and no query parameters in this version.
 
 ### Response Format
 
-All responses are **JSON**:
-
-```json
-{
-  "status": "success",
-  "data": { ... },
-  "time_ms": 1234
-}
-```
-
-or on error:
-
-```json
-{
-  "detail": "Validation error or error message",
-  "status": 422,
-  "errors": [...]
-}
-```
+All responses are JSON. Schemas are defined in `backend/schemas.py`. See the individual endpoint pages for full field listings.
 
 ### HTTP Status Codes
 
 | Code | Meaning | Example |
 |------|---------|---------|
 | 200 | Success | Simulation completed |
-| 400 | Bad Request | Malformed JSON |
-| 422 | Validation Error | T_e < T_p (constraint violation) |
+| 422 | Validation Error | T₁ ≤ T₂, or parameter out of range |
 | 500 | Server Error | Unhandled exception (rare) |
 
 ---
 
 ## Authentication & CORS
 
-### No Authentication Required
+### No Authentication
 
-The simulator uses **no authentication**. All endpoints are open.
+All endpoints are open. If you deploy publicly, add an auth layer in front.
 
-**Production note**: If deploying publicly, add authentication (API keys, OAuth, etc.).
+### CORS
 
-### CORS (Cross-Origin Resource Sharing)
+CORS is configured in `api.py` from the `CORS_ALLOW_ORIGINS` env var, defaulting to:
+- `http://localhost:5173` (Vite dev server)
+- `http://localhost:3000` (alternative)
 
-CORS is **enabled** for:
-- `http://localhost:5173` (local development frontend)
-- `http://localhost:3000` (alternative local frontend)
-- Production domains (configured in backend)
-
-This allows the frontend to make requests to the backend from a different port/domain.
+Override with `CORS_ALLOW_ORIGINS="https://your-domain.example,..."` when deploying.
 
 ---
 
 ## Common Parameters
 
-Most endpoints accept these parameters:
+These are the parameters that appear in both `/api/simulate` and `/api/bifurcation` requests. **All have defaults**, so you can send `{}` and get a working simulation.
 
-| Parameter | Type | Default | Units | Validation |
-|-----------|------|---------|-------|-----------|
-| T_e | float | 25 | °C | Must be > T_p |
-| T_p | float | 5 | °C | Must be < T_e |
-| S_e0 | float | 36 | psu | ge: 30, le: 40 |
-| S_p0 | float | 34 | psu | ge: 28, le: 40 |
-| alpha | float | 1.5e-4 | 1/°C | ge: 0.5e-4, le: 3e-4 |
-| beta | float | 8e-4 | 1/psu | ge: 2e-4, le: 1.5e-3 |
-| k | float | 1.5e-6 | 1/s | ge: 5e-8, le: 1e-5 |
-| F | float | 1e-4 | psu/s | ge: 0, le: 5e-4 |
-| t_max | float | 3000 | years | ge: 100, le: 10000 |
-| dt | float | 1.0 | years | ge: 0.1, le: 100 |
-| noise_amplitude | float | 0 | psu/s | ge: 0, le: 5e-5 |
+| Parameter | Type | Default | Units | Range | Description |
+|-----------|------|---------|-------|-------|-------------|
+| `T_1` | float | 25.0 | °C | 15 – 35 | Box 1 (equatorial) temperature |
+| `T_2` | float | 5.0 | °C | -2 – 25 | Box 2 (polar) temperature |
+| `S_1_eq` | float | 36.0 | psu | 30 – 40 | Box 1 equilibrium (relaxation target) salinity |
+| `S_2_eq` | float | 34.0 | psu | 28 – 40 | Box 2 equilibrium salinity |
+| `alpha` | float | 2.0e-4 | 1/°C | 0.5e-4 – 3e-4 | Thermal expansion (Stommel original) |
+| `beta` | float | 1.0e-3 | 1/psu | 2e-4 – 2e-3 | Haline contraction (Stommel original) |
+| `k` | float | 3.0e-9 | 1/s | 1e-10 – 1e-6 | Circulation coefficient (Stommel original) |
+| `lam` | float | 3.0e-11 | 1/s | 1e-12 – 1e-9 | Salinity relaxation rate (~1000-yr timescale) |
 
-**Validation rules**:
-- All ge/le bounds are enforced
-- T_e > T_p is enforced (custom validator)
-- Bounds correspond to slider ranges in UI
+`/api/simulate` additionally takes:
+
+| Parameter | Type | Default | Units | Range |
+|-----------|------|---------|-------|-------|
+| `S_1_init` | float | 36.0 | psu | 30 – 40 |
+| `S_2_init` | float | 34.0 | psu | 28 – 40 |
+| `t_max` | float | 3000 | years | 100 – 10000 |
+| `dt` | float | 1.0 | years | 0.1 – 100 |
+| `noise_amplitude` | float | 0.0 | psu/s | 0 – 5e-5 |
+
+`/api/bifurcation` additionally takes:
+
+| Parameter | Type | Default | Units | Range |
+|-----------|------|---------|-------|-------|
+| `T_2_min` | float | 0.0 | °C | -5 – 25 |
+| `T_2_max` | float | 20.0 | °C | 0 – 30 |
+| `n_points` | int | 200 | – | 10 – 500 |
+
+### Validation Rules
+
+- All `ge`/`le` bounds are enforced by Pydantic
+- `T_1 > T_2` is enforced (custom validator)
+- For bifurcation requests: `T_2_min < T_2_max` and `T_1 > T_2_min`
+
+> **Note:** This is the **original Stommel (1961) relaxation model** — there is no freshwater flux `F` parameter. The bifurcation parameter is the temperature difference ΔT = T₁ − T₂, which the bifurcation endpoint sweeps by varying T₂.
 
 ---
 
@@ -123,196 +138,138 @@ Most endpoints accept these parameters:
 
 ### Validation Error (422)
 
-If parameters violate constraints:
-
 ```bash
-curl -X POST http://localhost:8000/simulate \
+curl -X POST http://localhost:8000/api/simulate \
   -H "Content-Type: application/json" \
-  -d '{"T_e": 20, "T_p": 25, ...}' # T_e < T_p violates constraint
+  -d '{"T_1": 5, "T_2": 25}'
 ```
-
-Response:
 
 ```json
 {
   "detail": [
     {
       "type": "value_error",
-      "loc": ["body", "T_e"],
-      "msg": "T_e must be greater than T_p"
+      "loc": ["body"],
+      "msg": "Value error, T_1 must be greater than T_2"
     }
   ]
 }
 ```
 
-### Server Error (500)
+### Out-of-bounds parameter
 
-Rare, but if the server crashes:
+```bash
+curl -X POST http://localhost:8000/api/simulate \
+  -H "Content-Type: application/json" \
+  -d '{"alpha": 1e-2}'
+```
 
 ```json
 {
-  "detail": "Internal server error. Contact administrator."
+  "detail": [{
+    "type": "less_than_equal",
+    "loc": ["body", "alpha"],
+    "msg": "Input should be less than or equal to 0.0003"
+  }]
 }
 ```
 
-Check the backend logs (terminal running uvicorn) for details.
+### Server Error (500)
 
----
-
-## Rate Limiting
-
-**No rate limiting** is currently enforced. Production deployments should add:
-- Per-IP limits (e.g., 100 requests/minute)
-- Per-user limits (with authentication)
+Rare; check the backend terminal for the traceback.
 
 ---
 
 ## Performance & Timeouts
 
-### Simulation Computation Time
+### Computation Time (typical)
 
-| Scenario | Time | Hardware |
-|----------|------|----------|
-| Single simulation (t_max=3000) | 0.5–2 sec | 2022 MacBook Pro |
-| Bifurcation (200 points, 2 directions) | 10–30 sec | Same |
-| Long simulation (t_max=10000) | 2–5 sec | Same |
+| Scenario | Wall time |
+|----------|-----------|
+| Single deterministic simulation (`t_max=3000`) | ~0.1–1 s |
+| Single stochastic simulation (`t_max=3000`, dt=1) | ~0.5–2 s |
+| Bifurcation diagram (`n_points=200`, two sweeps × 100-yr each) | ~10–30 s |
 
-**Timeout**: HTTP timeout is set to **60 seconds**. Very large t_max with small dt might exceed this.
+`ThreadPoolExecutor(max_workers=2)` queues concurrent requests.
 
-### Memory Usage
+There is no application-level HTTP timeout; uvicorn's default applies.
 
-- Single simulation output: ~100 KB (JSON)
-- Bifurcation output: ~50 KB (JSON)
-- Concurrent requests: Each uses ~10 MB memory for ODE solver
+### Memory
 
-With default `ThreadPoolExecutor(max_workers=2)`, simultaneous requests are queued.
-
----
-
-## API Endpoints Summary
-
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/health` | GET | Server health check |
-| `/simulate` | POST | Run a single simulation |
-| `/bifurcation` | POST | Compute bifurcation diagram |
-| `/presets` | GET | List available presets |
-
----
-
-## Next Steps
-
-- See [POST /simulate](/api-reference/simulate) for the simulation endpoint
-- See [POST /bifurcation](/api-reference/bifurcation) for bifurcation analysis
-- See [GET /presets](/api-reference/presets) for preset configurations
-- Return to [Getting Started](/simulator/getting-started) for integration examples
+- Single simulation response: ~50–500 KB JSON depending on `t_max/dt`
+- Bifurcation response: ~5 KB JSON (only steady-state q values, not full trajectories)
 
 ---
 
 ## Example: Complete Request-Response Cycle
 
-**1. Check server health**:
+**1. Check server health**
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8000/api/health
+# {"status": "ok"}
 ```
 
-Response:
-```json
-{"status": "ok", "uptime_seconds": 42.3}
-```
-
-**2. Run simulation**:
+**2. Run simulation with defaults**
 ```bash
-curl -X POST http://localhost:8000/simulate \
+curl -X POST http://localhost:8000/api/simulate \
   -H "Content-Type: application/json" \
-  -d '{
-    "T_e": 25,
-    "T_p": 5,
-    "S_e0": 36,
-    "S_p0": 34,
-    "alpha": 1.5e-4,
-    "beta": 8e-4,
-    "k": 1.5e-6,
-    "F": 1e-4,
-    "t_max": 3000,
-    "dt": 1.0,
-    "noise_amplitude": 0
-  }'
+  -d '{}'
 ```
 
 Response (truncated):
 ```json
 {
-  "parameters": { ... },
   "time": [0, 1, 2, ..., 3000],
-  "S_e": [36.0, 35.999, 35.998, ..., 36.15],
-  "S_p": [34.0, 34.001, 34.002, ..., 33.85],
-  "q": [1.5e-9, 1.51e-9, ..., 2.1e-9],
-  "q_sv_final": 14.7,
+  "S_1": [36.0, ...],
+  "S_2": [34.0, ...],
+  "q": [3.0e-9, ...],
+  "q_sv": [21.0, ...],
   "steady_state_reached": true,
-  "computation_time_sec": 1.23
+  "final_state": [36.18, 33.82],
+  "metadata": {"t_max_years": 3000, "noise_amplitude": 0.0}
 }
 ```
 
-**3. Extract and analyze**:
+**3. Read final AMOC strength in Python**
 ```python
-import json
 import requests
-
-resp = requests.post('http://localhost:8000/simulate', json={
-    "T_e": 25, "T_p": 5, "S_e0": 36, "S_p0": 34,
-    "alpha": 1.5e-4, "beta": 8e-4, "k": 1.5e-6,
-    "F": 1e-4, "t_max": 3000, "dt": 1, "noise_amplitude": 0
-})
-
-data = resp.json()
-print(f"Final AMOC: {data['q_sv_final']:.1f} Sv")
+r = requests.post('http://localhost:8000/api/simulate', json={})
+data = r.json()
+print(f"Final AMOC: {data['q_sv'][-1]:.1f} Sv")
 print(f"Steady state: {data['steady_state_reached']}")
-```
-
-Output:
-```
-Final AMOC: 14.7 Sv
-Steady state: True
 ```
 
 ---
 
 ## Debugging
 
-### Enable Backend Logging
-
-Start uvicorn with verbose output:
+### Enable verbose backend logging
 
 ```bash
 uv run uvicorn api:app --reload --log-level debug
 ```
 
-Watch the terminal for request/response logs.
+### Use a REST client
 
-### Use a REST Client
+Postman, Insomnia, Bruno, or VS Code's "Thunder Client" / REST Client extensions all work.
 
-Tools like **Postman**, **Insomnia**, or **Thunder Client** (VS Code extension) provide GUIs for testing APIs without command-line curl.
+### Inspect from the browser
 
-### Check Frontend Console
-
-Open browser developer tools (Cmd+Option+J on macOS) and check the Network tab to see requests sent and responses received.
+Open the simulator at http://localhost:5173, open DevTools → Network tab, watch the `/api/*` calls go by, and click any of them to see the exact request/response payloads.
 
 ---
 
 ## Production Considerations
 
-If deploying to production:
+If you deploy publicly:
 
-1. **Authentication**: Add API keys or OAuth
-2. **Rate limiting**: Prevent abuse
-3. **HTTPS**: Use SSL/TLS certificates
-4. **CORS**: Restrict to trusted domains
-5. **Logging**: Log all requests (for debugging and monitoring)
-6. **Monitoring**: Set up alerts for high error rates
-7. **Load balancing**: Use multiple server instances if high traffic expected
-8. **Caching**: Cache bifurcation results for common parameter sets
+1. **Authentication** (API keys / OAuth)
+2. **Rate limiting** (per-IP)
+3. **HTTPS** (TLS termination at a reverse proxy)
+4. **Tighten CORS** via `CORS_ALLOW_ORIGINS`
+5. **Logging & monitoring** (request logs, error rates)
+6. **Caching** for `/api/bifurcation` since it is deterministic and slow
 
 ---
 
-**Next**: Explore the specific endpoints for [Simulate](/api-reference/simulate), [Bifurcation](/api-reference/bifurcation), and [Presets](/api-reference/presets).
+**Next**: See [POST /api/simulate](/api-reference/simulate), [POST /api/bifurcation](/api-reference/bifurcation), or [GET /api/presets](/api-reference/presets).

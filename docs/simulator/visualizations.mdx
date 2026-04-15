@@ -128,8 +128,8 @@ A bar chart comparing:
 
 Three time series plotted against time (x-axis, in years):
 1. **Circulation q(t)** (blue line, left y-axis): In Sverdrups, showing how q evolves
-2. **Equatorial salinity S_e(t)** (yellow/orange line, right y-axis): In psu
-3. **Polar salinity S_p(t)** (cyan line, right y-axis): In psu
+2. **Box 1 / equatorial salinity S₁(t)** (yellow/orange line, right y-axis): In psu
+3. **Box 2 / polar salinity S₂(t)** (cyan line, right y-axis): In psu
 
 ### How to Read It
 
@@ -158,8 +158,8 @@ Three time series plotted against time (x-axis, in years):
 ```
 Time series shape:
 q: starts at ~10 Sv → quickly rises → flattens at ~15 Sv (equilibrium)
-S_e: starts at 36 → slightly decreases → flat at ~36.2 psu
-S_p: starts at 34 → slightly increases → flat at ~34.8 psu
+S₁: starts at 36 → slightly decreases → flat at ~36.2 psu
+S₂: starts at 34 → slightly increases → flat at ~34.8 psu
 Interpretation: System quickly equilibrates to strong stable state
 ```
 
@@ -167,8 +167,8 @@ Interpretation: System quickly equilibrates to strong stable state
 ```
 Time series shape:
 q: starts at ~10 Sv → slowly decreases → flattens at ~5 Sv (after ~2000 years)
-S_e: gradual decrease → flat at lower value
-S_p: gradual increase → flat at higher value
+S₁: gradual decrease → flat at lower value
+S₂: gradual increase → flat at higher value
 Interpretation: Slower equilibration (critical slowing down); marginal state
 ```
 
@@ -176,8 +176,8 @@ Interpretation: Slower equilibration (critical slowing down); marginal state
 ```
 Time series shape:
 q: starts at ~10 Sv → rapidly drops → flat near 0 or negative (within ~500 years)
-S_e: rapid decrease to lower value
-S_p: rapid increase to higher value
+S₁: rapid decrease to lower value
+S₂: rapid increase to higher value
 Interpretation: Bifurcation/jump to collapsed state; irreversible transition
 ```
 
@@ -188,12 +188,10 @@ Interpretation: Bifurcation/jump to collapsed state; irreversible transition
    - 1000–2000 years = near bifurcation (critical slowing down)
    - >2000 years = very close to tipping
 
-2. **Salinity balance**: S_e + S_p should remain constant (salt conservation)
-   - Check a few points on the time series
-   - Should always sum to same value (≈70 psu in this model)
+2. **Relaxation toward equilibrium**: Each box's salinity is pulled toward its target S₁ᵉᵍ / S₂ᵉᵍ at rate λ (~1000-year timescale). Total salt is **not** conserved in this relaxation model.
 
 3. **Circulation-salinity coupling**:
-   - Stronger q (more northward flow) → more salt transported north → larger S_e, smaller S_p
+   - Stronger q (more northward flow) → more salt transported north → larger S₁, smaller S₂
    - Weaker q → less salt transport → smaller ΔS
 
 ---
@@ -203,7 +201,7 @@ Interpretation: Bifurcation/jump to collapsed state; irreversible transition
 ### What It Shows
 
 A 2D plot of the system trajectory in **state space**:
-- **X-axis**: Salinity difference ΔS = S_e − S_p (psu)
+- **X-axis**: Salinity difference ΔS = S₁ − S₂ (psu)
 - **Y-axis**: Circulation strength q (Sv)
 - **Colored line**: Trajectory from initial state (red star) to final state (green circle)
 - **Color gradient**: Blue = early time, Yellow = late time (viridis colormap)
@@ -212,16 +210,16 @@ A 2D plot of the system trajectory in **state space**:
 ### How to Read It
 
 **Initial & final states**:
-- **Red star**: Starting condition (S_e0, S_p0)
-- **Green circle**: Final state (S_e^*, S_p^*) — where the system ends up
+- **Red star**: Starting condition (S₁ᵢⁿⁱᵗ, S₂ᵢⁿⁱᵗ)
+- **Green circle**: Final state (S₁*, S₂*) — where the system ends up
 - **Distance between them**: How far the system "moved" in state space
 
 **The q-nullcline** (dashed line):
-- This is the curve where circulation is instantaneously determined by salinity difference
+- This is the curve relating q to ΔS by the diagnostic equation
 - Equation: q = k[α·ΔT − β·ΔS]
-- The nullcline is **diagonal-shaped**: positive slope (higher ΔS → weaker q)
-- The system's equilibria lie exactly on this curve
-- The trajectory **asymptotically approaches** the nullcline
+- The nullcline is a **straight line** with negative slope (higher ΔS → weaker q if ΔT is fixed)
+- The system's equilibria lie at the intersection of this line with the salinity-relaxation balance
+- The trajectory **asymptotically approaches** equilibrium
 
 **Trajectory shape**:
 - **Spiral**: System "overshoots" then settles on the nullcline
@@ -274,64 +272,61 @@ The **phase space portrait shows which basin you're in**:
 
 ### What It Shows
 
-*Only appears after clicking "Compute Bifurcation".*
+*Only appears after clicking "Compute Bifurcation Diagram".*
 
-A 2D plot showing equilibrium circulation **q** as a function of freshwater forcing **F**:
-- **X-axis**: Freshwater flux F (psu/s), ranging from 0 to 5 × 10⁻⁴
+A 2D plot showing equilibrium circulation **q** as a function of temperature difference **ΔT = T₁ − T₂**:
+- **X-axis**: ΔT (°C), swept by varying T₂ (default range: T₂ ∈ [0, 20] °C → ΔT ∈ [5, 25] °C)
 - **Y-axis**: Equilibrium circulation q_sv (Sv), ranging from -5 to +20
-- **Blue upper branch**: Stable states for increasing F (forward sweep)
-- **Orange lower branch**: Stable states for decreasing F (backward sweep)
-- **Grey dashed middle branch**: Inferred unstable (saddle) states
-- **Orange shaded region**: Bistable region (hysteresis window)
-- **Red diamonds**: Bifurcation points (F_c1 and F_c2)
-- **Orange X marker**: Current F from your slider
+- **Blue upper branch**: Stable states from forward sweep (T₂ low → high, ΔT high → low)
+- **Orange lower branch**: Stable states from backward sweep (T₂ high → low, ΔT low → high), starting from a fresh polar condition
+- **Grey shaded region**: Bistable region (hysteresis window)
+- **Red diamonds**: Bifurcation points (collapse and recovery thresholds)
+- **Orange X marker**: Your current ΔT from the T₁/T₂ sliders
 
 ### How to Read It
 
 **The S-curve**:
-- Resembles a sideways "S" or fold
-- **Upper right loop** = forward tipping: moving right along upper branch until collapse at F_c1
-- **Lower left loop** = backward recovery: moving left along lower branch until recovery at F_c2
-- **Gap between upper and lower** = hysteresis window; two states exist here
+- Resembles a sideways "S" or fold, plotted against ΔT
+- **Forward branch** (upper, blue): traces strong-AMOC equilibria as ΔT decreases until collapse at ΔT_crit
+- **Backward branch** (lower, orange): traces weak/collapsed equilibria as ΔT increases until recovery
+- **Gap between upper and lower** = hysteresis window; two states coexist here for the same ΔT
 
-**Bifurcation points**:
-- **F_c1** (right diamond, collapse threshold): Where upper branch ends
-  - For F < F_c1: Only upper branch is stable
-  - For F > F_c1: Only lower branch is stable
-- **F_c2** (left diamond, recovery threshold): Where lower branch begins
-  - For F < F_c2: Only upper branch is stable (recovered)
-  - For F > F_c2: Both branches can be stable
+**Bifurcation points** (red diamonds):
+- **Collapse threshold (small ΔT)**: Where the upper (strong-AMOC) branch dies
+  - For ΔT > collapse threshold: upper branch is stable
+  - For ΔT < collapse threshold: only lower branch is stable
+- **Recovery threshold (larger ΔT)**: Where the lower (collapsed) branch dies
+  - For ΔT > recovery threshold: both branches stable (bistable)
+  - For ΔT > a still-larger value beyond the diamond: only upper branch stable
 
 **The orange X marker**:
-- Shows your current F value from the slider
-- Moves left/right as you adjust F
-- Falls in the "bistable window" if F_c2 < F < F_c1
+- Shows your current ΔT (from T₁ − T₂) on the diagram
+- Moves left/right as you adjust the T₁ or T₂ sliders
+- Falls in the "bistable window" if it sits between the two diamonds
 
 ### Interpretation Examples
 
-**Scenario A: Wide hysteresis (default parameters)**
+**Scenario A: Wide hysteresis (default Stommel parameters)**
 ```
 Bifurcation diagram:
-F_c1 ≈ 2.0 × 10⁻⁴ (right diamond)
-F_c2 ≈ 1.0 × 10⁻⁴ (left diamond)
-Hysteresis width ≈ 1.0 × 10⁻⁴
-Interpretation: Large "memory" — system can remain in one state far from bifurcation
+Collapse threshold ΔT_c ≈ 8–12°C
+Recovery threshold ΔT_r ≈ 12–17°C
+Hysteresis width ≈ 5°C in ΔT
+Interpretation: Large "memory" — system can remain in one state for a wide range of ΔT
 ```
 
-**Scenario B: Narrow hysteresis (lower ΔT)**
+**Scenario B: Narrow hysteresis (smaller β)**
 ```
 Bifurcation diagram:
-F_c1 ≈ 1.5 × 10⁻⁴
-F_c2 ≈ 1.2 × 10⁻⁴
-Hysteresis width ≈ 0.3 × 10⁻⁴
-Interpretation: Small bistable region; less history dependence; easier to predict
+Both thresholds shift; hysteresis window shrinks
+Interpretation: Smaller bistable region; less history dependence; easier to predict
 ```
 
 ### Why Compute Bifurcation?
 
 - **Understanding stability**: See the full picture of all possible steady states
-- **Finding tipping points**: Exactly identify F_c1 and F_c2
-- **Designing experiments**: Plan which F values to run based on diagram
+- **Finding tipping points**: Exactly identify the collapse and recovery thresholds
+- **Designing experiments**: Plan which T₂ values to run based on diagram
 - **Parameter sensitivity**: Recompute after changing parameters to see how tipping points shift
 
 ---
@@ -340,25 +335,27 @@ Interpretation: Small bistable region; less history dependence; easier to predic
 
 ### What It Shows
 
-All sliders, buttons, and options for controlling the simulation:
-- **Parameter sliders** (T_e, T_p, S_e0, S_p0, α, β, k, F, t_max, dt, noise)
-- **Preset buttons** (Normal AMOC, Weakened AMOC, Collapsed AMOC, Stommel 1961)
-- **Action buttons** (Run Simulation, Compute Bifurcation, Export)
-- **Advanced options** (if present)
+All sliders, buttons, and options for controlling the simulation, organized into collapsible sections:
+- **Preset buttons** (top): Normal AMOC, Weakened, Collapsed, Stommel 1961
+- **Temperature & Salinity** (open by default): T₁, T₂, S₁ᵉᵍ, S₂ᵉᵍ, S₁ᵢⁿⁱᵗ, S₂ᵢⁿⁱᵗ
+- **Physics Parameters** (open by default): α, β, k (log), λ (log)
+- **Stochastic Forcing** (collapsed): noise_amplitude
+- **Integration** (collapsed): t_max, dt
+- **Action buttons** at bottom: Run Simulation (green), Reset (red), Compute Bifurcation Diagram (blue)
 
 ### How to Use It
 
 1. **Adjust sliders** to set parameters
 2. **Click "Run Simulation"** to execute with current parameters
 3. **Watch all 5 visualization panels update** with new results
-4. **Click "Compute Bifurcation"** to generate the S-curve (takes ~10–30 seconds)
-5. **Click "Export"** to save results as JSON
+4. **Click "Compute Bifurcation Diagram"** to generate the S-curve (takes ~10–30 seconds)
+5. **Click "Reset"** to restore defaults
 
 ### Tips
 
-- **Auto-run feature**: Some sliders may auto-trigger re-runs after a 500ms pause
-- **Log-scale slider (k)**: The k slider uses logarithmic scale; small visual changes correspond to big numerical changes
-- **Debounced updates**: Parameters often have a small delay before taking effect (to avoid 100 simultaneous re-runs)
+- **No auto-run on slider change**: You must click Run Simulation each time. (The app does run once automatically when you first load the page.)
+- **Log-scale sliders (k and λ)**: These use logarithmic scale; small visual changes correspond to factor-of-10 numerical changes
+- **No Export button**: To get raw data, hit the API directly (see [API Reference](/api-reference/overview))
 
 ---
 
@@ -369,18 +366,18 @@ All sliders, buttons, and options for controlling the simulation:
 **Step 1**: Load "Normal AMOC" preset, run simulation
 - **Panel 1** (Two-Box): Thick northward arrow → visually: strong circulation
 - **Panel 2** (AMOC Comparison): Blue bar aligns with RAPID mean → quantitatively: realistic
-- **Panel 3** (Time Series): q flattens at 15 Sv after 500 years → dynamically: stable and fast-equilibrating
+- **Panel 3** (Time Series): q flattens at ~15 Sv after a few hundred years → dynamically: stable and fast-equilibrating
 - **Panel 4** (Phase Space): Red star and green circle both on upper branch → geometrically: strong basin attractor
-- **Panel 5** (Bifurcation): Orange X far to the left of F_c1 → quantitatively: large safety margin
+- **Panel 5** (Bifurcation): Orange X is at ΔT = 20 °C, far from the collapse threshold → quantitatively: large safety margin
 
 **Conclusion**: The AMOC is strong, stable, and far from tipping at this parameter set.
 
-**Step 2**: Load "Weakened AMOC" preset, run simulation
-- **Panel 1**: Thinner arrow; orange label "Weakened"
-- **Panel 2**: Bar drops to orange region (~5 Sv)
-- **Panel 3**: Time series bends slowly; takes 2000 years to equilibrate
-- **Panel 4**: Trajectory approaches nullcline very slowly (critical slowing down)
-- **Panel 5**: Orange X is now *inside* the bistable window, closer to F_c1
+**Step 2**: Load "Weakened" preset (T₂ = 12), run simulation
+- **Panel 1**: Thinner arrow
+- **Panel 2**: Bar drops noticeably below RAPID mean
+- **Panel 3**: Time series bends more slowly; takes longer to equilibrate
+- **Panel 4**: Trajectory approaches equilibrium more slowly (critical slowing down)
+- **Panel 5**: Orange X is now at ΔT = 13 °C, closer to the collapse diamond
 
 **Conclusion**: The AMOC is weakened and fragile; we're approaching a tipping point.
 
@@ -392,9 +389,9 @@ All sliders, buttons, and options for controlling the simulation:
 |-------|--------------|----------|
 | No data in panels | Simulation hasn't run yet | Click "Run Simulation" |
 | Panels blank/grey | Still running (slow computer) | Wait 10 seconds |
-| Time series goes off scale | Parameters extreme (very large t_max or F) | Reduce t_max or adjust F |
-| No bifurcation diagram | "Compute Bifurcation" hasn't been clicked | Click the button (takes ~20 sec) |
-| Phase space shows weird jump | Bifurcation occurred mid-simulation | Try lower F or check parameters |
+| Time series goes off scale | Parameters extreme (very large t_max or wild k/λ) | Reduce t_max or click Reset |
+| No bifurcation diagram | "Compute Bifurcation Diagram" hasn't been clicked | Click the blue button (takes ~20 sec) |
+| Phase space shows weird jump | Tipping occurred mid-simulation | Adjust T₂ or check parameters |
 
 ---
 

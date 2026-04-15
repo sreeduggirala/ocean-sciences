@@ -467,7 +467,7 @@ The simulator enforces the following constraints:
 
 **Note on salt conservation**: The model does **not** enforce total salt conservation; instead, both boxes have independent relaxation dynamics $H_i = -\lambda(S_i - S_i^0)$ toward their respective equilibrium values. This is consistent with Stommel's original formulation where salinity relaxes toward atmospheric equilibrium targets.
 
-If you violate a constraint (e.g., set T_e < T_p), the simulator returns a **422 Validation Error** with a helpful message.
+If you violate a constraint (e.g. set T₁ ≤ T₂), the API returns a **422 Validation Error** with a helpful message.
 
 ---
 
@@ -475,46 +475,48 @@ If you violate a constraint (e.g., set T_e < T_p), the simulator returns a **422
 
 All presets use **Stommel's original coefficients** by default: α=2×10⁻⁴, β=1×10⁻³, k=3×10⁻⁹, λ=3×10⁻¹¹.
 
-### 1. **Normal AMOC** (Present-Day Earth)
+> The four sets exposed as **preset buttons** in the UI (Normal, Weakened, Collapsed, Stommel 1961) are documented in detail on the [Presets](/simulator/presets) page. The sets below are extra hand-rolled scenarios you can dial in via the sliders.
+
+### 1. **Normal AMOC** (Present-Day Earth — also a preset button)
 ```
 T₁: 25, T₂: 5, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, S₁ᵢⁿⁱᵗ: 36, S₂ᵢⁿⁱᵗ: 34
-Result: ΔT = 20°C (>> ΔT_crit), q ≈ 5–10×10⁻⁷ 1/s (strong, stable AMOC)
+Result: ΔT = 20°C (>> ΔT_crit), strong, stable AMOC (q ≈ 15 Sv)
 Interpretation: Robust present-day state; far from bifurcation
 ```
 
-### 2. **Weakened AMOC** (Approaching Fragility)
+### 2. **Weakened AMOC** (Approaching Fragility — also a preset button)
 ```
-T₁: 26, T₂: 10, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, S₁ᵢⁿⁱᵗ: 36, S₂ᵢⁿⁱᵗ: 34
-Result: ΔT = 16°C (≈ 1–2°C above ΔT_crit), q ≈ 2–5×10⁻⁷ 1/s (weaker)
+T₁: 25, T₂: 12, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, S₁ᵢⁿⁱᵗ: 36, S₂ᵢⁿⁱᵗ: 34
+Result: ΔT = 13°C (close to ΔT_crit), noticeably weaker AMOC
 Interpretation: Near critical region; critical slowing down observable; noise-induced tipping possible
 ```
 
-### 3. **Collapsed AMOC** (Below Critical Threshold)
+### 3. **Collapsed AMOC** (Below Critical Threshold — also a preset button)
 ```
-T₁: 25, T₂: 15, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, S₁ᵢⁿⁱᵗ: 34.5, S₂ᵢⁿⁱᵗ: 34
-Result: ΔT = 10°C (< ΔT_crit), q ≈ 0 or negative (collapsed)
-Interpretation: Only lower branch exists; AMOC is in haline-dominated state
+T₁: 25, T₂: 20, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, S₁ᵢⁿⁱᵗ: 36, S₂ᵢⁿⁱᵗ: 36.5
+Result: ΔT = 5°C (< ΔT_crit), q ≈ 0 or negative (collapsed)
+Interpretation: Only lower branch exists; AMOC in haline-dominated state
 ```
 
-### 4. **Fragile AMOC** (Low Thermal Drive)
+### 4. **Fragile AMOC** (Low Thermal Drive — manual scenario)
 ```
 T₁: 20, T₂: 8, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, [salinity defaults]
 Result: ΔT = 12°C (close to ΔT_crit), lower ΔT_crit due to weak thermal drive
 Interpretation: System is in a fragile state; small changes push toward collapse
 ```
 
-### 5. **Robust AMOC** (High Thermal Drive)
+### 5. **Robust AMOC** (High Thermal Drive — manual scenario)
 ```
 T₁: 30, T₂: 0, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, [salinity defaults]
 Result: ΔT = 30°C (>> ΔT_crit), much higher ΔT_crit
-Interpretation: Thermally dominated; very stable; hard to collapse without huge forcing
+Interpretation: Thermally dominated; very stable; hard to collapse
 ```
 
-### 6. **Stommel's Original (1961)**
+### 6. **Stommel's Original (1961 — also a preset button)**
 ```
-T₁: 25, T₂: 5, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, S₁ᵢⁿⁱᵗ: 36, S₂ᵢⁿⁱᵗ: 34
+T₁: 25, T₂: 7.5, S₁ᵉᵍ: 36, S₂ᵉᵍ: 34, S₁ᵢⁿⁱᵗ: 36, S₂ᵢⁿⁱᵗ: 34
 α: 2e-4, β: 1e-3, k: 3e-9, λ: 3e-11
-Result: Canonical two-box behavior; ΔT_crit ≈ 12–15°C
+Result: ΔT = 17.5°C; canonical two-box behavior
 Interpretation: The original Stommel parameters; use for publication-quality bifurcation curves
 ```
 
