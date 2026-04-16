@@ -2,7 +2,7 @@
 
 ## Abstract
 
-The Atlantic Meridional Overturning Circulation (AMOC) is a critical component of Earth's climate system, responsible for transporting vast quantities of heat from the tropics to the North Atlantic. Recent observations suggest the AMOC may be weakening, raising concerns about potential collapse. To understand the physical mechanisms driving AMOC stability and tipping points, we implemented and analyzed the Stommel (1961) two-box model—an elegant yet powerful framework for exploring thermohaline circulation dynamics. Using numerical integration and bifurcation analysis, we demonstrate how the interplay between thermal and haline forcing creates bistability: two competing stable states separated by a hysteresis loop. Our model reproduces key observational estimates (~15 Sv at baseline) and reveals the critical freshwater flux threshold beyond which AMOC collapse becomes inevitable. We explore the model across multiple regimes, from normal thermally-driven circulation to collapsed states, and examine how stochastic forcing affects tipping point dynamics. This work illustrates why simple models remain indispensable for understanding complex climate processes and demonstrates the power of computational tools in climate science education.
+The Atlantic Meridional Overturning Circulation (AMOC) is a critical component of Earth's climate system, responsible for transporting vast quantities of heat from the tropics to the North Atlantic. Recent observations suggest the AMOC may be weakening, raising concerns about potential collapse. To understand the physical mechanisms behind AMOC stability and tipping points, we implemented and analyzed the Stommel (1961) two-box model, a simple framework for exploring thermohaline circulation dynamics. Using numerical integration and bifurcation analysis, we show how the competition between thermal and haline forcing creates bistability: two stable states separated by a hysteresis loop. Our model matches observational estimates (~15 Sv at baseline) and reveals the critical freshwater flux threshold beyond which AMOC collapse occurs. We explore the model across multiple regimes, from normal thermally-driven circulation to collapsed states, and look at how stochastic forcing affects tipping point dynamics. The Stommel model, despite its simplicity, captures the main features of AMOC dynamics and is a useful tool for learning about climate tipping points.
 
 **Keywords:** AMOC, thermohaline circulation, bifurcation, climate tipping points, dynamical systems
 
@@ -14,11 +14,11 @@ The Atlantic Meridional Overturning Circulation (AMOC) is one of Earth's most im
 
 But there is a vulnerability built into this system. The AMOC depends on a delicate balance between two competing forces: thermal forcing (the buoyancy difference from temperature gradients) and haline forcing (the buoyancy difference from salinity gradients). When freshwater input from melting glaciers or increased rainfall tips this balance, the circulation can weaken catastrophically—a phenomenon known as a "tipping point." Evidence has mounted over the past two decades that the AMOC may indeed be approaching such a threshold. Observations from the RAPID array, which monitors AMOC strength at 26°N in the Atlantic, show the circulation has weakened by roughly 15% since 2004, a decline much larger than what climate models predicted. Scientists debate whether this represents long-term change or natural variability, but the question itself highlights how little we understand about AMOC stability.
 
-To gain insight into AMOC dynamics and tipping points, researchers turn to reduced models—simplified mathematical frameworks that capture essential physics without the overwhelming complexity of full 3D ocean models. The most famous and elegant of these is the Stommel (1961) two-box model, published in a classic paper by Henry Stommel in the journal *Tellus*. Stommel's insight was profound: by dividing the ocean into just two well-mixed boxes (equatorial and polar), each with constant temperature and exchanging water via a simple overturning circulation, he could capture the essential instability that drives AMOC bifurcations and hysteresis. The model is so clean that one can solve it by hand; yet it contains all the physics needed to understand why AMOC can exist in multiple stable states and why freshwater forcing destabilizes it.
+To gain insight into AMOC dynamics and tipping points, researchers turn to reduced models—simplified mathematical frameworks that capture essential physics without the overwhelming complexity of full 3D ocean models. The most famous and elegant of these is the Stommel (1961) two-box model, published in a classic paper by Henry Stommel in the journal *Tellus*. Stommel's idea was to divide the ocean into just two well-mixed boxes (equatorial and polar), each with constant temperature and exchanging water via a simple overturning circulation. This setup is enough to capture the basic instability that drives AMOC bifurcations and hysteresis. The equations are simple enough to solve analytically, but the model still contains the key physics needed to understand why AMOC can exist in multiple stable states and why freshwater forcing destabilizes it.
 
 The goal of this paper is to explore the Stommel model computationally and examine its implications for AMOC stability. We implement the model in code, numerically integrate the governing equations, and construct bifurcation diagrams to reveal the landscape of stable states. We examine how the circulation evolves from a normal thermally-driven state to a weakened or collapsed state as freshwater forcing increases. We also consider how stochastic forcing—random fluctuations in freshwater input—might trigger unexpected transitions. Throughout, we emphasize the match between model predictions and real observations, calibrating our simulation against the RAPID array data.
 
-Our broader aim is to demonstrate that computational tools, even for simple models, can provide deep physical insight. The Stommel model teaches us that climate tipping points are not exotic phenomena requiring complicated mechanisms; they emerge naturally from elementary physics—from the tension between heat and salt. Understanding this via computation—running simulations, visualizing phase space, constructing bifurcation diagrams—builds intuition in ways that equations alone cannot.
+The Stommel model shows that climate tipping points can emerge from simple physical feedbacks—specifically the competition between temperature and salinity effects. Running simulations, visualizing phase space, and constructing bifurcation diagrams helps build intuition for these dynamics that can be hard to get from the equations alone.
 
 ---
 
@@ -46,7 +46,7 @@ The RAPID array, deployed in 2004 across 26°N in the Atlantic, has provided the
 
 Additional evidence comes from paleoclimate studies. During the last glacial period, the AMOC repeatedly collapsed, triggering abrupt climate shifts known as Dansgaard-Oeschger (D-O) events, in which Greenland temperatures swung by 10–15°C within decades. These events are believed to have been triggered by massive freshwater pulses from melting ice sheets. The same mechanism operates today: continued melting of the Greenland Ice Sheet and Arctic sea ice loss both inject freshwater into the North Atlantic, pushing the system toward instability.
 
-Recent statistical analyses (Ditlevsen & Ditlevsen, 2023; Boers, 2021) suggest the AMOC may be approaching a critical transition. These studies use indicators of "critical slowing down"—the hallmark signature of a system near a tipping point—and infer that collapse might occur within decades if freshwater forcing continues to increase.
+Some recent analyses suggest the AMOC may be approaching a critical transition, using indicators of "critical slowing down" to infer that collapse might occur within decades if freshwater forcing continues to increase.
 
 ---
 
@@ -235,7 +235,7 @@ where σᵢ is the noise amplitude (psu/s) and ξᵢ(t) represents independent G
 
 ### 5.1 Equilibrium Structure: Temperature-Controlled Bifurcation
 
-The Stommel model reveals that AMOC stability is fundamentally controlled by the meridional temperature difference ΔT. We compute steady-state equilibria across a range of temperatures (ΔT = 10–60°C) using the equilibrium formula from Section 3.3, with fixed ΔS₀ = 10 psu.
+The Stommel model shows that AMOC stability is controlled by the meridional temperature difference ΔT. We compute steady-state equilibria across a range of temperatures (ΔT = 10–60°C) using the equilibrium formula from Section 3.3, with fixed ΔS₀ = 10 psu.
 
 ![Bifurcation Diagram showing equilibrium circulation strength vs temperature difference](fig4_bifurcation.png)
 
@@ -275,18 +275,18 @@ To understand the flow structure, we plot trajectories in (ΔS, q) phase space. 
 
 ![Phase space portrait showing trajectory convergence and nullclines](fig3_phase_space.png)
 
-The phase space visualization makes clear that the flow is dissipative; trajectories converge to attractors and do not exhibit complex dynamics like limit cycles.
+The phase space portrait shows that the flow is dissipative—trajectories converge to attractors and there are no limit cycles or other complex behaviors.
 
 ### 5.5 Model Calibration Against Observations
 
-How well does Stommel's simplified model match the real AMOC? The comparison below shows the model's predictive accuracy:
+To check how well the model matches observations, we compare its output to RAPID array measurements:
 
 - **Model prediction:** Using ΔT = 40°C (difference between tropical ~25°C and polar ~5°C waters), the model yields q ≈ 15–17 Sv in the thermal regime
 - **Observed AMOC:** RAPID array mean (2004–2020) = 16.9 ± 4.2 Sv
 
 ![Model AMOC strength compared to observations from the RAPID array](fig6_calibration.png)
 
-The agreement is remarkably close—within ~10%—despite the model's simplifications. This validates that the Stommel model captures the leading-order physics controlling AMOC strength. The remaining discrepancy likely reflects wind forcing (not in the model), spatial structure, and other omitted processes.
+The agreement is within ~10% despite the model's simplifications. The remaining discrepancy likely reflects wind forcing (which the model ignores), spatial structure, and other omitted processes.
 
 ---
 
@@ -294,7 +294,7 @@ The agreement is remarkably close—within ~10%—despite the model's simplifica
 
 ### 6.1 Physical Interpretation: Thermal vs. Haline Feedback
 
-The Stommel two-box model reveals a fundamental principle: **AMOC stability depends on the competition between thermal and haline effects.** The bifurcation structure emerges from this competition:
+The Stommel two-box model shows that AMOC stability depends on the competition between thermal and haline effects. The bifurcation structure comes from this competition:
 
 - **Thermal feedback (stabilizing):** When ΔT is large, temperature differences drive strong density gradients and circulation. Heat released during northward water transport moderates climate and is self-sustaining.
 
@@ -302,7 +302,7 @@ The Stommel two-box model reveals a fundamental principle: **AMOC stability depe
 
 The dimensionless parameter $E = \frac{\lambda\beta\Delta S_0}{k(\alpha\Delta T)^2}$ quantifies this competition. For present-day Earth (large ΔT), E is small and the thermal state dominates. But E could become O(1) if temperature gradients weakened (e.g., in a glacial world with reduced solar forcing) or if freshwater input increased, shifting the system toward the haline branch.
 
-The **hysteresis** observed in the bifurcation diagram is not a pathology but a fundamental consequence of saddle-node bifurcations in nonlinear systems. Once the system is forced past the bifurcation point, it must be pulled back significantly below that point to recover. This is the essence of a "tipping point"—the recovery threshold differs from the collapse threshold.
+The hysteresis in the bifurcation diagram is a consequence of saddle-node bifurcations in nonlinear systems. Once the system is pushed past the bifurcation point, it has to be pulled back well below that point to recover. This is what makes it a "tipping point"—the recovery threshold is different from the collapse threshold.
 
 ### 6.2 Timescales and Equilibration
 
@@ -320,11 +320,11 @@ An important consequence: the AMOC's response to freshwater forcing is delayed. 
 
 The simple Stommel model can be extended to include random freshwater fluctuations (e.g., from interannual variability in precipitation, ice sheet discharge, or other sources). Near a bifurcation point where growth rate σ ≈ 0, the system is "marginally stable"—noise can occasionally push the system across the separatrix dividing the two basins of attraction, causing a premature transition even before the deterministic bifurcation is reached.
 
-This phenomenon, called "noise-induced tipping" or "stochastic resonance," is believed to be relevant to paleoclimate abrupt changes. Dansgaard-Oeschger (D-O) events during the last glacial period may have been triggered not by large deterministic freshwater pulses but by the combined effect of ordinary climate variability amplified by the nonlinear bistability of the AMOC. The ~1500-year quasi-periodicity of D-O events may reflect stochastic resonance—periodic forcing by millennial-timescale climate variability encountering a system tuned near bifurcation.
+This phenomenon is called "noise-induced tipping" and may be relevant to paleoclimate abrupt changes. Dansgaard-Oeschger (D-O) events during the last glacial period may have been triggered not by large freshwater pulses but by ordinary climate variability amplified by the nonlinear bistability of the AMOC. The ~1500-year quasi-periodicity of D-O events could reflect this kind of stochastic forcing near a bifurcation point.
 
 ### 6.4 Model Limitations and Extensions
 
-Despite its elegance and explanatory power, the Stommel model has significant limitations:
+Despite how well the Stommel model works for its size, it has significant limitations:
 
 1. **No spatial structure:** The model assumes each box is well-mixed with uniform properties. Reality is spatially complex: salinity anomalies are localized (e.g., in the Labrador Sea or Nordic Seas), and the source region of freshwater (Greenland, Arctic sea ice, Southern Ocean) affects its impact. Multi-box or spatially continuous models can capture this.
 
@@ -336,7 +336,7 @@ Despite its elegance and explanatory power, the Stommel model has significant li
 
 5. **No explicit meltwater:** The freshwater input is prescribed as a relaxation term. Real ice sheet discharge has geographical specificity and episodic character (Heinrich events, jökulhlaups) not captured here.
 
-Despite these limitations, Stommel's core prediction—**that AMOC bifurcates and exhibits hysteresis under freshwater forcing**—has proven remarkably robust. Comprehensive 3D ocean-atmosphere general circulation models (GCMs) consistently show bifurcations, though at different critical freshwater thresholds depending on geometry and physics included.
+Despite these limitations, Stommel's core prediction—that AMOC bifurcates and exhibits hysteresis under freshwater forcing—has held up well. More complex 3D ocean-atmosphere models consistently show bifurcations too, though at different critical freshwater thresholds depending on the geometry and physics included.
 
 ![Comparison of normal thermally-driven AMOC versus collapsed circulation regimes](fig5_comparison.png)
 
@@ -348,11 +348,11 @@ The Stommel model provides a unifying framework for understanding both future an
 
 **Paleoclimate implications:** The bifurcation structure explains Dansgaard-Oeschger (D-O) events and Heinrich events. During the Last Glacial Maximum, the AMOC may have operated near its bifurcation point (smaller ΔT due to reduced solar forcing, larger freshwater input). Small perturbations could trigger switches between thermal and haline modes on 1000–3000 year timescales, consistent with observations.
 
-**Future projections:** Climate models forced by CO₂ predict AMOC weakening by 10–30% by 2100. Stommel's model suggests that unless we approach the bifurcation point, changes are reversible. However, recent observations show 15% decline in just 16 years (Caesar et al., 2021; Ditlevsen & Ditlevsen, 2023), suggesting either stronger forced changes or enhanced natural variability. If the trend extrapolates, centennial-timescale collapse is possible—crossing Stommel's bifurcation within this century.
+**Future projections:** Climate models forced by CO₂ predict AMOC weakening by 10–30% by 2100. Stommel's model suggests that unless we approach the bifurcation point, changes are reversible. However, recent observations show a 15% decline in just 16 years, suggesting either stronger forced changes or enhanced natural variability. If that trend continues, centennial-timescale collapse is possible—crossing Stommel's bifurcation within this century.
 
 ### 6.5 Educational Value
 
-Beyond its climate applications, the Stommel model exemplifies how computational tools deepen understanding. A student can read the governing equations and understand them intellectually. But by simulating the model, constructing bifurcation diagrams, and visualizing phase space trajectories, understanding crystallizes. The student develops intuition: they see how freshwater forcing gradually weakens the thermal feedback, feel the nonlinearity through the hysteresis loop, and appreciate why simple models remain indispensable in climate science despite enormous computational advances.
+Beyond its climate applications, the Stommel model is also useful as a teaching tool. Reading the equations gives some understanding of the physics, but actually running simulations and plotting bifurcation diagrams makes things much clearer. You can watch how freshwater forcing gradually weakens the thermal feedback and trace the hysteresis loop step by step, which makes it a lot easier to understand why tipping points happen and why they're hard to reverse.
 
 ---
 
@@ -372,49 +372,15 @@ The Stommel (1961) two-box thermohaline circulation model, despite its simplicit
 
 6. **Observational calibration:** Using parameters from Stommel's original paper (α = 2 × 10⁻⁴ K⁻¹, β = 1 × 10⁻³ psu⁻¹, k = 3 × 10⁻⁹ s⁻¹, λ = 3 × 10⁻¹¹ s⁻¹) and present-day ΔT ~ 20–25°C, the model predicts q ~ 15–17 Sv, matching the RAPID array observational mean of 16.9 ± 4.2 Sv.
 
-**Implications for climate:** Anthropogenic freshwater input to the North Atlantic is accelerating due to Greenland Ice Sheet melt and Arctic sea ice loss. If continued, this may push the AMOC toward or beyond its bifurcation threshold. Once the bifurcation is crossed, recovery becomes nonlinear and difficult—the system would need to be pulled well back (ΔS must decrease) to return to the thermal state. This creates a "window of opportunity": as long as we remain far from the bifurcation, AMOC changes are gradual and reversible. But if we enter the bistable or haline regime, recovery timescales extend to millennia.
+**Implications for climate:** Freshwater input to the North Atlantic is increasing due to Greenland Ice Sheet melt and Arctic sea ice loss. If this continues, it could push the AMOC toward its bifurcation threshold. Once the bifurcation is crossed, recovery requires ΔS to decrease significantly before the thermal state restores—recovery timescales would extend to millennia. As long as the system stays far from the bifurcation, AMOC changes remain gradual and reversible, but entering the bistable or haline regime would make that much harder.
 
-**Broader lessons:** The Stommel model teaches that climate tipping points are not exotic failures of the climate system but natural, inevitable consequences of nonlinear feedback and bifurcation structure. By studying simplified models, we develop physical intuition that guides interpretation of complex observations and projections. The elegance of Stommel's model—capturing the essential physics in just two boxes—demonstrates the power of idealization in science: simplicity reveals principles.
+**Broader lessons:** The Stommel model shows that climate tipping points are not unusual or exotic—they are a natural result of nonlinear feedbacks and bifurcation structure. Working with simplified models like this one helps build physical intuition that is useful when interpreting more complex observations. The fact that just two boxes can capture so much of the essential physics is a good reminder of why simple models are still worth studying in climate science.
 
 ---
 
 ## References
 
-Boers, N. (2021). Observation-based early-warning signals for a collapse of the Atlantic Meridional Overturning Circulation. *Nature Climate Change*, 11(9), 680–688.
-
-Brady, R. X., et al. (2019). Closing the global carbon budget: A state-of-the-art review. *Global Biogeochemical Cycles*, 32(12), 1659–1703.
-
-Bryden, H. L., Longworth, H. R., & Cunningham, S. A. (2005). Slowing of the Atlantic meridional overturning circulation at 25°N. *Nature*, 438(7068), 655–657.
-
-Caesar, L., McCarthy, G. D., Thornalley, D. J. R., Cahill, N., & Rahmstorf, S. (2021). Current Atlantic Meridional Overturning Circulation weakest in last millennium. *Nature Geoscience*, 14(3), 118–120.
-
-Dijkstra, H. A., & Ghil, M. (2005). Low-frequency variability of the large-scale ocean circulation: A dynamical systems approach. *Reviews of Geophysics*, 43, RG2004.
-
-Ditlevsen, P. D., & Ditlevsen, S. (2023). Warning of a forthcoming collapse of the Atlantic meridional overturning circulation. *Nature Communications*, 14, 4254.
-
-Frajka-Williams, E., et al. (2019). Atlantic Meridional Overturning Circulation: Observations and Models. *Reviews of Geophysics*, 57(3), e2019RG000644.
-
-Gregory, J. M., et al. (2005). A model intercomparison of changes in the Atlantic thermohaline circulation in response to increasing atmospheric CO₂ concentration. *Geophysical Research Letters*, 32, L12703.
-
-Intergovernmental Panel on Climate Change (IPCC). (2021). Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report. Cambridge University Press.
-
-Jackson, L. C., et al. (2023). Understanding Atlantic Meridional Overturning Circulation variability. *Nature Reviews Earth & Environment*, 4(5), 311–330.
-
-Lenton, T. M., et al. (2008). Tipping elements in the Earth's climate system. *Proceedings of the National Academy of Sciences*, 105(6), 1786–1793.
-
-Manabe, S., & Stouffer, R. J. (1988). Two stable equilibria of a coupled ocean-atmosphere model. *Journal of Climate*, 1(9), 841–866.
-
-McCarthy, G. D., et al. (2015). Measuring the Atlantic Meridional Overturning Circulation at 26°N. *Progress in Oceanography*, 130, 91–111.
-
-Rahmstorf, S. (1996). On the freshwater forcing and transport of the Atlantic thermohaline circulation. *Climate Dynamics*, 12(12), 799–811.
-
-Rahmstorf, S. (2002). Ocean circulation and climate during the past 120,000 years. *Nature*, 419(6903), 207–214.
-
-Smeed, D. A., et al. (2018). The North Atlantic Ocean is in a state of reduced overturning. *Geophysical Research Letters*, 45(3), 1527–1533.
-
 Stommel, H. M. (1961). Thermohaline convection with two stable regimes of flow. *Tellus*, 13(2), 224–230.
-
-Weijer, W., et al. (2019). Stability of the Atlantic Meridional Overturning Circulation: A review and synthesis. *Journal of Geophysical Research: Oceans*, 124(8), 5336–5375.
 
 ---
 
@@ -426,9 +392,9 @@ Weijer, W., et al. (2019). Stability of the Atlantic Meridional Overturning Circ
 
 **Figure 3:** Time series showing relaxation to equilibrium. Starting from S₁ = 35 psu, S₂ = 34 psu with ΔT = 40°C, salinities adjust toward equilibrium over ~1000 years (the relaxation timescale τ ~ 1/λ). Circulation q(t) rises monotonically, reflecting the slow salinity equilibration. The timescale separation (fast circulation, slow salinity) is characteristic of the Stommel model.
 
-**Figure 4:** Stability diagram showing growth rate σ = -[λ + 2k(αΔT - βΔS*)] along the thermal branch as ΔT varies. Near the bifurcation point, σ → 0 and perturbations decay very slowly—a signature of "critical slowing down." Far from bifurcation, σ < -λ and the system is robustly stable. This explains why observing critical slowing down can provide early warning of tipping points.
+**Figure 4:** Stability diagram showing growth rate σ = -[λ + 2k(αΔT - βΔS*)] along the thermal branch as ΔT varies. Near the bifurcation point, σ → 0 and perturbations decay very slowly—a signature of "critical slowing down." Far from bifurcation, σ < -λ and the system is stable.
 
 **Figure 5:** Phase space portrait in (ΔS, q) showing trajectories for different initial conditions, all converging to steady states on the thermal or haline branches. The q-nullcline (dashed grey line) shows where dq/dt = 0. Trajectories spiral inward, demonstrating dissipative dynamics and stable equilibria.
 
-**Figure 6:** Bar chart comparing model AMOC strength to observations. Using Stommel's original parameters and ΔT = 40°C (difference between tropical ~25°C and polar ~-5°C waters), the model predicts q ~ 15.5 Sv. This agrees with the RAPID array mean of 16.9 Sv (2004–2020), validating that the Stommel model captures the essential physics controlling modern AMOC transport despite neglecting wind forcing and spatial structure.
+**Figure 6:** Bar chart comparing model AMOC strength to observations. Using Stommel's original parameters and ΔT = 40°C (difference between tropical ~25°C and polar ~-5°C waters), the model predicts q ~ 15.5 Sv, compared to the RAPID array mean of 16.9 Sv (2004–2020). The agreement is within ~10% despite the model ignoring wind forcing and spatial structure.
 

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Stommel THC Simulator",
+  "colors": {
+    "primary": "#58a6ff",
+    "light": "#79c0ff",
+    "dark": "#388bfd"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "index",
+              "how-to-use"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Theory",
+        "groups": [
+          {
+            "group": "Theory",
+            "pages": [
+              "theory/stommel-1961",
+              "theory/ocean-physics",
+              "theory/two-box-model",
+              "theory/steady-states",
+              "theory/stability-analysis",
+              "theory/bifurcations-hysteresis"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Simulator",
+        "groups": [
+          {
+            "group": "Simulator Guide",
+            "pages": [
+              "simulator/getting-started",
+              "simulator/parameters",
+              "simulator/presets",
+              "simulator/running-experiments",
+              "simulator/visualizations"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "API Reference",
+            "pages": [
+              "api-reference/overview",
+              "api-reference/simulate",
+              "api-reference/bifurcation",
+              "api-reference/presets"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/logo.svg",
+    "dark": "/logo.svg"
+  },
+  "background": {
+    "color": {
+      "dark": "#0d1117"
+    }
+  },
+  "navbar": {
+    "primary": {
+      "type": "button",
+      "label": "GitHub",
+      "href": "https://github.com/your-repo"
+    }
+  },
+  "footer": {
+    "socials": {}
+  }
+}
