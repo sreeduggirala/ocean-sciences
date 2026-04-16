@@ -4,8 +4,6 @@
 
 The Atlantic Meridional Overturning Circulation (AMOC) is a critical component of Earth's climate system, responsible for transporting vast quantities of heat from the tropics to the North Atlantic. Recent observations suggest the AMOC may be weakening, raising concerns about potential collapse. To understand the physical mechanisms behind AMOC stability and tipping points, we implemented and analyzed the Stommel (1961) two-box model, a simple framework for exploring thermohaline circulation dynamics. Using numerical integration and bifurcation analysis, we show how the competition between thermal and haline forcing creates bistability: two stable states separated by a hysteresis loop. Our model matches observational estimates (~15 Sv at baseline) and reveals the critical freshwater flux threshold beyond which AMOC collapse occurs. We explore the model across multiple regimes, from normal thermally-driven circulation to collapsed states, and look at how stochastic forcing affects tipping point dynamics. The Stommel model, despite its simplicity, captures the main features of AMOC dynamics and is a useful tool for learning about climate tipping points.
 
-**Keywords:** AMOC, thermohaline circulation, bifurcation, climate tipping points, dynamical systems
-
 ---
 
 ## 1. Introduction
