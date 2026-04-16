@@ -180,8 +180,6 @@ Health check endpoint.
 ## Scientific References
 
 - Stommel, H. (1961). "A mathematical model of the Atlantic meridional overturning circulation." *Journal of Physical Oceanography*, 18, 1944-1955.
-- Brady, R. X., et al. (2019). "Closing the global carbon budget: A state-of-the-art review." *Global Biogeochemical Cycles*, 32(12), 1659-1703.
-- Ditlevsen, P. D., & Ditlevsen, S. (2019). "Warning of a forthcoming collapse of the Atlantic meridional overturning circulation." *Nature Communications*, 10, 2428.
 
 ## License
 
